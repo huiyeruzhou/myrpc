@@ -1,0 +1,12 @@
+@startuml total
+!include core.puml
+' uncomment the following line and comment the first to use locally
+!include serialization.plantuml
+!include server.plantuml
+!include transport.puml
+!include stub.puml
+Codec-Server
+Lay_D(Server, Service)
+Service-D-Server
+Server-Transport
+@enduml

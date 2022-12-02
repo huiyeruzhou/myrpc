@@ -102,6 +102,7 @@ public:
             if (idx < ERPC_DEFAULT_BUFFERS_COUNT)
             {
                 m_freeBufferBitmap[idx >> 3U] |= 1U << (idx & 0x7U);
+                //m_freeBufferBitmap[idx / 8] |= 1U << (idx % 8);
             }
 #if !ERPC_THREADS_IS(NONE)
             m_semaphore.put();

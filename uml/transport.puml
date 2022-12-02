@@ -1,0 +1,45 @@
+@startuml Transport
+
+class Transport
+{
+    +struct Header{
+        uint16_t m_messageSize;  
+        uint16_t m_crc;          
+    };
+    #Crc16 *m_crcImpl;  
+
+    --Check--
+    +virtual void setCrc16(Crc16 *crcImpl) override;
+    +virtual Crc16 *getCrc16() override;
+    --Transport--
+    +virtual erpc_status_t receive(MessageBuffer *message) 
+    +virtual erpc_status_t send(MessageBuffer *message) 
+    #{abstract}erpc_status_t underlyingSend(const uint8_t *data, uint32_t size) 
+    #{abstract}erpc_status_t underlyingReceive(uint8_t *data, uint32_t size) 
+}
+
+ 
+
+class TCPTransport extends Transport{
+    #bool m_isServer;        
+    #const char *m_host;     
+    #uint16_t m_port;        
+    #int m_socket;           
+    #Thread m_serverThread;  
+    #bool m_runServer;      
+
+    --init--
+    +void configure(const char *host, uint16_t port);
+    --network--
+    +virtual erpc_status_t open(void);
+    +virtual erpc_status_t close(bool stopServer = true);
+    #virtual erpc_status_t connectClient(void);
+    --io--
+    #virtual erpc_status_t underlyingReceive(uint8_t *data, uint32_t size);
+    #virtual erpc_status_t underlyingSend(const uint8_t *data, uint32_t size);
+    --Thread--
+    #void serverThread(void);
+    #static void serverThreadStub(void *arg);
+}
+
+@enduml

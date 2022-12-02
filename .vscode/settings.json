@@ -2,5 +2,29 @@
     "makefile.extensionOutputFolder": "./.vscode",
     "makefile.buildBeforeLaunch": true,
     "makefile.clearOutputBeforeBuild": true,
-    "python.formatting.provider": "autopep8"
+    "python.formatting.provider": "autopep8",
+    "files.associations": {
+        "*.c": "c",
+        "memory_resource": "cpp",
+        "new": "cpp",
+        "array": "cpp",
+        "*.tcc": "cpp",
+        "memory": "cpp",
+        "istream": "cpp",
+        "functional": "cpp",
+        "tuple": "cpp",
+        "utility": "cpp",
+        "variant": "cpp",
+        "erpc_client_setup.h": "c",
+        "bitset": "cpp",
+        "fstream": "cpp",
+        "iomanip": "cpp",
+        "limits": "cpp",
+        "mutex": "cpp",
+        "ostream": "cpp",
+        "numeric": "cpp",
+        "sstream": "cpp",
+        "streambuf": "cpp",
+        "thread": "cpp"
+    }
 }
