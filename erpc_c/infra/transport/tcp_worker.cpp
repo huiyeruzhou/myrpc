@@ -6,6 +6,8 @@
 
 using namespace erpc;
 
+TCPWorker::~TCPWorker(void) {}
+
 erpc_status_t TCPWorker::underlyingReceive(uint8_t *data, uint32_t size)
 {
     ssize_t length;
@@ -14,7 +16,7 @@ erpc_status_t TCPWorker::underlyingReceive(uint8_t *data, uint32_t size)
     if(m_socket <= 0)
     {
         status = kErpcStatus_ConnectionFailure;
-        return;
+        return status;
     }
 
     // Loop until all requested data is received.

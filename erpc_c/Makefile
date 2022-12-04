@@ -60,9 +60,11 @@ SOURCES += 	$(ERPC_C_ROOT)/infra/codec/erpc_basic_codec.cpp \
 			\
 			$(ERPC_C_ROOT)/infra/server/erpc_server.cpp \
 			$(ERPC_C_ROOT)/infra/server/erpc_simple_server.cpp \
+			$(ERPC_C_ROOT)/infra/server/server_worker.cpp\
 			\
 			$(ERPC_C_ROOT)/infra/transport/erpc_tcp_transport.cpp\
 			$(ERPC_C_ROOT)/infra/transport/erpc_framed_transport.cpp \
+			$(ERPC_C_ROOT)/infra/transport/tcp_worker.cpp\
 			\
 			$(ERPC_C_ROOT)/port/erpc_port_stdlib.cpp \
 			$(ERPC_C_ROOT)/port/erpc_threading_pthreads.cpp \

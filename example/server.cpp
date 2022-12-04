@@ -41,9 +41,9 @@ int main()
     erpc_add_service_to_server(server, service);
 
     /* run server */
-    // erpc_server_run(server); /* or erpc_server_poll(); *
-    while(1)    
-    erpc_server_poll(server);
+    erpc_server_run(server); /* or erpc_server_poll(); */
+    // while(1)    
+    // erpc_server_poll(server);
 
     return 0;
 }

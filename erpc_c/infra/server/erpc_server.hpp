@@ -13,6 +13,7 @@
 
 #include "erpc_client_server_common.hpp"
 #include "erpc_config_internal.h"
+#include "service.hpp"
 
 
 /*!
@@ -31,64 +32,6 @@ namespace erpc {
  *
  * @ingroup infra_server
  */
-class Service
-{
-public:
-    /*!
-     * @brief Constructor.
-     *
-     * This function initializes object attributes.
-     */
-    Service(uint32_t serviceId)
-    : m_serviceId(serviceId)
-    , m_next(NULL)
-    {
-    }
-
-    /*!
-     * @brief Service destructor
-     */
-    virtual ~Service(void) {}
-
-    /*!
-     * @brief Return service id number.
-     *
-     * @return Service id number.
-     */
-    uint32_t getServiceId(void) const { return m_serviceId; }
-
-    /*!
-     * @brief Return next service.
-     *
-     * @return Pointer to next service.
-     */
-    Service *getNext(void) { return m_next; }
-
-    /*!
-     * @brief Set next service.
-     *
-     * @param[in] next Pointer to next service.
-     */
-    void setNext(Service *next) { m_next = next; }
-
-    /*!
-     * @brief This function call function implementation of current service.
-     *
-     * @param[in] methodId Id number of function, which is requested.
-     * @param[in] sequence Sequence number. To be sure that reply from server belongs to client request.
-     * @param[in] codec For reading and writing data.
-     * @param[in] messageFactory Used for setting output buffer.
-     *
-     * @return Based on handleInvocation implementation.
-     */
-    virtual erpc_status_t handleInvocation(uint32_t methodId, uint32_t sequence, Codec *codec,
-                                           MessageBufferFactory *messageFactory) = 0;
-
-protected:
-    uint32_t m_serviceId; /*!< Service unique id. */
-    Service *m_next;      /*!< Pointer to next service. */
-};
-
 /*!
  * @brief Based server functionality.
  *
@@ -141,41 +84,41 @@ protected:
     Service *m_firstService; /*!< Contains pointer to first service. */
 
     /*!
-     * @brief Process message.
-     *
-     * @param[in] codec Inout codec to use.
-     * @param[in] msgType Type of received message. Based on message type will be (will be not) sent respond.
-     * @param[in] serviceId To identify interface.
-     * @param[in] methodId To identify function in interface.
-     * @param[in] sequence To connect correct answer with correct request.
-     *
-     * @returns #kErpcStatus_Success or based on codec startReadMessage.
-     */
-    virtual erpc_status_t processMessage(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId,
-                                         uint32_t sequence);
+    //  * @brief Process message.
+    //  *
+    //  * @param[in] codec Inout codec to use.
+    //  * @param[in] msgType Type of received message. Based on message type will be (will be not) sent respond.
+    //  * @param[in] serviceId To identify interface.
+    //  * @param[in] methodId To identify function in interface.
+    //  * @param[in] sequence To connect correct answer with correct request.
+    //  *
+    //  * @returns #kErpcStatus_Success or based on codec startReadMessage.
+    //  */
+    // virtual erpc_status_t processMessage(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId,
+    //                                      uint32_t sequence);
 
-    /*!
-     * @brief Read head of message to identify type of message.
-     *
-     * @param[in] codec Inout codec to use.
-     * @param[out] msgType Type of received message. Based on message type will be (will be not) sent respond.
-     * @param[out] serviceId To identify interface.
-     * @param[out] methodId To identify function in interface.
-     * @param[out] sequence To connect correct answer with correct request.
-     *
-     * @returns #kErpcStatus_Success or based on service handleInvocation.
-     */
-    virtual erpc_status_t readHeadOfMessage(Codec *codec, message_type_t &msgType, uint32_t &serviceId,
-                                            uint32_t &methodId, uint32_t &sequence);
+    // /*!
+    //  * @brief Read head of message to identify type of message.
+    //  *
+    //  * @param[in] codec Inout codec to use.
+    //  * @param[out] msgType Type of received message. Based on message type will be (will be not) sent respond.
+    //  * @param[out] serviceId To identify interface.
+    //  * @param[out] methodId To identify function in interface.
+    //  * @param[out] sequence To connect correct answer with correct request.
+    //  *
+    //  * @returns #kErpcStatus_Success or based on service handleInvocation.
+    //  */
+    // virtual erpc_status_t readHeadOfMessage(Codec *codec, message_type_t &msgType, uint32_t &serviceId,
+    //                                         uint32_t &methodId, uint32_t &sequence);
 
-    /*!
-     * @brief This function finds service base on service ID.
-     *
-     * @param[in] serviceId Service id number.
-     *
-     * @return Pointer to service or NULL.
-     */
-    virtual Service *findServiceWithId(uint32_t serviceId);
+    // /*!
+    //  * @brief This function finds service base on service ID.
+    //  *
+    //  * @param[in] serviceId Service id number.
+    //  *
+    //  * @return Pointer to service or NULL.
+    //  */
+    // virtual Service *findServiceWithId(uint32_t serviceId);
 
 
 

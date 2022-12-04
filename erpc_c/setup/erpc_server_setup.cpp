@@ -14,7 +14,7 @@
 #include "erpc_manually_constructed.hpp"
 #include "erpc_message_buffer.hpp"
 #include "erpc_simple_server.hpp"
-#include "erpc_transport.hpp"
+#include "erpc_tcp_transport.hpp"
 
 using namespace erpc;
 
@@ -36,7 +36,7 @@ erpc_server_t erpc_server_init(erpc_transport_t transport, erpc_mbf_t message_bu
     erpc_assert(transport != NULL);
     erpc_assert(message_buffer_factory != NULL);
 
-    Transport *castedTransport;
+    TCPTransport *castedTransport;
     BasicCodecFactory *codecFactory;
     SimpleServer *simpleServer;
 
@@ -85,8 +85,9 @@ erpc_server_t erpc_server_init(erpc_transport_t transport, erpc_mbf_t message_bu
     if (simpleServer != NULL)
     {
         // Init server with the provided transport.
-        castedTransport = reinterpret_cast<Transport *>(transport);
+        castedTransport = reinterpret_cast<TCPTransport *>(transport);
         simpleServer->setTransport(castedTransport);
+        castedTransport->m_server = simpleServer;
         simpleServer->setCodecFactory(codecFactory);
         simpleServer->setMessageBufferFactory(reinterpret_cast<MessageBufferFactory *>(message_buffer_factory));
     }
@@ -141,14 +142,14 @@ erpc_status_t erpc_server_run(erpc_server_t server)
     return simpleServer->run();
 }
 
-erpc_status_t erpc_server_poll(erpc_server_t server)
-{
-    erpc_assert(server != NULL);
+// erpc_status_t erpc_server_poll(erpc_server_t server)
+// {
+//     erpc_assert(server != NULL);
 
-    SimpleServer *simpleServer = reinterpret_cast<SimpleServer *>(server);
+//     SimpleServer *simpleServer = reinterpret_cast<SimpleServer *>(server);
 
-    return simpleServer->poll();
-}
+//     return simpleServer->poll();
+// }
 
 void erpc_server_stop(erpc_server_t server)
 {

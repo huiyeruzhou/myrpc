@@ -9,208 +9,56 @@
  */
 
 #include "erpc_simple_server.hpp"
-
+#include <stdio.h>
 using namespace erpc;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Code
 ////////////////////////////////////////////////////////////////////////////////
 
-void SimpleServer::disposeBufferAndCodec(Codec *codec)
-{
-    if (codec != NULL)
-    {
-        if (codec->getBuffer() != NULL)
-        {
-            m_messageFactory->dispose(codec->getBuffer());
-        }
-        m_codecFactory->dispose(codec);
-    }
-}
-
-erpc_status_t SimpleServer::runInternal(void)
-{
-    MessageBuffer buff;
-    Codec *codec = NULL;
-
-    // Handle the request.
-    message_type_t msgType;
-    uint32_t serviceId;
-    uint32_t methodId;
-    uint32_t sequence;
-
-    erpc_status_t err = runInternalBegin(&codec, buff, msgType, serviceId, methodId, sequence);
-    if (err == kErpcStatus_Success)
-    {
-        err = runInternalEnd(codec, msgType, serviceId, methodId, sequence);
-    }
-
-    return err;
-}
-
-erpc_status_t SimpleServer::runInternalBegin(Codec **codec, MessageBuffer &buff, message_type_t &msgType,
-                                             uint32_t &serviceId, uint32_t &methodId, uint32_t &sequence)
-{
-    erpc_status_t err = kErpcStatus_Success;
-
-    //创建接收缓冲区
-    if (m_messageFactory->createServerBuffer() == true)
-    {
-        buff = m_messageFactory->create();
-        if (NULL == buff.get())
-        {
-            err = kErpcStatus_MemoryError;
-        }
-    }
-
-    // Receive the next invocation request.
-    if (err == kErpcStatus_Success)
-    {
-        err = m_transport->receive(&buff);
-    }
-
-
-
-    //创建codec
-    if (err == kErpcStatus_Success)
-    {
-        *codec = m_codecFactory->create();
-        if (*codec == NULL)
-        {
-            err = kErpcStatus_MemoryError;
-        }
-    }
-
-    //
-    if (err != kErpcStatus_Success)
-    {
-        // Dispose of buffers.
-        if (buff.get() != NULL)
-        {
-            m_messageFactory->dispose(&buff);
-        }
-    }
-
-    if (err == kErpcStatus_Success)
-    {
-        (*codec)->setBuffer(buff);
-
-        err = readHeadOfMessage(*codec, msgType, serviceId, methodId, sequence);
-        if (err != kErpcStatus_Success)
-        {
-            // Dispose of buffers and codecs.
-            disposeBufferAndCodec(*codec);
-        }
-    }
-
-    return err;
-}
-
-erpc_status_t SimpleServer::runInternalEnd(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId,
-                                           uint32_t sequence)
-{
-    erpc_status_t err = processMessage(codec, msgType, serviceId, methodId, sequence);
-
-    if (err == kErpcStatus_Success)
-    {
-        if (msgType != kOnewayMessage)
-        {
-
-                err = m_transport->send(codec->getBuffer());
-        }
-    }
-
-    // Dispose of buffers and codecs.
-    disposeBufferAndCodec(codec);
-
-    return err;
-}
-
 erpc_status_t SimpleServer::run(void)
 {
     erpc_status_t err = kErpcStatus_Success;
     while ((err == kErpcStatus_Success) && m_isServerOn)
     {
-        err = runInternal();
+        // Sleep 10 ms.
+         Thread::sleep(10000);
     }
     return err;
 }
 
-#if ERPC_NESTED_CALLS
-erpc_status_t SimpleServer::run(RequestContext &request)
-{
-    erpc_status_t err = kErpcStatus_Success;
-    message_type_t msgType;
-    uint32_t serviceId;
-    uint32_t methodId;
-    uint32_t sequence;
+// erpc_status_t SimpleServer::poll(void)
+// {
+//     erpc_status_t err;
 
-    while ((err == kErpcStatus_Success) && m_isServerOn)
-    {
-        MessageBuffer buff;
-        Codec *codec = NULL;
+//     if (m_isServerOn)
+//     {
+//         if (m_transport->hasMessage() == true)
+//         {
+//             err = runInternal();
+//         }
+//         else
+//         {
+//             err = kErpcStatus_Success;
+//         }
+//     }
+//     else
+//     {
+//         err = kErpcStatus_ServerIsDown;
+//     }
 
-        // Handle the request.
-        err = runInternalBegin(&codec, buff, msgType, serviceId, methodId, sequence);
-
-        if (err != kErpcStatus_Success)
-        {
-            break;
-        }
-
-        if (msgType == kReplyMessage)
-        {
-            if (sequence == request.getSequence())
-            {
-                // Swap the received message buffer with the client's message buffer.
-                request.getCodec()->getBuffer()->swap(&buff);
-                codec->setBuffer(buff);
-            }
-
-            // Dispose of buffers and codecs.
-            disposeBufferAndCodec(codec);
-
-            if (sequence != request.getSequence())
-            {
-                // Ignore message
-                continue;
-            }
-
-            break;
-        }
-        else
-        {
-            err = runInternalEnd(codec, msgType, serviceId, methodId, sequence);
-        }
-    }
-    return err;
-}
-#endif
-
-erpc_status_t SimpleServer::poll(void)
-{
-    erpc_status_t err;
-
-    if (m_isServerOn)
-    {
-        if (m_transport->hasMessage() == true)
-        {
-            err = runInternal();
-        }
-        else
-        {
-            err = kErpcStatus_Success;
-        }
-    }
-    else
-    {
-        err = kErpcStatus_ServerIsDown;
-    }
-
-    return err;
-}
+//     return err;
+// }
 
 void SimpleServer::stop(void)
 {
     m_isServerOn = false;
 }
+
+void SimpleServer::onNewSocket(int sockfd) {
+    printf("%d\n", sockfd);
+    TCPWorker *transport_worker = new TCPWorker(sockfd);
+    ServerWorker *worker = new ServerWorker(m_firstService, m_messageFactory, m_codecFactory, transport_worker);
+    worker->m_workerThread.start(worker);
+}
+

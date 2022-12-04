@@ -365,11 +365,12 @@ void TCPTransport::serverThread(void)
                         // Successfully accepted a connection.
                         TCP_DEBUG_PRINT("server:    accepted connection from ");
                         print_net_info(&incomingAddress, incomingAddressLength);
-                        addfd(epfd, incomingSocket, true);
-                        m_socket = incomingSocket;
                         // should be inherited from accept() socket but it's not always ...
                         yes = 1;
                         setsockopt(m_socket, IPPROTO_TCP, TCP_NODELAY, (void *) &yes, sizeof(yes));
+                        addfd(epfd, incomingSocket, true);
+                        m_socket = incomingSocket;
+                        m_server->onNewSocket(incomingSocket);
                     }
                     else
                     {

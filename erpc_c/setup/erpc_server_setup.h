@@ -96,16 +96,16 @@ void erpc_remove_service_from_server(erpc_server_t server, void *service);
  */
 erpc_status_t erpc_server_run(erpc_server_t server);
 
-/*!
- * @brief This function calls server implementation only once.
- *
- * This is non-blocking method, where server is trying read (and if it is requested also send) message only once.
- *
- * @param[in] server Pointer to server structure.
- *
- * @return Return one of status from erpc_status.h
- */
-erpc_status_t erpc_server_poll(erpc_server_t server);
+// /*!
+//  * @brief This function calls server implementation only once.
+//  *
+//  * This is non-blocking method, where server is trying read (and if it is requested also send) message only once.
+//  *
+//  * @param[in] server Pointer to server structure.
+//  *
+//  * @return Return one of status from erpc_status.h
+//  */
+// erpc_status_t erpc_server_poll(erpc_server_t server);
 
 /*!
  * @brief This functions should be used when client is calling quit server.
@@ -116,39 +116,6 @@ erpc_status_t erpc_server_poll(erpc_server_t server);
  * @param[in] server Pointer to server structure.
  */
 void erpc_server_stop(erpc_server_t server);
-
-#if ERPC_MESSAGE_LOGGING
-/*!
- * @brief This function adds transport object for logging send/receive messages.
- *
- * @param[in] server Pointer to server structure.
- * @param[in] transport Initiated transport.
- *
- * @retval True When transport was successfully added.
- * @retval False When transport wasn't added.
- */
-bool erpc_server_add_message_logger(erpc_server_t server, erpc_transport_t transport);
-#endif
-
-#if ERPC_PRE_POST_ACTION
-/*!
- * @brief This function set callback function executed at the beginning of eRPC call.
- *
- * @param[in] server Pointer to server structure.
- * @param[in] preCB Callback used at the beginning of eRPC call. When NULL and ERPC_PRE_POST_ACTION_DEFAULT
- * is enabled then default function will be set.
- */
-void erpc_server_add_pre_cb_action(erpc_server_t server, pre_post_action_cb preCB);
-
-/*!
- * @brief This function set callback function executed at the end of eRPC call.
- *
- * @param[in] server Pointer to server structure.
- * @param[in] postCB Callback used at the end of eRPC call. When NULL and ERPC_PRE_POST_ACTION_DEFAULT
- * is enabled then default function will be set.
- */
-void erpc_server_add_post_cb_action(erpc_server_t server, pre_post_action_cb postCB);
-#endif
 
 //@}
 

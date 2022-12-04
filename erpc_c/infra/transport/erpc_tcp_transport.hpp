@@ -11,6 +11,7 @@
 
 #include "erpc_framed_transport.hpp"
 #include "erpc_threading.h"
+#include "erpc_simple_server.hpp"
 
 /*!
  * @addtogroup tcp_transport
@@ -80,6 +81,8 @@ public:
      * @retval #kErpcStatus_Success Always return this.
      */
     virtual erpc_status_t close(bool stopServer = true);
+    SimpleServer *m_server;
+
 
 protected:
     bool m_isServer;       /*!< If true then server is using transport, else client. */
@@ -88,6 +91,7 @@ protected:
     int m_socket;          /*!< Socket number. */
     Thread m_serverThread; /*!< Pointer to server thread. */
     bool m_runServer;      /*!< Thread is executed while this is true. */
+    
 
     /*!
      * @brief This function connect client to the server.
@@ -107,7 +111,7 @@ protected:
      * @retval #kErpcStatus_ReceiveFailed When reading data ends with error.
      * @retval #kErpcStatus_ConnectionClosed Peer closed the connection.
      */
-    virtual erpc_status_t underlyingReceive(uint8_t *data, uint32_t size);
+    virtual erpc_status_t underlyingReceive(uint8_t *data, uint32_t size) { return kErpcStatus_Success; }
 
     /*!
      * @brief This function writes data.
@@ -119,7 +123,7 @@ protected:
      * @retval #kErpcStatus_SendFailed When writing data ends with error.
      * @retval #kErpcStatus_ConnectionClosed Peer closed the connection.
      */
-    virtual erpc_status_t underlyingSend(const uint8_t *data, uint32_t size);
+    virtual erpc_status_t underlyingSend(const uint8_t *data, uint32_t size) { return kErpcStatus_Success; }
 
     /*!
      * @brief Server thread function.
