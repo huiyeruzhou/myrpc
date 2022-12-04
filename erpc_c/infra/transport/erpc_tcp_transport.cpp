@@ -254,88 +254,7 @@ erpc_status_t TCPTransport::close(bool stopServer)
     return kErpcStatus_Success;
 }
 
-erpc_status_t TCPTransport::underlyingReceive(uint8_t *data, uint32_t size)
-{
-    ssize_t length;
-    erpc_status_t status = kErpcStatus_Success;
 
-    // Block until we have a valid connection.
-    while (m_socket <= 0)
-    {
-        // Sleep 10 ms.
-        Thread::sleep(10000);
-    }
-
-    // Loop until all requested data is received.
-    while (size > 0U)
-    {
-        length = read(m_socket, data, size);
-
-        // Length will be zero if the connection is closed.
-        if (length > 0)
-        {
-            size -= length;
-            data += length;
-        }
-        else
-        {
-            if (length == 0)
-            {
-                // close socket, not server
-                close(false);
-                status = kErpcStatus_ConnectionClosed;
-            }
-            else
-            {
-                status = kErpcStatus_ReceiveFailed;
-            }
-            break;
-        }
-    }
-
-    return status;
-}
-
-erpc_status_t TCPTransport::underlyingSend(const uint8_t *data, uint32_t size)
-{
-    erpc_status_t status = kErpcStatus_Success;
-    ssize_t result;
-
-    if (m_socket <= 0)
-    {
-        // we should not pretend to have a succesful Send or we create a deadlock
-        status = kErpcStatus_ConnectionFailure;
-    }
-    else
-    {
-        // Loop until all data is sent.
-        while (size > 0U)
-        {
-            result = write(m_socket, data, size);
-            if (result >= 0)
-            {
-                size -= result;
-                data += result;
-            }
-            else
-            {
-                if (result == EPIPE)
-                {
-                    // close socket, not server
-                    close(false);
-                    status = kErpcStatus_ConnectionClosed;
-                }
-                else
-                {
-                    status = kErpcStatus_SendFailed;
-                }
-                break;
-            }
-        }
-    }
-
-    return status;
-}
 
 void TCPTransport::serverThread(void)
 {
@@ -357,8 +276,9 @@ void TCPTransport::serverThread(void)
     if (serverSocket < 0)
     {
         TCP_DEBUG_ERR("failed to create server socket");
+        status = true;
     }
-    else
+    if (!status)
     {
         // Fill in address struct.
         (void) memset(&serverAddress, 0, sizeof(serverAddress));
@@ -373,101 +293,99 @@ void TCPTransport::serverThread(void)
             TCP_DEBUG_ERR("setsockopt failed");
             status = true;
         }
+    }
 
-        if (!status)
+    if (!status)
+    {
+        // Bind socket to address.
+        result = bind(serverSocket, (struct sockaddr *) &serverAddress, sizeof(serverAddress));
+        //on Failed
+        if (result < 0)
         {
-            // Bind socket to address.
-            result = bind(serverSocket, (struct sockaddr *) &serverAddress, sizeof(serverAddress));
-            //on Failed
-            if (result < 0)
-            {
-                TCP_DEBUG_ERR("server:    bind failed");
-                status = true;
-            }
-            //on Success
-            TCP_DEBUG_PRINT("server:    bind to ");
-            print_net_info((struct sockaddr *) &serverAddress, sizeof(serverAddress));
+            TCP_DEBUG_ERR("server:    bind failed");
+            status = true;
         }
+        //on Success
+        TCP_DEBUG_PRINT("server:    bind to ");
+        print_net_info((struct sockaddr *) &serverAddress, sizeof(serverAddress));
+    }
 
-        if (!status)
+    if (!status)
+    {
+        // Listen for connections.
+        result = listen(serverSocket, 1);
+        //on Failed
+        if (result < 0)
         {
-            // Listen for connections.
-            result = listen(serverSocket, 1);
-            //on Failed
-            if (result < 0)
-            {
-                TCP_DEBUG_ERR("server:    listen failed");
-                status = true;
-            }
-            //on Success
-            TCP_DEBUG_PRINT("server:    %s", "Listening for connections\n");
+            TCP_DEBUG_ERR("server:    listen failed");
+            status = true;
         }
-        if (!status)
+        //on Success
+        TCP_DEBUG_PRINT("server:    %s", "Listening for connections\n");
+    }
+    if (!status)
+    {
+        //在内核中创建事件表
+        epfd = epoll_create(EPOLL_SIZE);
+        if (epfd < 0)
         {
-            //在内核中创建事件表
-            epfd = epoll_create(EPOLL_SIZE);
-            if (epfd < 0)
-            {
-                TCP_DEBUG_ERR("server:    epfd error");
-                status = true;
-            }
-            TCP_DEBUG_PRINT("server:    epoll created, epollfd = %d\n", epfd);
-            //往内核事件表里添加事件
-            addfd(epfd, serverSocket, true);
-
+            TCP_DEBUG_ERR("server:    epfd error");
+            status = true;
         }
-        if (!status)
+        TCP_DEBUG_PRINT("server:    epoll created, epollfd = %d\n", epfd);
+        //往内核事件表里添加事件
+        addfd(epfd, serverSocket, true);
+
+    }
+    if (!status)
+    {
+
+        while (m_runServer)
         {
 
-            while (m_runServer)
+            int epoll_events_count = epoll_wait(epfd, events, EPOLL_SIZE, -1);
+            if (epoll_events_count < 0)
             {
-
-                int epoll_events_count = epoll_wait(epfd, events, EPOLL_SIZE, -1);
-                if (epoll_events_count < 0)
+                perror("epoll failure");
+                break;
+            }
+            //处理所有已经就绪的事件
+            for (int i = 0; i < epoll_events_count; ++i)
+            {
+                int sockfd = events[i].data.fd;
+                //新用户连接
+                if (sockfd == serverSocket)
                 {
-                    perror("epoll failure");
-                    break;
-                }
-                for (int i = 0; i < epoll_events_count; ++i)
-                {
-                    int sockfd = events[i].data.fd;
-                    //新用户连接
-                    if (sockfd == serverSocket)
+                    incomingAddressLength = sizeof(struct sockaddr);
+                    // we should use select() otherwise we can't end the server properly
+                    incomingSocket = accept(serverSocket, &incomingAddress, &incomingAddressLength);
+
+                    if (incomingSocket > 0)
                     {
-                        incomingAddressLength = sizeof(struct sockaddr);
-                        // we should use select() otherwise we can't end the server properly
-                        incomingSocket = accept(serverSocket, &incomingAddress, &incomingAddressLength);
-
-                        if (incomingSocket > 0)
-                        {
-                            // Successfully accepted a connection.
-                            TCP_DEBUG_PRINT("server:    accepted connection from ");
-                            print_net_info(&incomingAddress, incomingAddressLength);
-                            addfd(epfd, incomingSocket, true);
-                            m_socket = incomingSocket;
-                            // should be inherited from accept() socket but it's not always ...
-                            yes = 1;
-                            setsockopt(m_socket, IPPROTO_TCP, TCP_NODELAY, (void *) &yes, sizeof(yes));
-                        }
-                        else
-                        {
-                            TCP_DEBUG_ERR("accept failed");
-                        }
-                        
-
-                        
+                        // Successfully accepted a connection.
+                        TCP_DEBUG_PRINT("server:    accepted connection from ");
+                        print_net_info(&incomingAddress, incomingAddressLength);
+                        addfd(epfd, incomingSocket, true);
+                        m_socket = incomingSocket;
+                        // should be inherited from accept() socket but it's not always ...
+                        yes = 1;
+                        setsockopt(m_socket, IPPROTO_TCP, TCP_NODELAY, (void *) &yes, sizeof(yes));
                     }
-                    //TODO:处理客户端的进一步输入
                     else
                     {
+                        TCP_DEBUG_ERR("accept failed");
                     }
                 }
-
+                //TODO:处理客户端的进一步输入
+                else
+                {
+                }
             }
         }
-        ::close(serverSocket);
     }
+    ::close(serverSocket);
 }
+
 
 void TCPTransport::serverThreadStub(void *arg)
 {

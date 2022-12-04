@@ -28,6 +28,7 @@
         "sstream": "cpp",
         "streambuf": "cpp",
         "thread": "cpp",
-        "cstdlib": "cpp"
+        "cstdlib": "cpp",
+        "cstring": "cpp"
     }
 }

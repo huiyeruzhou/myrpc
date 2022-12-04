@@ -1,5 +1,6 @@
 cd /home/huiyeruzhou/Documents/WorkSpace/embeeded-rpc/myrpc/example
 ./server &
+sleep 1
 ./client 1 1 
 
 
