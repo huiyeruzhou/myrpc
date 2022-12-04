@@ -41,7 +41,7 @@ erpc:
 
 .PHONY: example
 example: erpc
-	@$(MAKE) -j$(MAKETHREADS) -r -C example
+	@$(MAKE) $(silent_make) -j$(MAKETHREADS) -r -C example
 
 # Force rebuild
 .PHONY: refresh

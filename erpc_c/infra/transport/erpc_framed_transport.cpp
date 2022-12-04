@@ -11,7 +11,6 @@
 #include "erpc_framed_transport.hpp"
 
 #include "erpc_config_internal.h"
-#include ENDIANNESS_HEADER
 #include "erpc_message_buffer.hpp"
 
 #include <cstdio>
@@ -49,7 +48,6 @@ erpc_status_t FramedTransport::receive(MessageBuffer *message)
 
         if (retVal == kErpcStatus_Success)
         {
-            ERPC_READ_AGNOSTIC_16(h.m_messageSize);
 
             // received size can't be zero.
             if (h.m_messageSize == 0U)
@@ -95,8 +93,6 @@ erpc_status_t FramedTransport::send(MessageBuffer *message)
 
     // Send header first.
     h.m_messageSize = messageLength;
-
-    ERPC_WRITE_AGNOSTIC_16(h.m_messageSize);
 
     ret = underlyingSend((uint8_t *)&h, sizeof(h));
     if (ret == kErpcStatus_Success)

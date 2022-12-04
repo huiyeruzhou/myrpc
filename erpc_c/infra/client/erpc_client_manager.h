@@ -13,10 +13,6 @@
 
 #ifdef __cplusplus
 #include "erpc_client_server_common.hpp"
-#if ERPC_NESTED_CALLS
-#include "erpc_server.hpp"
-#include "erpc_threading.h"
-#endif
 
 /*!
  * @addtogroup infra_client
@@ -63,10 +59,6 @@ public:
     : ClientServerCommon()
     , m_sequence(0)
     , m_errorHandler(NULL)
-#if ERPC_NESTED_CALLS
-    , m_server(NULL)
-    , m_serverThreadId(NULL)
-#endif
     {
     }
 
@@ -113,29 +105,9 @@ public:
      */
     void callErrorHandler(erpc_status_t err, uint32_t functionID);
 
-#if ERPC_NESTED_CALLS
-    /*!
-     * @brief This function sets server used for nested calls.
-     *
-     * @param[in] server Server used for nested calls.
-     */
-    void setServer(Server *server) { m_server = server; }
-
-    /*!
-     * @brief This function sets server thread id.
-     *
-     * @param[in] serverThreadId Id of thread where server run function is executed.
-     */
-    void setServerThreadId(Thread::thread_id_t serverThreadId) { m_serverThreadId = serverThreadId; }
-#endif
-
 protected:
     uint32_t m_sequence;                    //!< Sequence number.
     client_error_handler_t m_errorHandler;  //!< Pointer to function error handler.
-#if ERPC_NESTED_CALLS
-    Server *m_server;                     //!< Server used for nested calls.
-    Thread::thread_id_t m_serverThreadId; //!< Thread in which server run function is called.
-#endif
 
     /*!
      * @brief This function performs request.
@@ -146,17 +118,6 @@ protected:
      * @param[in] request Request context to perform.
      */
     virtual void performClientRequest(RequestContext &request);
-
-#if ERPC_NESTED_CALLS
-    /*!
-     * @brief This function performs nested request.
-     *
-     * Used when from eRPC function server implementation context is called new eRPC function.
-     *
-     * @param[in] request Request context to perform.
-     */
-    virtual void performNestedClientRequest(RequestContext &request);
-#endif
 
     //! @brief Validate that an incoming message is a reply.
     virtual void verifyReply(RequestContext &request);

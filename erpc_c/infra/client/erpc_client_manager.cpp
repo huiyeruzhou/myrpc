@@ -39,17 +39,6 @@ void ClientManager::performRequest(RequestContext &request)
     // Check the codec status
     performRequest = request.getCodec()->isStatusOk();
 
-#if ERPC_NESTED_CALLS
-    if (performRequest)
-    {
-        erpc_assert((m_serverThreadId != NULL) && ("server thread id was not set" != NULL));
-        if (Thread::getCurrentThreadId() == m_serverThreadId)
-        {
-            performNestedClientRequest(request);
-            performRequest = false;
-        }
-    }
-#endif
     if (performRequest)
     {
         performClientRequest(request);
@@ -59,21 +48,6 @@ void ClientManager::performRequest(RequestContext &request)
 void ClientManager::performClientRequest(RequestContext &request)
 {
     erpc_status_t err;
-
-#if ERPC_NESTED_CALLS_DETECTION
-    if (!request.isOneway() && nestingDetection)
-    {
-        request.getCodec()->updateStatus(kErpcStatus_NestedCallFailure);
-    }
-#endif
-
-#if ERPC_MESSAGE_LOGGING
-    if (request.getCodec()->isStatusOk() == true)
-    {
-        err = logMessage(request.getCodec()->getBuffer());
-        request.getCodec()->updateStatus(err);
-    }
-#endif
 
     // Send invocation request to server.
     if (request.getCodec()->isStatusOk() == true)
@@ -92,14 +66,6 @@ void ClientManager::performClientRequest(RequestContext &request)
             request.getCodec()->updateStatus(err);
         }
 
-#if ERPC_MESSAGE_LOGGING
-        if (request.getCodec()->isStatusOk() == true)
-        {
-            err = logMessage(request.getCodec()->getBuffer());
-            request.getCodec()->updateStatus(err);
-        }
-#endif
-
         // Check the reply.
         if (request.getCodec()->isStatusOk() == true)
         {
@@ -108,55 +74,6 @@ void ClientManager::performClientRequest(RequestContext &request)
     }
 }
 
-#if ERPC_NESTED_CALLS
-void ClientManager::performNestedClientRequest(RequestContext &request)
-{
-    erpc_status_t err;
-
-    erpc_assert((m_transport != NULL) && ("transport/arbitrator not set" != NULL));
-
-#if ERPC_MESSAGE_LOGGING
-    if (request.getCodec()->isStatusOk() == true)
-    {
-        err = logMessage(request.getCodec()->getBuffer());
-        request.getCodec()->updateStatus(err);
-    }
-#endif
-
-    // Send invocation request to server.
-    if (request.getCodec()->isStatusOk() == true)
-    {
-        err = m_transport->send(request.getCodec()->getBuffer());
-        request.getCodec()->updateStatus(err);
-    }
-
-    // If the request is oneway, then there is nothing more to do.
-    if (!request.isOneway())
-    {
-        // Receive reply.
-        if (request.getCodec()->isStatusOk() == true)
-        {
-            erpc_assert((m_server != NULL) && ("server for nesting calls was not set" != NULL));
-            err = m_server->run(request);
-            request.getCodec()->updateStatus(err);
-        }
-
-#if ERPC_MESSAGE_LOGGING
-        if (request.getCodec()->isStatusOk() == true)
-        {
-            err = logMessage(request.getCodec()->getBuffer());
-            request.getCodec()->updateStatus(err);
-        }
-#endif
-
-        // Check the reply.
-        if (request.getCodec()->isStatusOk() == true)
-        {
-            verifyReply(request);
-        }
-    }
-}
-#endif
 
 void ClientManager::verifyReply(RequestContext &request)
 {

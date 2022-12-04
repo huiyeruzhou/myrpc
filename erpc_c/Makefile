@@ -46,24 +46,32 @@ LIBS_ROOT = $(TARGET_OUTPUT_ROOT)/lib
 #-----------------------------------------------
 INCLUDES += $(ERPC_C_ROOT)/config \
 			$(ERPC_C_ROOT)/infra \
-			$(ERPC_C_ROOT)/port \
+			$(ERPC_C_ROOT)/infra/codec \
+			$(ERPC_C_ROOT)/infra/client \
+			$(ERPC_C_ROOT)/infra/server \
+			$(ERPC_C_ROOT)/infra/transport \
 			$(ERPC_C_ROOT)/setup \
-			$(ERPC_C_ROOT)/transports
+			$(ERPC_C_ROOT)/port \
+			
 
-SOURCES += 	$(ERPC_C_ROOT)/infra/erpc_basic_codec.cpp \
-			$(ERPC_C_ROOT)/infra/erpc_client_manager.cpp \
-			$(ERPC_C_ROOT)/infra/erpc_framed_transport.cpp \
-			$(ERPC_C_ROOT)/infra/erpc_message_buffer.cpp \
-			$(ERPC_C_ROOT)/infra/erpc_server.cpp \
-			$(ERPC_C_ROOT)/infra/erpc_simple_server.cpp \
+SOURCES += 	$(ERPC_C_ROOT)/infra/codec/erpc_basic_codec.cpp \
+			$(ERPC_C_ROOT)/infra/codec/erpc_message_buffer.cpp \
+			\
+			$(ERPC_C_ROOT)/infra/client/erpc_client_manager.cpp \
+			\
+			$(ERPC_C_ROOT)/infra/server/erpc_server.cpp \
+			$(ERPC_C_ROOT)/infra/server/erpc_simple_server.cpp \
+			\
+			$(ERPC_C_ROOT)/infra/transport/erpc_tcp_transport.cpp\
+			$(ERPC_C_ROOT)/infra/transport/erpc_framed_transport.cpp \
+			\
 			$(ERPC_C_ROOT)/port/erpc_port_stdlib.cpp \
 			$(ERPC_C_ROOT)/port/erpc_threading_pthreads.cpp \
-			$(ERPC_C_ROOT)/port/erpc_serial.cpp \
+			\
 			$(ERPC_C_ROOT)/setup/erpc_client_setup.cpp \
 			$(ERPC_C_ROOT)/setup/erpc_setup_mbf_dynamic.cpp \
 			$(ERPC_C_ROOT)/setup/erpc_server_setup.cpp \
 			$(ERPC_C_ROOT)/setup/erpc_setup_tcp.cpp \
-			$(ERPC_C_ROOT)/transports/erpc_tcp_transport.cpp
 
 MAKE_TARGET = $(TARGET_LIB)($(OBJECTS_ALL))
 

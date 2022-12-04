@@ -1,7 +1,20 @@
+
+ERPC_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))../)
+ERPC_C_ROOT = $(ERPC_ROOT)/erpc_c
+ERPC_LIB=$(ERPC_ROOT)/Debug/Linux/erpc/lib/liberpc.a
+INCLUDES := $(ERPC_C_ROOT)/config \
+			$(ERPC_C_ROOT)/infra \
+			$(ERPC_C_ROOT)/infra/codec \
+			$(ERPC_C_ROOT)/infra/client \
+			$(ERPC_C_ROOT)/infra/server \
+			$(ERPC_C_ROOT)/infra/transport \
+			$(ERPC_C_ROOT)/setup \
+			$(ERPC_C_ROOT)/port 
+INCLUDE := $(foreach includes, $(INCLUDES), -I $(includes))
+
 CXX=g++
-CXXFLAGS+=-g -I../erpc_c/infra/ -I../erpc_c/setup/ -I../erpc_c/transports/ -I../erpc_c/config/ -I../erpc_c/port/ -lpthread
-# CXXFLAGS += -g -I. -L${ERPC_LIB_DIR} -lerpc -lpthread
-ERPC_LIB=/home/huiyeruzhou/Documents/WorkSpace/embeeded-rpc/myrpc/Debug/Linux/erpc/lib/liberpc.a
+CXXFLAGS += -g $(INCLUDE) -lpthread
+
 ERPC=idl.erpc
 ERPC_SERVER=erpc_matrix_multiply_server.cpp 
 ERPC_CLIENT=erpc_matrix_multiply_client.cpp

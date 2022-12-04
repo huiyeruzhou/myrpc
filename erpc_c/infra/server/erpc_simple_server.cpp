@@ -69,20 +69,7 @@ erpc_status_t SimpleServer::runInternalBegin(Codec **codec, MessageBuffer &buff,
         err = m_transport->receive(&buff);
     }
 
-#if ERPC_PRE_POST_ACTION
-    pre_post_action_cb preCB = this->getPreCB();
-    if (preCB != NULL)
-    {
-        preCB();
-    }
-#endif
 
-#if ERPC_MESSAGE_LOGGING
-    if (err == kErpcStatus_Success)
-    {
-        err = logMessage(&buff);
-    }
-#endif
 
     //创建codec
     if (err == kErpcStatus_Success)
@@ -128,24 +115,9 @@ erpc_status_t SimpleServer::runInternalEnd(Codec *codec, message_type_t msgType,
     {
         if (msgType != kOnewayMessage)
         {
-#if ERPC_MESSAGE_LOGGING
-            err = logMessage(codec->getBuffer());
-            if (err == kErpcStatus_Success)
-            {
-#endif
-                err = m_transport->send(codec->getBuffer());
-#if ERPC_MESSAGE_LOGGING
-            }
-#endif
-        }
 
-#if ERPC_PRE_POST_ACTION
-        pre_post_action_cb postCB = this->getPostCB();
-        if (postCB != NULL)
-        {
-            postCB();
+                err = m_transport->send(codec->getBuffer());
         }
-#endif
     }
 
     // Dispose of buffers and codecs.

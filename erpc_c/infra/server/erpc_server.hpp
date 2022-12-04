@@ -13,9 +13,7 @@
 
 #include "erpc_client_server_common.hpp"
 #include "erpc_config_internal.h"
-#if ERPC_NESTED_CALLS
-#include "erpc_client_manager.h"
-#endif
+
 
 /*!
  * @addtogroup infra_server
@@ -28,9 +26,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace erpc {
-#if ERPC_NESTED_CALLS
-class RequestContext;
-#endif
 /*!
  * @brief Abstract interface for service, which can be executed on server side.
  *
@@ -182,17 +177,7 @@ protected:
      */
     virtual Service *findServiceWithId(uint32_t serviceId);
 
-#if ERPC_NESTED_CALLS
-    friend class ClientManager;
-    friend class ArbitratedClientManager;
 
-    /*!
-     * @brief This function runs the server.
-     *
-     * @param[in] Request context to check that answer was for nested call.
-     */
-    virtual erpc_status_t run(RequestContext &request) = 0;
-#endif
 
 private:
     // Disable copy ctor.

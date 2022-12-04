@@ -12,12 +12,7 @@
 
 #include "erpc_config_internal.h"
 #include "erpc_codec.hpp"
-#if ERPC_MESSAGE_LOGGING
-#include "erpc_message_loggers.hpp"
-#endif
-#if ERPC_PRE_POST_ACTION
-#include "erpc_pre_post_action.h"
-#endif
+
 
 /*!
  * @addtogroup infra_transport
@@ -37,57 +32,12 @@ namespace erpc {
  * @ingroup infra_utility
  */
 class ClientServerCommon
-#if ERPC_MESSAGE_LOGGING
-#ifdef ERPC_OTHER_INHERITANCE
-    ,
-#else
-#define ERPC_OTHER_INHERITANCE 1
-:
-#endif
-    public MessageLoggers
-#endif
-#if ERPC_PRE_POST_ACTION
-#ifdef ERPC_OTHER_INHERITANCE
-    ,
-#else
-#define ERPC_OTHER_INHERITANCE 1
-:
-#endif
-    public PrePostAction
-#endif
 {
 public:
     /*!
      * @brief ClientServerCommon constructor.
      */
-    ClientServerCommon(void)
-#ifdef ERPC_OTHER_INHERITANCE
-#undef ERPC_OTHER_INHERITANCE
-#endif
-#if ERPC_MESSAGE_LOGGING
-#ifdef ERPC_OTHER_INHERITANCE
-        ,
-#else
-#define ERPC_OTHER_INHERITANCE 1
-    :
-#endif
-        MessageLoggers()
-#endif
-#if ERPC_PRE_POST_ACTION
-#ifdef ERPC_OTHER_INHERITANCE
-            ,
-#else
-#define ERPC_OTHER_INHERITANCE 1
-    :
-#endif
-        PrePostAction()
-#endif
-#ifdef ERPC_OTHER_INHERITANCE
-            ,
-#else
-#define ERPC_OTHER_INHERITANCE 1
-    :
-#endif
+    ClientServerCommon(void):
         m_messageFactory(NULL), m_codecFactory(NULL), m_transport(NULL){};
 
     /*!

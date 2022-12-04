@@ -5,11 +5,14 @@
             "includePath": [
                 "${workspaceFolder}/erpc_c/infra",
                 "${workspaceFolder}/erpc_c/setup",
-                "${workspaceFolder}/erpc_c/transports",
                 "${workspaceFolder}/erpc_c/port",
                 "${workspaceFolder}/erpc_c/port",
                 "${workspaceFolder}/erpc_c/port",
-                "${workspaceFolder}/erpc_c/port"
+                "${workspaceFolder}/erpc_c/port",
+                "${workspaceFolder}/erpc_c/config",
+                "${workspaceFolder}/erpc_c/config",
+                "${workspaceFolder}/erpc_c/infra",
+                "${workspaceFolder}/erpc_c/infra/server"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
