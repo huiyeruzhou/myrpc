@@ -3,23 +3,21 @@
         {
             "name": "Linux",
             "includePath": [
+                "${workspaceFolder}/erpc_c/**",
                 "${workspaceFolder}/erpc_c/infra",
                 "${workspaceFolder}/erpc_c/setup",
                 "${workspaceFolder}/erpc_c/port",
-                "${workspaceFolder}/erpc_c/port",
-                "${workspaceFolder}/erpc_c/port",
-                "${workspaceFolder}/erpc_c/port",
-                "${workspaceFolder}/erpc_c/config",
-                "${workspaceFolder}/erpc_c/config",
                 "${workspaceFolder}/erpc_c/infra",
-                "${workspaceFolder}/erpc_c/infra/server"
+                "${workspaceFolder}/erpc_c/infra/server",
+                "${workspaceFolder}/erpc_c/infra/codec",
+                "${workspaceFolder}/erpc_c/infra/transport",
+                "${workspaceFolder}/erpc_c/infra/client"
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/gcc",
+            "compilerPath": "/usr/bin/g++",
             "cStandard": "gnu17",
             "cppStandard": "gnu++14",
-            "intelliSenseMode": "linux-gcc-x64",
-            "configurationProvider": "ms-vscode.makefile-tools"
+            "intelliSenseMode": "linux-gcc-x64"
         }
     ],
     "version": 4

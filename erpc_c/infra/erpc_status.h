@@ -71,7 +71,7 @@ enum _erpc_status
     //! Sending/Receiving callback function which is not defined in IDL.
     kErpcStatus_UnknownCallback,
 
-    //! Calling eRPC function from another eRPC function. For more information see erpc_common.h.
+    //! Calling eRPC function from another eRPC function. For more information see erpc_status.h.
     kErpcStatus_NestedCallFailure,
 
     //! When sending address from bigger architecture to smaller.

@@ -1,8 +1,6 @@
-cd ~/Documents/WorkSpace/embeeded-rpc/embeeded-rpc/example
-# make
-./server&
-./client 1 5 &
-./client 2 1 &
+cd /home/huiyeruzhou/Documents/WorkSpace/embeeded-rpc/myrpc/example
+./server &
+./client 1 1 
 
 
 # 只要正在处理一个请求的时候来了新的请求,后面请求就都收不到返回.

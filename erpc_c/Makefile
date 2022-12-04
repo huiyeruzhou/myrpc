@@ -44,8 +44,7 @@ LIBS_ROOT = $(TARGET_OUTPUT_ROOT)/lib
 # Include path. Add the include paths like this:
 # INCLUDES += ./include/
 #-----------------------------------------------
-INCLUDES += $(ERPC_C_ROOT)/config \
-			$(ERPC_C_ROOT)/infra \
+INCLUDES += $(ERPC_C_ROOT)/infra \
 			$(ERPC_C_ROOT)/infra/codec \
 			$(ERPC_C_ROOT)/infra/client \
 			$(ERPC_C_ROOT)/infra/server \

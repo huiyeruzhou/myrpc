@@ -10,7 +10,7 @@
 #ifndef _EMBEDDED_RPC__TRANSPORT_H_
 #define _EMBEDDED_RPC__TRANSPORT_H_
 
-#include "erpc_common.h"
+#include "erpc_status.h"
 #include "erpc_message_buffer.hpp"
 
 #include <cstring>

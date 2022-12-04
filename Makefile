@@ -33,7 +33,7 @@ endif
 
 # Default target.
 .PHONY: default
-default: erpc
+default: refresh 
 
 .PHONY: erpc
 erpc:
@@ -45,7 +45,7 @@ example: erpc
 
 # Force rebuild
 .PHONY: refresh
-refresh: clean erpc
+refresh: clean erpc example
 
 # Target to clean everything.
 .PHONY: clean

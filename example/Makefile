@@ -1,4 +1,4 @@
-
+include ../mk/common.mk
 ERPC_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))../)
 ERPC_C_ROOT = $(ERPC_ROOT)/erpc_c
 ERPC_LIB=$(ERPC_ROOT)/Debug/Linux/erpc/lib/liberpc.a
@@ -24,9 +24,11 @@ all: client server
 
 server: ${ERPC_SERVER} ${ERPC_HEADER}
 	${CXX}  server.cpp erpc_matrix_multiply_server.cpp  ${ERPC_LIB} ${CXXFLAGS} -o server
+	@$(call printmessage,build,Building, server)
 
 client: ${ERPC_CLIENT} ${ERPC_HEADER}
 	${CXX}  client.cpp erpc_matrix_multiply_client.cpp  ${ERPC_LIB} ${CXXFLAGS} -o client
+	@$(call printmessage,build,Building, client)
 
 ${ERPC_SERVER} ${ERPC_CLIENT} ${ERPC_HEADER}:
 	erpcgen ${ERPC} -g c

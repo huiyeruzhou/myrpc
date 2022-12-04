@@ -11,15 +11,9 @@
 #ifndef _EMBEDDED_RPC__CLIENT_SETUP_H_
 #define _EMBEDDED_RPC__CLIENT_SETUP_H_
 
-#include "erpc_common.h"
+#include "erpc_status.h"
 #include "erpc_config_internal.h"
 #include "erpc_mbf_setup.h"
-#if ERPC_PRE_POST_ACTION
-#include "erpc_pre_post_action.h"
-#endif
-#if ERPC_NESTED_CALLS
-#include "erpc_server_setup.h"
-#endif
 #include "erpc_client_manager.h"
 #include "erpc_transport_setup.h"
 

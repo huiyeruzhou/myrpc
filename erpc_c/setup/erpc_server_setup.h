@@ -11,13 +11,11 @@
 #ifndef _EMBEDDED_RPC__SERVER_SETUP_H_
 #define _EMBEDDED_RPC__SERVER_SETUP_H_
 
-#include "erpc_common.h"
+#include "erpc_status.h"
 #include "erpc_config_internal.h"
 #include "erpc_mbf_setup.h"
 #include "erpc_transport_setup.h"
-#if ERPC_PRE_POST_ACTION
-#include "erpc_pre_post_action.h"
-#endif
+
 
 /*!
  * @addtogroup server_setup
@@ -94,7 +92,7 @@ void erpc_remove_service_from_server(erpc_server_t server, void *service);
  *
  * @param[in] server Pointer to server structure.
  *
- * @return Return one of status from erpc_common.h
+ * @return Return one of status from erpc_status.h
  */
 erpc_status_t erpc_server_run(erpc_server_t server);
 
@@ -105,7 +103,7 @@ erpc_status_t erpc_server_run(erpc_server_t server);
  *
  * @param[in] server Pointer to server structure.
  *
- * @return Return one of status from erpc_common.h
+ * @return Return one of status from erpc_status.h
  */
 erpc_status_t erpc_server_poll(erpc_server_t server);
 

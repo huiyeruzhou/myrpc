@@ -16,10 +16,6 @@
 #include "erpc_message_buffer.hpp"
 #include "erpc_transport.hpp"
 
-#if ERPC_NESTED_CALLS
-#include "erpc_threading.h"
-#endif
-
 using namespace erpc;
 
 ////////////////////////////////////////////////////////////////////////////////
