@@ -11,7 +11,6 @@
 #define _EMBEDDED_RPC__TRANSPORT_H_
 
 #include "erpc_common.h"
-#include "erpc_crc16.hpp"
 #include "erpc_message_buffer.hpp"
 
 #include <cstring>
@@ -78,20 +77,6 @@ public:
      * @retval True when a message is available to process, else false.
      */
     virtual bool hasMessage(void) { return true; }
-
-    /*!
-     * @brief This functions sets the CRC-16 implementation.
-     *
-     * @param[in] crcImpl Object containing crc-16 compute function.
-     */
-    virtual void setCrc16(Crc16 *crcImpl) { (void)crcImpl; }
-
-    /*!
-     * @brief This functions gets the CRC-16 object.
-     *
-     * @return Crc16* Pointer to CRC-16 object containing crc-16 compute function.
-     */
-    virtual Crc16 *getCrc16() { return NULL; }
 };
 
 /*!

@@ -66,7 +66,7 @@ namespace erpc {
  *
  * @ingroup port_threads
  */
-class Thread
+class   Thread
 {
 public:
     //! @brief Unique identifier for a thread.

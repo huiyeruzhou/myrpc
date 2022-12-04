@@ -11,7 +11,6 @@
 #include "erpc_server_setup.h"
 
 #include "erpc_basic_codec.hpp"
-#include "erpc_crc16.hpp"
 #include "erpc_manually_constructed.hpp"
 #include "erpc_message_buffer.hpp"
 #include "erpc_simple_server.hpp"
@@ -39,7 +38,6 @@ erpc_server_t erpc_server_init(erpc_transport_t transport, erpc_mbf_t message_bu
 
     Transport *castedTransport;
     BasicCodecFactory *codecFactory;
-    Crc16 *crc16;
     SimpleServer *simpleServer;
 
 #if ERPC_ALLOCATION_POLICY == ERPC_ALLOCATION_POLICY_STATIC
@@ -64,20 +62,15 @@ erpc_server_t erpc_server_init(erpc_transport_t transport, erpc_mbf_t message_bu
     // Init factories.
     codecFactory = new BasicCodecFactory();
 
-    crc16 = new Crc16();
 
     // Init the client manager.
     simpleServer = new SimpleServer();
 
-    if ((codecFactory == NULL) || (crc16 == NULL) || (simpleServer == NULL))
+    if ((codecFactory == NULL) || (simpleServer == NULL))
     {
         if (codecFactory != NULL)
         {
             delete codecFactory;
-        }
-        if (crc16 != NULL)
-        {
-            delete crc16;
         }
         if (simpleServer != NULL)
         {
@@ -93,7 +86,6 @@ erpc_server_t erpc_server_init(erpc_transport_t transport, erpc_mbf_t message_bu
     {
         // Init server with the provided transport.
         castedTransport = reinterpret_cast<Transport *>(transport);
-        castedTransport->setCrc16(crc16);
         simpleServer->setTransport(castedTransport);
         simpleServer->setCodecFactory(codecFactory);
         simpleServer->setMessageBufferFactory(reinterpret_cast<MessageBufferFactory *>(message_buffer_factory));
@@ -115,7 +107,6 @@ void erpc_server_deinit(erpc_server_t server)
     SimpleServer *simpleServer = reinterpret_cast<SimpleServer *>(server);
 
     delete simpleServer->getCodecFactory();
-    delete simpleServer->getTransport()->getCrc16();
     delete simpleServer;
 #else
 #error "Unknown eRPC allocation policy!"
@@ -139,15 +130,6 @@ void erpc_remove_service_from_server(erpc_server_t server, void *service)
     SimpleServer *simpleServer = reinterpret_cast<SimpleServer *>(server);
 
     simpleServer->removeService(static_cast<erpc::Service *>(service));
-}
-
-void erpc_server_set_crc(erpc_server_t server, uint32_t crcStart)
-{
-    erpc_assert(server != NULL);
-
-    SimpleServer *simpleServer = reinterpret_cast<SimpleServer *>(server);
-
-    simpleServer->getTransport()->getCrc16()->setCrcStart(crcStart);
 }
 
 erpc_status_t erpc_server_run(erpc_server_t server)

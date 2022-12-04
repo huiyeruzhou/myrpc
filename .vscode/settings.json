@@ -5,6 +5,8 @@
     "python.formatting.provider": "autopep8",
     "files.associations": {
         "*.c": "c",
+        "*.rmd": "markdown",
+        ".mpyproject.json": "jsonc",
         "memory_resource": "cpp",
         "new": "cpp",
         "array": "cpp",
@@ -25,6 +27,7 @@
         "numeric": "cpp",
         "sstream": "cpp",
         "streambuf": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "cstdlib": "cpp"
     }
 }

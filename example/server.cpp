@@ -1,6 +1,7 @@
 #include "erpc_matrix_multiply_server.h"
 #include "erpc_server_setup.h"
 #include "erpc_transport_setup.h"
+#include "erpc_tcp_transport.hpp"
 #include <unistd.h>
 #include <stdio.h>
 /* implementation of function call */

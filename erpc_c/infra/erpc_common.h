@@ -41,9 +41,6 @@ enum _erpc_status
     //! Expected a reply message but got another message type.
     kErpcStatus_ExpectedReply,
 
-    //! Message is corrupted.
-    kErpcStatus_CrcCheckFailed,
-
     //! Attempt to read or write past the end of a buffer.
     kErpcStatus_BufferOverrun,
 

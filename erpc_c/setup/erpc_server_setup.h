@@ -81,17 +81,6 @@ void erpc_add_service_to_server(erpc_server_t server, void *service);
  */
 void erpc_remove_service_from_server(erpc_server_t server, void *service);
 
-/*!
- * @brief Can be used to set own crcStart number.
- *
- * For example can be used generated crc from erpcgen
- * which is providing when @crc annotation is used.
- * Accessed can be through 'extern const uint32_t erpc_generated_crc;'
- *
- * @param[in] server Pointer to server structure.
- * @param[in] crcStart Set start number for crc.
- */
-void erpc_server_set_crc(erpc_server_t server, uint32_t crcStart);
 //@}
 
 //! @name Server control

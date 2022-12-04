@@ -65,18 +65,6 @@ erpc_client_t erpc_client_init(erpc_transport_t transport, erpc_mbf_t message_bu
  */
 void erpc_client_set_error_handler(erpc_client_t client, client_error_handler_t error_handler);
 
-/*!
- * @brief Can be used to set own crcStart number.
- *
- * For example can be used generated crc from erpcgen
- * which is providing when @crc annotation is used.
- * Accessed can be through 'extern const uint32_t erpc_generated_crc;'
- *
- * @param[in] client Pointer to client structure.
- * @param[in] crcStart Set start number for crc.
- */
-void erpc_client_set_crc(erpc_client_t client, uint32_t crcStart);
-
 #if ERPC_NESTED_CALLS
 /*!
  * @brief This function sets server object for handling nested eRPC calls.

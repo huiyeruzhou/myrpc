@@ -99,25 +99,10 @@ public:
     struct Header
     {
         uint16_t m_messageSize; //!< Size in bytes of the message, excluding the header.
-        uint16_t m_crc;         //!< CRC-16 over the message data.
     };
 
-    /*!
-     * @brief This functions sets the CRC-16 implementation.
-     *
-     * @param[in] crcImpl Object containing crc-16 compute function.
-     */
-    virtual void setCrc16(Crc16 *crcImpl) override;
-
-    /*!
-     * @brief This functions gets the CRC-16 object.
-     *
-     * @return Crc16* Pointer to CRC-16 object containing crc-16 compute function.
-     */
-    virtual Crc16 *getCrc16() override;
 
 protected:
-    Crc16 *m_crcImpl; /*!< CRC object. */
 
 #if !ERPC_THREADS_IS(NONE)
     Mutex m_sendLock;    //!< Mutex protecting send.

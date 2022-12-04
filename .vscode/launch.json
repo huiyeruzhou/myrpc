@@ -26,7 +26,7 @@
                     "text": "-gdb-set disassembly-flavor intel",
                     "ignoreFailures": true
                 }
-            ]
+            ],
         },
 
         {
@@ -40,34 +40,10 @@
             "name": "Launch lldb",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceRoot}/example/server",
+            "program": "${workspaceRoot}/example/client",
             // "initCommands": [
             //     "${workspaceRoot}/example/server"
             // ]
         },
-        {
-            "name": "Debug Linux erpcgen test.erpc",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${cwd}/Debug/Linux/erpcgen/erpcgen",
-            "args": ["-v", "-v", "-o", "Debug/Linux/erpcgen/", "${cwd}/Debug/Linux/erpcgen/test.erpc"],
-            "stopAtEntry": true,
-            "cwd": "${cwd}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                },
-                {
-                    "description": "Set Disassembly Flavor to Intel",
-                    "text": "-gdb-set disassembly-flavor intel",
-                    "ignoreFailures": true
-                }
-            ]
-        }
     ]
 }
