@@ -19,8 +19,9 @@ void erpcMatrixMultiply(Matrix matrix1, Matrix matrix2, Matrix result_matrix)
 }
 
 void erpctest(int32_t num1, int32_t num2, int32_t *ret) {
+    printf("called\n");
     *ret = num1 + 10;
-    usleep(num2 * 10000);
+    usleep(num2 * 1000000);
 }
 
 int main()

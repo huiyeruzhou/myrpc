@@ -3,7 +3,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <errno.h>
-
+#include <stdio.h>
 using namespace erpc;
 
 TCPWorker::~TCPWorker(void) {}
@@ -41,6 +41,7 @@ erpc_status_t TCPWorker::underlyingReceive(uint8_t *data, uint32_t size)
             else
             {
                 status = kErpcStatus_ReceiveFailed;
+                printf("transport:   unknown error from tcp, return value of read is %ld\n", length);
             }
             break;
         }

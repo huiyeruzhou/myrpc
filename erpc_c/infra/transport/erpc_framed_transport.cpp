@@ -53,6 +53,7 @@ erpc_status_t FramedTransport::receive(MessageBuffer *message)
             if (h.m_messageSize == 0U)
             {
                 retVal = kErpcStatus_ReceiveFailed;
+                printf("transport:    received size can't be zero.\n");
             }
         }
 
@@ -62,6 +63,7 @@ erpc_status_t FramedTransport::receive(MessageBuffer *message)
             if (h.m_messageSize > message->getLength())
             {
                 retVal = kErpcStatus_ReceiveFailed;
+                printf("transport:    received size can't be larger then buffer length.\n");
             }
         }
 

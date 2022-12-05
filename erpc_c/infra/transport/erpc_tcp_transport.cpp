@@ -398,3 +398,88 @@ void TCPTransport::serverThreadStub(void *arg)
         This->serverThread();
     }
 }
+
+erpc_status_t TCPTransport::underlyingReceive(uint8_t *data, uint32_t size)
+{
+    ssize_t length;
+    erpc_status_t status = kErpcStatus_Success;
+
+    // Block until we have a valid connection.
+    while (m_socket <= 0)
+    {
+        // Sleep 10 ms.
+        Thread::sleep(10000);
+    }
+
+    // Loop until all requested data is received.
+    while (size > 0U)
+    {
+        length = read(m_socket, data, size);
+
+        // Length will be zero if the connection is closed.
+        if (length > 0)
+        {
+            size -= length;
+            data += length;
+        }
+        else
+        {
+            if (length == 0)
+            {
+                // close socket, not server
+                close(false);
+                status = kErpcStatus_ConnectionClosed;
+            }
+            else
+            {
+                status = kErpcStatus_ReceiveFailed;
+            }
+            break;
+        }
+    }
+
+    return status;
+}
+
+erpc_status_t TCPTransport::underlyingSend(const uint8_t *data, uint32_t size)
+{
+    erpc_status_t status = kErpcStatus_Success;
+    ssize_t result;
+
+    if (m_socket <= 0)
+    {
+        // we should not pretend to have a succesful Send or we create a deadlock
+        status = kErpcStatus_ConnectionFailure;
+    }
+    else
+    {
+        // Loop until all data is sent.
+        while (size > 0U)
+        {
+            result = write(m_socket, data, size);
+            if (result >= 0)
+            {
+                size -= result;
+                data += result;
+            }
+            else
+            {
+                if (result == EPIPE)
+                {
+                    // close socket, not server
+                    close(false);
+                    status = kErpcStatus_ConnectionClosed;
+                }
+                else
+                {
+                    status = kErpcStatus_SendFailed;
+                }
+                break;
+            }
+        }
+    }
+
+    return status;
+}
+
+

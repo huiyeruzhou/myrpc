@@ -5,7 +5,7 @@ using namespace erpc;
 
 ServerWorker::ServerWorker(Service *services, MessageBufferFactory *messageFactory,
     CodecFactory *codecFactory,
-    Transport *worker)
+    TCPWorker *worker)
     : m_firstService(services)
     , m_messageFactory(messageFactory)
     , m_codecFactory(codecFactory)
@@ -92,11 +92,17 @@ erpc_status_t ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff,
         (*codec)->setBuffer(buff);
 
         err = readHeadOfMessage(*codec, msgType, serviceId, methodId, sequence);
+        printf("worker:    read head of message\n"
+            "           msgType: %d, serviceId: %d,  methodId: %d, sequence: %d\n",msgType, serviceId, methodId, sequence);
         if (err != kErpcStatus_Success)
         {
             // Dispose of buffers and codecs.
             disposeBufferAndCodec(*codec);
         }
+    }
+    if (err != kErpcStatus_Success)
+    {
+        printf("worker:   runInternalBegin err: %d\n", err);
     }
 
     return err;
@@ -118,6 +124,10 @@ erpc_status_t ServerWorker::runInternalEnd(Codec *codec, message_type_t msgType,
 
     // Dispose of buffers and codecs.
     disposeBufferAndCodec(codec);
+    if (err != kErpcStatus_Success)
+    {
+        printf("worker:   runInternalEnd err: %d\n", err);
+    }
 
     return err;
 }
@@ -152,6 +162,12 @@ erpc_status_t ServerWorker::processMessage(Codec *codec, message_type_t msgType,
     if (err == kErpcStatus_Success)
     {
         err = service->handleInvocation(methodId, sequence, codec, m_messageFactory);
+        printf("worker:    service No.%d invoked\n", serviceId);
+    }
+
+    if (err != kErpcStatus_Success)
+    {
+        printf("worker:   processMessage err: %d\n", err);
     }
 
     return err;
@@ -169,15 +185,24 @@ Service *ServerWorker::findServiceWithId(uint32_t serviceId)
 
         service = service->getNext();
     }
+    printf("worker:    service No.%d found\n", serviceId);
     return service;
 }
 
 void ServerWorker::workerStub(void *arg)
 {
+    int err = kErpcStatus_Fail;
     ServerWorker *This = reinterpret_cast<ServerWorker *>(arg);
-
+    printf("\nworker:    in worker stub\n");
     if (This != NULL)
     {
-        This->runInternal();
+        int i = 1;
+        while (err != kErpcStatus_Success && i <= 5)
+        {
+            err = This->runInternal();
+            i++;
+        }
+        close(This->m_worker->m_socket);
+
     }
 }

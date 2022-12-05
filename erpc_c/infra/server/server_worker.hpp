@@ -4,13 +4,15 @@
 #include "erpc_codec.hpp"
 #include "service.hpp"
 #include "tcp_worker.hpp"
+#include <cstdio>
+#include <unistd.h>
 namespace erpc
 {
     class ServerWorker {
     public:
         ServerWorker(Service *services, MessageBufferFactory *messageFactory,
             CodecFactory *codecFactory,
-            Transport *worker);
+            TCPWorker *worker);
         ~ServerWorker(){}
         void disposeBufferAndCodec(Codec *codec);
         erpc_status_t runInternal(void);
@@ -28,7 +30,7 @@ namespace erpc
         Service *m_firstService;
         MessageBufferFactory *m_messageFactory; //!< Message buffer factory to use.
         CodecFactory *m_codecFactory;           //!< Codec to use.
-        Transport *m_worker;                 //!< Worker to do transport
+        TCPWorker *m_worker;                 //!< Worker to do transport
         
     };
 

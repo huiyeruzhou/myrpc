@@ -17,7 +17,6 @@ namespace erpc {
         virtual ~TCPWorker(void);
         erpc_status_t underlyingReceive(uint8_t *data, uint32_t size);
         erpc_status_t underlyingSend(const uint8_t *data, uint32_t size);
-    private:
         int m_socket;
     };
 }
