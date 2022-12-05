@@ -44,6 +44,16 @@ void print_net_info(const sockaddr *__sockaddr, int __len) {
     getnameinfo(__sockaddr, __len, host, 32, service, 32, 0);
     printf("%s:%s\n", host, service);
 }
+int getPortFormAddr(const sockaddr *__sockaddr, int __len) {
+    char service[32];
+    int port;
+    getnameinfo(__sockaddr, __len, NULL, 0, service, 32, 0);
+    if (sscanf(service, "%d", &port) == 1)
+    {
+        return port;
+    }
+    return -1;
+}
 #else
 #define TCP_DEBUG_PRINT(_fmt_, ...)
 #define TCP_DEBUG_ERR(_msg_)
@@ -365,12 +375,13 @@ void TCPTransport::serverThread(void)
                         // Successfully accepted a connection.
                         TCP_DEBUG_PRINT("server:    accepted connection from ");
                         print_net_info(&incomingAddress, incomingAddressLength);
+                        
                         // should be inherited from accept() socket but it's not always ...
                         yes = 1;
                         setsockopt(m_socket, IPPROTO_TCP, TCP_NODELAY, (void *) &yes, sizeof(yes));
                         addfd(epfd, incomingSocket, true);
                         m_socket = incomingSocket;
-                        m_server->onNewSocket(incomingSocket);
+                        m_server->onNewSocket(incomingSocket, getPortFormAddr(&incomingAddress, incomingAddressLength));
                     }
                     else
                     {

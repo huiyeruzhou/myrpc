@@ -2,6 +2,7 @@
 #include "erpc_server_setup.h"
 #include "erpc_transport_setup.h"
 #include "erpc_tcp_transport.hpp"
+#include "service.hpp"
 #include <unistd.h>
 #include <stdio.h>
 /* implementation of function call */
@@ -39,10 +40,13 @@ int main()
 
     /* connect generated service into server, look into erpc_matrix_multiply_server.h */
     erpc_service_t service = create_MatrixMultiplyService_service();
+    erpc::Service *ser = (erpc::Service *)(service);
+    ser->setName("Test Service");
     erpc_add_service_to_server(server, service);
 
     /* run server */
     erpc_server_run(server); /* or erpc_server_poll(); */
+    
     // while(1)    
     // erpc_server_poll(server);
 

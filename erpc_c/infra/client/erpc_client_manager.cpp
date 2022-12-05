@@ -16,13 +16,6 @@ using namespace erpc;
 // Code
 ////////////////////////////////////////////////////////////////////////////////
 
-#if ERPC_NESTED_CALLS_DETECTION
-extern bool nestingDetection;
-#ifndef _WIN32
-#pragma weak nestingDetection
-bool nestingDetection = false;
-#endif
-#endif
 
 RequestContext ClientManager::createRequest(bool isOneway)
 {

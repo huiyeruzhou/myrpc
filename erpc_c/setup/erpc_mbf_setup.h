@@ -46,20 +46,6 @@ erpc_mbf_t erpc_mbf_static_init(void);
  */
 erpc_mbf_t erpc_mbf_dynamic_init(void);
 
-/*!
- * @brief Create MessageBuffer factory which is using RPMSG LITE zero copy buffers.
- *
- * Has to be used with RPMSG lite zero copy transport.
- */
-erpc_mbf_t erpc_mbf_rpmsg_init(erpc_transport_t transport);
-
-/*!
- * @brief Create MessageBuffer factory which is using RPMSG LITE TTY buffers.
- *
- * Has to be used with RPMSG lite TTY transport.
- */
-erpc_mbf_t erpc_mbf_rpmsg_tty_init(erpc_transport_t transport);
-
 //@}
 
 #ifdef __cplusplus

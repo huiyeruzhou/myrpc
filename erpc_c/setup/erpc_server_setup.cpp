@@ -160,33 +160,4 @@ void erpc_server_stop(erpc_server_t server)
     simpleServer->stop();
 }
 
-#if ERPC_MESSAGE_LOGGING
-bool erpc_server_add_message_logger(erpc_server_t server, erpc_transport_t transport)
-{
-    erpc_assert(server != NULL);
 
-    SimpleServer *simpleServer = reinterpret_cast<SimpleServer *>(server);
-
-    return simpleServer->addMessageLogger(reinterpret_cast<Transport *>(transport));
-}
-#endif
-
-#if ERPC_PRE_POST_ACTION
-void erpc_client_add_pre_cb_action(erpc_server_t server, pre_post_action_cb preCB)
-{
-    erpc_assert(server != NULL);
-
-    SimpleServer *simpleServer = reinterpret_cast<SimpleServer *>(server);
-
-    simpleServer->addPreCB(preCB);
-}
-
-void erpc_client_add_post_cb_action(erpc_server_t server, pre_post_action_cb postCB)
-{
-    erpc_assert(server) != NULL;
-
-    SimpleServer *simpleServer = reinterpret_cast<SimpleServer *>(server);
-
-    simpleServer->addPostCB(postCB);
-}
-#endif

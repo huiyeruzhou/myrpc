@@ -45,6 +45,8 @@ namespace erpc
          */
         void setNext(Service *next) { m_next = next; }
 
+        void setName(const char *name) { m_name = name; }
+
         /*!
          * @brief This function call function implementation of current service.
          *
@@ -58,9 +60,12 @@ namespace erpc
         virtual erpc_status_t handleInvocation(uint32_t methodId, uint32_t sequence, Codec *codec,
             MessageBufferFactory *messageFactory) = 0;
 
+        const char *m_name;
+
     protected:
         uint32_t m_serviceId; /*!< Service unique id. */
         Service *m_next;      /*!< Pointer to next service. */
+        
     };
 
 } // namespace erpc

@@ -55,9 +55,9 @@ void SimpleServer::stop(void)
     m_isServerOn = false;
 }
 
-void SimpleServer::onNewSocket(int sockfd) {
+void SimpleServer::onNewSocket(int sockfd, int port) {
     printf("%d\n", sockfd);
-    TCPWorker *transport_worker = new TCPWorker(sockfd);
+    TCPWorker *transport_worker = new TCPWorker(sockfd, port);
     ServerWorker *worker = new ServerWorker(m_firstService, m_messageFactory, m_codecFactory, transport_worker);
     worker->m_workerThread.start(worker);
 }

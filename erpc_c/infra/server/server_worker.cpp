@@ -92,8 +92,8 @@ erpc_status_t ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff,
         (*codec)->setBuffer(buff);
 
         err = readHeadOfMessage(*codec, msgType, serviceId, methodId, sequence);
-        printf("worker:    read head of message\n"
-            "           msgType: %d, serviceId: %d,  methodId: %d, sequence: %d\n",msgType, serviceId, methodId, sequence);
+        printf("port %d:     read head of message\n"
+               "                msgType: %d, serviceId: %d,  methodId: %d, sequence: %d\n",m_worker->m_port,msgType, serviceId, methodId, sequence);
         if (err != kErpcStatus_Success)
         {
             // Dispose of buffers and codecs.
@@ -102,7 +102,7 @@ erpc_status_t ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff,
     }
     if (err != kErpcStatus_Success)
     {
-        printf("worker:   runInternalBegin err: %d\n", err);
+        printf("port %d:    runInternalBegin err: %d\n", m_worker->m_port, err);
     }
 
     return err;
@@ -126,7 +126,7 @@ erpc_status_t ServerWorker::runInternalEnd(Codec *codec, message_type_t msgType,
     disposeBufferAndCodec(codec);
     if (err != kErpcStatus_Success)
     {
-        printf("worker:   runInternalEnd err: %d\n", err);
+        printf("port %d:    runInternalEnd err: %d\n", m_worker->m_port, err);
     }
 
     return err;
@@ -162,12 +162,12 @@ erpc_status_t ServerWorker::processMessage(Codec *codec, message_type_t msgType,
     if (err == kErpcStatus_Success)
     {
         err = service->handleInvocation(methodId, sequence, codec, m_messageFactory);
-        printf("worker:    service No.%d invoked\n", serviceId);
+        printf("port %d:     service `%s` invoked\n", m_worker->m_port, service->m_name);
     }
 
     if (err != kErpcStatus_Success)
     {
-        printf("worker:   processMessage err: %d\n", err);
+        printf("port %d:    processMessage err: %d\n", m_worker->m_port, err);
     }
 
     return err;
@@ -185,7 +185,7 @@ Service *ServerWorker::findServiceWithId(uint32_t serviceId)
 
         service = service->getNext();
     }
-    printf("worker:    service No.%d found\n", serviceId);
+    printf("port %d:     service No.%d `%s` found\n", m_worker->m_port, serviceId, service->m_name);
     return service;
 }
 
