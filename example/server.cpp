@@ -1,6 +1,5 @@
 #include "erpc_matrix_multiply_server.h"
-#include "erpc_server_setup.h"
-#include "service.hpp"
+#include "erpc_simple_server.hpp"
 #include <unistd.h>
 #include <stdio.h>
 /* implementation of function call */
@@ -30,21 +29,19 @@ int main()
     /* UART transport layer initialization */
 
     /* MessageBufferFactory initialization */
-    erpc_mbf_t message_buffer_factory = erpc_mbf_dynamic_init();
+    auto message_buffer_factory = new erpc::MessageBufferFactory();
 
     /* eRPC server side initialization */
-    auto server = erpc_server_init("localhost", 12345, message_buffer_factory);
+    auto server = new erpc::SimpleServer("localhost", 12345, message_buffer_factory);
     /* connect generated service into server, look into erpc_matrix_multiply_server.h */
     erpc_service_t service = create_MatrixMultiplyService_service();
     erpc::Service *ser = (erpc::Service *)(service);
     ser->setName("Test Service");
-    erpc_add_service_to_server(server, service);
+    server->addService(ser);
+    server->open();
 
     /* run server */
-    erpc_server_run(server); /* or erpc_server_poll(); */
+    server->run();
     
-    // while(1)    
-    // erpc_server_poll(server);
-
     return 0;
 }

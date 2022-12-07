@@ -11,10 +11,14 @@
 #ifndef _EMBEDDED_RPC__SIMPLE_SERVER_H_
 #define _EMBEDDED_RPC__SIMPLE_SERVER_H_
 
+#include "erpc_threading.h"
+#include "erpc_basic_codec.hpp"
+#include "erpc_message_buffer.hpp"
+#include "erpc_simple_server.hpp"
+#include "tcp_worker.hpp"
 #include "erpc_server.hpp"
 #include "server_worker.hpp"
-#include "tcp_worker.hpp"
-#include "erpc_threading.h"
+
 
  /*!
  * @addtogroup infra_server
@@ -40,8 +44,9 @@ public:
      *
      * This function initializes object attributes.
      */
-    SimpleServer(const char *host, uint16_t port);
+    SimpleServer(const char *host, uint16_t port, MessageBufferFactory *message_buffer_factory);
 
+    ~SimpleServer();
     /*!
      * @brief Run server in infinite loop.
      *

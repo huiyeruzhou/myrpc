@@ -15,53 +15,53 @@
 
 using namespace std;
 
-void *operator new(size_t count) THROW_BADALLOC
-{
-    void *p = erpc_malloc(count);
-    return p;
-}
+// void *operator new(size_t count) THROW_BADALLOC
+// {
+//     void *p = erpc_malloc(count);
+//     return p;
+// }
 
-void *operator new(size_t count, const nothrow_t &tag) THROW NOEXCEPT
-{
-    (void)tag;
-    void *p = erpc_malloc(count);
-    return p;
-}
+// void *operator new(size_t count, const nothrow_t &tag) THROW NOEXCEPT
+// {
+//     (void)tag;
+//     void *p = erpc_malloc(count);
+//     return p;
+// }
 
-void *operator new[](size_t count) THROW_BADALLOC
-{
-    void *p = erpc_malloc(count);
-    return p;
-}
+// void *operator new[](size_t count) THROW_BADALLOC
+// {
+//     void *p = erpc_malloc(count);
+//     return p;
+// }
 
-void *operator new[](size_t count, const nothrow_t &tag) THROW NOEXCEPT
-{
-    (void)tag;
-    void *p = erpc_malloc(count);
-    return p;
-}
+// void *operator new[](size_t count, const nothrow_t &tag) THROW NOEXCEPT
+// {
+//     (void)tag;
+//     void *p = erpc_malloc(count);
+//     return p;
+// }
 
-void operator delete(void *ptr) THROW NOEXCEPT
-{
-    erpc_free(ptr);
-}
+// void operator delete(void *ptr) THROW NOEXCEPT
+// {
+//     erpc_free(ptr);
+// }
 
-void operator delete(void *ptr, std::size_t count) THROW NOEXCEPT
-{
-    (void)count;
-    erpc_free(ptr);
-}
+// void operator delete(void *ptr, std::size_t count) THROW NOEXCEPT
+// {
+//     (void)count;
+//     erpc_free(ptr);
+// }
 
-void operator delete[](void *ptr) THROW NOEXCEPT
-{
-    erpc_free(ptr);
-}
+// void operator delete[](void *ptr) THROW NOEXCEPT
+// {
+//     erpc_free(ptr);
+// }
 
-void operator delete[](void *ptr, std::size_t count) THROW NOEXCEPT
-{
-    (void)count;
-    erpc_free(ptr);
-}
+// void operator delete[](void *ptr, std::size_t count) THROW NOEXCEPT
+// {
+//     (void)count;
+//     erpc_free(ptr);
+// }
 
 void *erpc_malloc(size_t size)
 {

@@ -33,12 +33,23 @@ void addfd(int epollfd, int fd, bool enable_et)//将fd加入到epoll中，并设
 // Code
 ////////////////////////////////////////////////////////////////////////////////
 
-SimpleServer::SimpleServer(const char *host, uint16_t port)
+SimpleServer::SimpleServer(const char *host, uint16_t port, MessageBufferFactory *message_buffer_factory)
     : Server(host, port)
     , m_isServerOn(true)
     , m_serverThread(SimpleServer::serverThreadStub)
     , m_runServer(false)
 {
+    BasicCodecFactory *codecFactory = new BasicCodecFactory();
+
+    // Init server with the provided transport.
+    this->setCodecFactory(codecFactory);
+    this->setMessageBufferFactory(message_buffer_factory);
+
+}
+
+SimpleServer::~SimpleServer()
+{
+    delete m_codecFactory;
 }
 
 erpc_status_t SimpleServer::run(void)

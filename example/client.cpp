@@ -1,5 +1,5 @@
+#include "client.h"
 #include "erpc_matrix_multiply.h"
-#include "erpc_client_setup.h"
 
 #include <stdio.h>
 
@@ -17,10 +17,10 @@ int main(int argc,char** argv)
     /* Matrices definitions */
     Matrix matrix1, matrix2, result_matrix = {{0}};
     /* MessageBufferFactory initialization */
-    erpc_mbf_t message_buffer_factory = erpc_mbf_dynamic_init();
+    erpc::MessageBufferFactory *message_buffer_factory = new erpc::MessageBufferFactory();
 
     /* eRPC client side initialization */
-    erpc_client_t client = erpc_client_init("localhost", 12345, message_buffer_factory);
+    MatrixMultiplyServiceClient *client = new MatrixMultiplyServiceClient("localhost", 12345, message_buffer_factory);
     
     
     int num1 = argv[1][0] - '0';
@@ -46,7 +46,8 @@ int main(int argc,char** argv)
         // erpcMatrixMultiply(matrix1, matrix2, result_matrix);
     int ret;
     ret = 0;
-    erpctest(num1, num2, &ret);
+    client->open();
+    client->erpctest(num1, num2, &ret);
     printf("response: %d\n", ret);
     // printMatrix(result_matrix);
     /* other code like print result matrix */

@@ -18,6 +18,7 @@
 
    //! @name Threading model options
    //@{
+#include <new>
 #define ERPC_ALLOCATION_POLICY_DYNAMIC (0U) //!< Dynamic allocation policy
 #define ERPC_ALLOCATION_POLICY_STATIC (1U)  //!< Static allocation policy
 

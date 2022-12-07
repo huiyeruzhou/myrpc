@@ -8,9 +8,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "erpc_client_manager.h"
+#include "client.h"
 #include "tcp_worker.hpp"
 #include <string>
+
 
 extern "C" {
 #include <signal.h>
@@ -24,8 +25,34 @@ using namespace erpc;
 // Code
 ////////////////////////////////////////////////////////////////////////////////
 
+    /*!
+     * @brief Constructor.
+     *
+     * This function initializes object attributes.
+     */
+Client::Client(const char *host, uint16_t port, MessageBufferFactory *messageFactory)
+    : ClientServerCommon(host, port)
+    , m_sequence(0)
+    , m_errorHandler(NULL)
+{
+    BasicCodecFactory *codecFactory;
 
-RequestContext ClientManager::createRequest(bool isOneway)
+    // Init factories.
+    codecFactory = new BasicCodecFactory();
+
+    setCodecFactory(codecFactory);
+    setMessageBufferFactory(messageFactory);
+}
+
+/*!
+ * @brief Client destructor
+ */
+Client::~Client(void)
+{
+    delete this->m_messageFactory;
+    delete this->m_transport;
+}
+RequestContext Client::createRequest(bool isOneway)
 {
     // Create codec to read and write the request.
     Codec *codec = createBufferAndCodec();
@@ -33,7 +60,7 @@ RequestContext ClientManager::createRequest(bool isOneway)
     return RequestContext(++m_sequence, codec, isOneway);
 }
 
-void ClientManager::performRequest(RequestContext &request)
+void Client::performRequest(RequestContext &request)
 {
     bool performRequest;
 
@@ -46,7 +73,7 @@ void ClientManager::performRequest(RequestContext &request)
     }
 }
 
-void ClientManager::performClientRequest(RequestContext &request)
+void Client::performClientRequest(RequestContext &request)
 {
     erpc_status_t err;
 
@@ -76,7 +103,7 @@ void ClientManager::performClientRequest(RequestContext &request)
 }
 
 
-void ClientManager::verifyReply(RequestContext &request)
+void Client::verifyReply(RequestContext &request)
 {
     message_type_t msgType;
     uint32_t service;
@@ -100,7 +127,7 @@ void ClientManager::verifyReply(RequestContext &request)
     }
 }
 
-Codec *ClientManager::createBufferAndCodec(void)
+Codec *Client::createBufferAndCodec(void)
 {
     Codec *codec = m_codecFactory->create();
     MessageBuffer message;
@@ -123,7 +150,7 @@ Codec *ClientManager::createBufferAndCodec(void)
     return codec;
 }
 
-void ClientManager::releaseRequest(RequestContext &request)
+void Client::releaseRequest(RequestContext &request)
 {
     if (request.getCodec() != NULL)
     {
@@ -132,7 +159,7 @@ void ClientManager::releaseRequest(RequestContext &request)
     }
 }
 
-void ClientManager::callErrorHandler(erpc_status_t err, uint32_t functionID)
+void Client::callErrorHandler(erpc_status_t err, uint32_t functionID)
 {
     if (m_errorHandler != NULL)
     {
@@ -140,7 +167,7 @@ void ClientManager::callErrorHandler(erpc_status_t err, uint32_t functionID)
     }
 }
 
-erpc_status_t ClientManager::open(void)
+erpc_status_t Client::open(void)
 {
     erpc_status_t status = kErpcStatus_Success;
     struct addrinfo hints = {};

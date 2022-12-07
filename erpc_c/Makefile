@@ -56,7 +56,7 @@ INCLUDES += $(ERPC_C_ROOT)/infra \
 SOURCES += 	$(ERPC_C_ROOT)/infra/codec/erpc_basic_codec.cpp \
 			$(ERPC_C_ROOT)/infra/codec/erpc_message_buffer.cpp \
 			\
-			$(ERPC_C_ROOT)/infra/client/erpc_client_manager.cpp \
+			$(ERPC_C_ROOT)/infra/client/client.cpp \
 			\
 			$(ERPC_C_ROOT)/infra/server/erpc_server.cpp \
 			$(ERPC_C_ROOT)/infra/server/erpc_simple_server.cpp \
@@ -68,10 +68,7 @@ SOURCES += 	$(ERPC_C_ROOT)/infra/codec/erpc_basic_codec.cpp \
 			\
 			$(ERPC_C_ROOT)/port/erpc_port_stdlib.cpp \
 			$(ERPC_C_ROOT)/port/erpc_threading_pthreads.cpp \
-			\
-			$(ERPC_C_ROOT)/setup/erpc_client_setup.cpp \
-			$(ERPC_C_ROOT)/setup/erpc_setup_mbf_dynamic.cpp \
-			$(ERPC_C_ROOT)/setup/erpc_server_setup.cpp \
+
 
 MAKE_TARGET = $(TARGET_LIB)($(OBJECTS_ALL))
 

@@ -10,7 +10,7 @@
 
 #include "erpc_message_buffer.hpp"
 #include "erpc_config_internal.h"
-
+#include <new>
 #include <cstring>
 
 using namespace erpc;
@@ -224,3 +224,17 @@ erpc_status_t MessageBufferFactory::prepareServerBufferForSend(MessageBuffer *me
     message->setUsed(0);
     return kErpcStatus_Success;
 }
+MessageBuffer MessageBufferFactory::create(void)
+{
+    uint8_t *buf = new (nothrow) uint8_t[ERPC_DEFAULT_BUFFER_SIZE];
+    return MessageBuffer(buf, ERPC_DEFAULT_BUFFER_SIZE);
+}
+void MessageBufferFactory::dispose(MessageBuffer *buf)
+    {
+        erpc_assert(buf != NULL);
+        if (buf->get() != NULL)
+        {
+            delete[] buf->get();
+        }
+    }
+

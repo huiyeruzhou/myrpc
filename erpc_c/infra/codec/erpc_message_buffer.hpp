@@ -366,7 +366,7 @@ public:
      *
      * @return New created MessageBuffer.
      */
-    virtual MessageBuffer create(void) = 0;
+    virtual MessageBuffer create(void);
 
     /*!
      * @brief This function informs server if it has to create buffer for received message.
@@ -390,7 +390,7 @@ public:
      *
      * @param[in] buf MessageBuffer to dispose.
      */
-    virtual void dispose(MessageBuffer *buf) = 0;
+    virtual void dispose(MessageBuffer *buf);
 };
 
 } // namespace erpc

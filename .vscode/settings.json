@@ -43,6 +43,7 @@
         "vector": "cpp",
         "string_view": "cpp",
         "*.ipp": "cpp",
-        "atomic": "cpp"
+        "atomic": "cpp",
+        "exception": "cpp"
     }
 }

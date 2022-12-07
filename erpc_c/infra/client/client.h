@@ -12,7 +12,12 @@
 #define _EMBEDDED_RPC__CLIENT_MANAGER_H_
 
 #ifdef __cplusplus
+#include "erpc_status.h"
+#include "erpc_config_internal.h"
 #include "erpc_client_server_common.hpp"
+#include "erpc_basic_codec.hpp"
+#include "erpc_message_buffer.hpp"
+
 
 /*!
  * @addtogroup infra_client
@@ -21,6 +26,8 @@
  */
 
 extern "C" {
+#include <stdbool.h>
+#include <stdint.h>
 #endif
 
 typedef void (*client_error_handler_t)(erpc_status_t err,
@@ -47,7 +54,7 @@ class Server;
  *
  * @ingroup infra_client
  */
-class ClientManager : public ClientServerCommon
+class Client : public ClientServerCommon
 {
 public:
     /*!
@@ -55,17 +62,12 @@ public:
      *
      * This function initializes object attributes.
      */
-    ClientManager(const char *host, uint16_t port)
-    : ClientServerCommon(host, port)
-    , m_sequence(0)
-    , m_errorHandler(NULL)
-    {
-    }
+    Client(const char *host, uint16_t port, MessageBufferFactory *messageFactory);
 
     /*!
-     * @brief ClientManager destructor
+     * @brief Client destructor
      */
-    virtual ~ClientManager(void) {}
+    virtual ~Client(void);
 
     /*!
      * @brief This function creates request context.
@@ -142,8 +144,8 @@ protected:
 
 
 private:
-    ClientManager(const ClientManager &other);            //!< Disable copy ctor.
-    ClientManager &operator=(const ClientManager &other); //!< Disable copy ctor.
+    Client(const Client &other);            //!< Disable copy ctor.
+    Client &operator=(const Client &other); //!< Disable copy ctor.
 };
 
 /*!
