@@ -9,12 +9,37 @@
  */
 
 #include "erpc_simple_server.hpp"
-#include <stdio.h>
 using namespace erpc;
+
+#define EPOLL_SIZE 1024
+int setnonblocking(int sockfd)//非阻塞模式设置
+{
+    fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFD, 0) | O_NONBLOCK);
+    return 0;
+}
+void addfd(int epollfd, int fd, bool enable_et)//将fd加入到epoll中，并设置边缘触发模式
+{
+    struct epoll_event ev;
+    ev.data.fd = fd;
+    ev.events = EPOLLIN;
+    if (enable_et)
+        ev.events = EPOLLIN | EPOLLET;
+    epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev);
+    setnonblocking(fd);
+    printf("server:    fd No.%d added to epoll!\n", fd);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Code
 ////////////////////////////////////////////////////////////////////////////////
+
+SimpleServer::SimpleServer(const char *host, uint16_t port)
+    : Server(host, port)
+    , m_isServerOn(true)
+    , m_serverThread(SimpleServer::serverThreadStub)
+    , m_runServer(false)
+{
+}
 
 erpc_status_t SimpleServer::run(void)
 {
@@ -62,3 +87,172 @@ void SimpleServer::onNewSocket(int sockfd, int port) {
     worker->m_workerThread.start(worker);
 }
 
+erpc_status_t SimpleServer::close(bool stopServer)
+{
+    if (stopServer)
+    {
+        m_runServer = false;
+    }
+
+    if (m_sockfd != -1)
+    {
+        ::close(m_sockfd);
+        m_sockfd = -1;
+    }
+
+    return kErpcStatus_Success;
+}
+
+
+
+void SimpleServer::serverThread(void)
+{
+    int yes = 1;
+    int result;
+    struct sockaddr incomingAddress;
+    socklen_t incomingAddressLength;
+    int incomingSocket;
+    bool status = false;
+    struct sockaddr_in serverAddress;
+    int epfd;
+    static struct epoll_event events[EPOLL_SIZE];
+
+    TCP_DEBUG_PRINT("server:    %s", "in server thread\n");
+
+    // Create socket.
+    m_sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (m_sockfd < 0)
+    {
+        TCP_DEBUG_ERR("failed to create server socket");
+        status = true;
+    }
+    if (!status)
+    {
+        // Fill in address struct.
+        (void) memset(&serverAddress, 0, sizeof(serverAddress));
+        serverAddress.sin_family = AF_INET;
+        serverAddress.sin_addr.s_addr = INADDR_ANY; // htonl(local ? INADDR_LOOPBACK : INADDR_ANY);
+        serverAddress.sin_port = htons(m_port);
+
+        // Turn on reuse address option.
+        result = setsockopt(m_sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+        if (result < 0)
+        {
+            TCP_DEBUG_ERR("setsockopt failed");
+            status = true;
+        }
+    }
+
+    if (!status)
+    {
+        // Bind socket to address.
+        result = bind(m_sockfd, (struct sockaddr *) &serverAddress, sizeof(serverAddress));
+        //on Failed
+        if (result < 0)
+        {
+            TCP_DEBUG_ERR("server:    bind failed");
+            status = true;
+        }
+        //on Success
+        TCP_DEBUG_PRINT("server:    bind to ");
+        print_net_info((struct sockaddr *) &serverAddress, sizeof(serverAddress));
+    }
+
+    if (!status)
+    {
+        // Listen for connections.
+        result = listen(m_sockfd, 1);
+        //on Failed
+        if (result < 0)
+        {
+            TCP_DEBUG_ERR("server:    listen failed");
+            status = true;
+        }
+        //on Success
+        TCP_DEBUG_PRINT("server:    %s", "Listening for connections\n");
+    }
+    if (!status)
+    {
+        //在内核中创建事件表
+        epfd = epoll_create(EPOLL_SIZE);
+        if (epfd < 0)
+        {
+            TCP_DEBUG_ERR("server:    epfd error");
+            status = true;
+        }
+        TCP_DEBUG_PRINT("server:    epoll created, epollfd = %d\n", epfd);
+        //往内核事件表里添加事件
+        addfd(epfd, m_sockfd, true);
+
+    }
+    if (!status)
+    {
+
+        while (m_runServer)
+        {
+
+            int epoll_events_count = epoll_wait(epfd, events, EPOLL_SIZE, -1);
+            if (epoll_events_count < 0)
+            {
+                perror("epoll failure");
+                break;
+            }
+            //处理所有已经就绪的事件
+            for (int i = 0; i < epoll_events_count; ++i)
+            {
+                int sockfd = events[i].data.fd;
+                //新用户连接
+                if (sockfd == m_sockfd)
+                {
+                    incomingAddressLength = sizeof(struct sockaddr);
+                    // we should use select() otherwise we can't end the server properly
+                    incomingSocket = accept(m_sockfd, &incomingAddress, &incomingAddressLength);
+
+                    if (incomingSocket > 0)
+                    {
+                        // Successfully accepted a connection.
+                        TCP_DEBUG_PRINT("server:    accepted connection from ");
+                        print_net_info(&incomingAddress, incomingAddressLength);
+
+                        // should be inherited from accept() socket but it's not always ...
+                        yes = 1;
+                        setsockopt(m_sockfd, IPPROTO_TCP, TCP_NODELAY, (void *) &yes, sizeof(yes));
+                        addfd(epfd, incomingSocket, true);
+                        onNewSocket(incomingSocket, getPortFormAddr(&incomingAddress, incomingAddressLength));
+                    }
+                    else
+                    {
+                        TCP_DEBUG_ERR("accept failed");
+                    }
+                }
+                //TODO:处理客户端的进一步输入
+                else
+                {
+                }
+            }
+        }
+    }
+    close(m_sockfd);
+}
+
+
+void SimpleServer::serverThreadStub(void *arg)
+{
+    SimpleServer *This = reinterpret_cast<SimpleServer *>(arg);
+
+    TCP_DEBUG_PRINT("server:    in serverThreadStub (arg=%p)\n", arg);
+    if (This != NULL)
+    {
+        This->serverThread();
+    }
+}
+
+erpc_status_t SimpleServer::open(void)
+{
+    erpc_status_t status;
+    m_runServer = true;
+    TCP_DEBUG_PRINT("server:    start running serverThread\n");
+    m_serverThread.start(this);
+    status = kErpcStatus_Success;
+    return status;
+}

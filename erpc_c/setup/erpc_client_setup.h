@@ -15,7 +15,6 @@
 #include "erpc_config_internal.h"
 #include "erpc_mbf_setup.h"
 #include "erpc_client_manager.h"
-#include "erpc_transport_setup.h"
 
 /*!
  * @addtogroup client_setup
@@ -30,9 +29,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 #include <stdbool.h>
 #include <stdint.h>
+
 
 //! @name Client setup
 //@{
@@ -47,7 +46,8 @@ extern "C" {
  *
  * @return erpc_client_t Pointer to client structure.
  */
-erpc_client_t erpc_client_init(erpc_transport_t transport, erpc_mbf_t message_buffer_factory);
+
+erpc_client_t erpc_client_init(const char *host, uint16_t port, erpc_mbf_t message_buffer_factory);
 
 /*!
  * @brief This function sets error handler function.

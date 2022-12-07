@@ -45,8 +45,8 @@ public:
      *
      * This function initializes object attributes.
      */
-    Server(void)
-    : ClientServerCommon()
+    Server(const char *host, uint16_t port)
+    : ClientServerCommon(host, port)
     , m_firstService(NULL)
     {
     }
@@ -71,6 +71,15 @@ public:
     void removeService(Service *service);
 
     /*!
+* @brief This function will create host on server side, or connect client to the server.
+*
+* @retval #kErpcStatus_Success When creating host was successful or client connected successfully.
+* @retval #kErpcStatus_UnknownName Host name resolution failed.
+* @retval #kErpcStatus_ConnectionFailure Connecting to the specified host failed.
+*/
+    virtual erpc_status_t open(void) = 0;
+    
+    /*!
      * @brief This function runs the server.
      */
     virtual erpc_status_t run(void) = 0;
@@ -82,7 +91,7 @@ public:
 
 protected:
     Service *m_firstService; /*!< Contains pointer to first service. */
-
+    
     /*!
     //  * @brief Process message.
     //  *
@@ -119,7 +128,6 @@ protected:
     //  * @return Pointer to service or NULL.
     //  */
     // virtual Service *findServiceWithId(uint32_t serviceId);
-
 
 
 private:

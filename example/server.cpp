@@ -1,7 +1,5 @@
 #include "erpc_matrix_multiply_server.h"
 #include "erpc_server_setup.h"
-#include "erpc_transport_setup.h"
-#include "erpc_tcp_transport.hpp"
 #include "service.hpp"
 #include <unistd.h>
 #include <stdio.h>
@@ -30,14 +28,12 @@ int main()
     printf("qaq\n");
     /* Init eRPC server environment */
     /* UART transport layer initialization */
-    erpc_transport_t transport = erpc_transport_tcp_init("localhost", 12345, true);
 
     /* MessageBufferFactory initialization */
     erpc_mbf_t message_buffer_factory = erpc_mbf_dynamic_init();
 
     /* eRPC server side initialization */
-    auto server = erpc_server_init(transport, message_buffer_factory);
-
+    auto server = erpc_server_init("localhost", 12345, message_buffer_factory);
     /* connect generated service into server, look into erpc_matrix_multiply_server.h */
     erpc_service_t service = create_MatrixMultiplyService_service();
     erpc::Service *ser = (erpc::Service *)(service);

@@ -7,6 +7,13 @@
         "*.c": "c",
         "*.rmd": "markdown",
         ".mpyproject.json": "jsonc",
+        "sdkconfig.h": "c",
+        "esp_system.h": "c",
+        "task.h": "c",
+        "freertos.h": "c",
+        "esp_wifi.h": "c",
+        "sockets.h": "c",
+        "nvs_flash.h": "c",
         "memory_resource": "cpp",
         "new": "cpp",
         "array": "cpp",
@@ -34,6 +41,8 @@
         "list": "cpp",
         "string": "cpp",
         "vector": "cpp",
-        "string_view": "cpp"
+        "string_view": "cpp",
+        "*.ipp": "cpp",
+        "atomic": "cpp"
     }
 }

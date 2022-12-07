@@ -22,11 +22,11 @@ ERPC_HEADER=erpc_matrix_multiply_server.hpp
 .PHONY:all
 all: client server
 
-server: ${ERPC_SERVER} ${ERPC_HEADER}
+server: ${ERPC_SERVER} ${ERPC_LIB}
 	${CXX}  server.cpp erpc_matrix_multiply_server.cpp  ${ERPC_LIB} ${CXXFLAGS} -o server
 	@$(call printmessage,build,Building, server)
 
-client: ${ERPC_CLIENT} ${ERPC_HEADER}
+client: ${ERPC_CLIENT} ${ERPC_LIB}
 	${CXX}  client.cpp erpc_matrix_multiply_client.cpp  ${ERPC_LIB} ${CXXFLAGS} -o client
 	@$(call printmessage,build,Building, client)
 

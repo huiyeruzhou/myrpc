@@ -55,8 +55,8 @@ public:
      *
      * This function initializes object attributes.
      */
-    ClientManager(void)
-    : ClientServerCommon()
+    ClientManager(const char *host, uint16_t port)
+    : ClientServerCommon(host, port)
     , m_sequence(0)
     , m_errorHandler(NULL)
     {
@@ -105,6 +105,14 @@ public:
      */
     void callErrorHandler(erpc_status_t err, uint32_t functionID);
 
+    /*!
+* @brief This function connect client to the server.
+*
+* @retval kErpcStatus_Success When client connected successfully.
+* @retval kErpcStatus_Fail When client doesn't connected successfully.
+*/
+    virtual erpc_status_t open(void);
+
 protected:
     uint32_t m_sequence;                    //!< Sequence number.
     client_error_handler_t m_errorHandler;  //!< Pointer to function error handler.
@@ -131,6 +139,7 @@ protected:
      * @return Pointer to created codec with message buffer.
      */
     Codec *createBufferAndCodec(void);
+
 
 private:
     ClientManager(const ClientManager &other);            //!< Disable copy ctor.

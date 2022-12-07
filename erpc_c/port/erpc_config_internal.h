@@ -206,37 +206,39 @@
 /* clang-format off */
 
 // Determine if this is a POSIX system.
-#if !defined(ERPC_HAS_POSIX)
+#if !defined(CONFIG_HAS_POSIX)
     // Detect Linux, BSD, Cygwin, and Mac OS X.
     #if defined(__linux__) || defined(__GNU__) || defined(__FreeBSD__) || defined(__NetBSD__) || \
         defined(__OpenBSD__) || defined(__DragonFly__) || defined(__CYGWIN__) || defined(__MACH__)
-        #define ERPC_HAS_POSIX (1)
+        #define CONFIG_HAS_POSIX (1)
     #else
-        #define ERPC_HAS_POSIX (0)
+        #define CONFIG_HAS_POSIX (0)
     #endif
 #endif
 
 // Determine if we are targeting WIN32 environment
-#if !defined(ERPC_HAS_WIN32)
+#if !defined(CONFIG_HAS_WIN32)
     #if defined(_WIN32)
-        #define ERPC_HAS_WIN32 (1)
+        #define CONFIG_HAS_WIN32 (1)
     #else
-        #define ERPC_HAS_WIN32 (0)
+        #define CONFIG_HAS_WIN32 (0)
     #endif
 #endif
 
 // Safely detect FreeRTOSConfig.h.
-#define ERPC_HAS_FREERTOSCONFIG_H (0)
-#if defined(__has_include)
-    #if __has_include("FreeRTOSConfig.h")
-        #undef ERPC_HAS_FREERTOSCONFIG_H
-        #define ERPC_HAS_FREERTOSCONFIG_H (1)
+#if !defined(CONFIG_HAS_FREERTOS)
+    #define CONFIG_HAS_FREERTOS (0)
+    #if defined(__has_include)
+        #if __has_include("FreeRTOSConfig.h")
+            #undef CONFIG_HAS_FREERTOS
+            #define CONFIG_HAS_FREERTOS (1)
+        #endif
     #endif
 #endif
 
 // Detect allocation policy if not already set.
 #if !defined(ERPC_ALLOCATION_POLICY)
-    #if ERPC_HAS_FREERTOSCONFIG_H
+    #if CONFIG_HAS_FREERTOS
         #ifdef __cplusplus
             extern "C" {
         #endif
@@ -266,27 +268,16 @@
     #endif
 #endif
 
-// Safely detect tx_api.h.
-#define ERPC_HAS_THREADX_API_H (0)
-#if defined(__has_include)
-    #if __has_include("tx_api.h")
-        #undef ERPC_HAS_THREADX_API_H
-        #define ERPC_HAS_THREADX_API_H (1)
-    #endif
-#endif
-
 // Detect threading model if not already set.
 #if !defined(ERPC_THREADS)
-    #if ERPC_HAS_POSIX
+    #if CONFIG_HAS_POSIX
         // Default to pthreads for POSIX systems.
         #define ERPC_THREADS (ERPC_THREADS_PTHREADS)
-    #elif ERPC_HAS_FREERTOSCONFIG_H
+    #elif CONFIG_HAS_FREERTOS
         // Use FreeRTOS if we can auto detect it.
         #define ERPC_THREADS (ERPC_THREADS_FREERTOS)
-    #elif ERPC_HAS_WIN32
-        #define ERPC_THREADS (ERPC_THREADS_WIN32)
-    #elif ERPC_HAS_THREADX_API_H
-        #define ERPC_THREADS (ERPC_THREADS_THREADX)
+    #elif CONFIG_HAS_WIN32
+        #define ERPC_THREADS (ERPC_THREADS_WIN32）
     #else
         // Otherwise default to no threads.
         #define ERPC_THREADS (ERPC_THREADS_NONE)
@@ -311,7 +302,7 @@
 
 // Disable/enable noexcept.
 #if !defined(ERPC_NOEXCEPT)
-    #if ERPC_HAS_POSIX
+    #if CONFIG_HAS_POSIX
         #define ERPC_NOEXCEPT (ERPC_NOEXCEPT_ENABLED)
     #else
         #define ERPC_NOEXCEPT (ERPC_NOEXCEPT_DISABLED)
@@ -325,14 +316,6 @@
     #define NOEXCEPT
 #endif // NOEXCEPT
 
-// Disabling nesting calls support as default.
-#if !defined(ERPC_NESTED_CALLS)
-    #define ERPC_NESTED_CALLS (ERPC_NESTED_CALLS_DISABLED)
-#endif
-
-#if ERPC_NESTED_CALLS && !ERPC_THREADS
-    #error "Nested calls currently working only with Threads."
-#endif
 
 // Enabling nesting calls detection as default for debug.
 #if !defined(ERPC_NESTED_CALLS_DETECTION)
@@ -356,34 +339,11 @@
     #define THROW
 #endif
 
-#ifndef ERPC_TRANSPORT_MU_USE_MCMGR
-    #if defined(__has_include)
-        #if (__has_include("mcmgr.h"))
-            #define ERPC_TRANSPORT_MU_USE_MCMGR (ERPC_TRANSPORT_MU_USE_MCMGR_ENABLED)
-        #else
-            #define ERPC_TRANSPORT_MU_USE_MCMGR (ERPC_TRANSPORT_MU_USE_MCMGR_DISABLED)
-        #endif
-    #endif
-#else
-    #if defined(__has_include)
-        #if ((!(__has_include("mcmgr.h"))) && (ERPC_TRANSPORT_MU_USE_MCMGR == ERPC_TRANSPORT_MU_USE_MCMGR_ENABLED))
-            #error "Do not forget to add the MCMGR library into your project!"
-        #endif
-    #endif
-#endif
+#define ERPC_TRANSPORT_MU_USE_MCMGR (ERPC_TRANSPORT_MU_USE_MCMGR_DISABLED)
 
-// Disabling pre and post callback function related code.
-#if !defined(ERPC_PRE_POST_ACTION)
-    #define ERPC_PRE_POST_ACTION (ERPC_PRE_POST_ACTION_DISABLED)
-#endif
-
-// Disabling pre and post default callback function code.
-#if !defined(ERPC_PRE_POST_ACTION_DEFAULT)
-    #define ERPC_PRE_POST_ACTION_DEFAULT (ERPC_PRE_POST_ACTION_DEFAULT_DISABLED)
-#endif
 
 #if !defined(erpc_assert)
-    #if ERPC_HAS_FREERTOSCONFIG_H
+    #if CONFIG_HAS_FREERTOS
         #ifdef __cplusplus
             extern "C" {
         #endif
@@ -393,9 +353,6 @@
             }
         #endif
         #define erpc_assert(condition) configASSERT(condition)
-    #elif defined(ERPC_THREADS) && (ERPC_THREADS == ERPC_THREADS_MBED)
-        #include "platform/mbed_assert.h"
-        #define erpc_assert(condition) MBED_ASSERT(condition)
     #else
         #ifdef __cplusplus
             #include <cassert>

@@ -14,7 +14,6 @@
 #include "erpc_status.h"
 #include "erpc_config_internal.h"
 #include "erpc_mbf_setup.h"
-#include "erpc_transport_setup.h"
 
 
 /*!
@@ -50,7 +49,7 @@ typedef struct ServerType *erpc_server_t;
  *
  * @return erpc_server_t Pointer to server structure.
  */
-erpc_server_t erpc_server_init(erpc_transport_t transport, erpc_mbf_t message_buffer_factory);
+erpc_server_t erpc_server_init(const char *host, uint16_t port, erpc_mbf_t message_buffer_factory);
 
 /*!
  * @brief This function de-initializes server.

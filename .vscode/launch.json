@@ -41,6 +41,7 @@
             "type": "lldb",
             "request": "launch",
             "program": "${workspaceRoot}/example/client",
+            "args": ["2","2"]
             // "initCommands": [
             //     "${workspaceRoot}/example/server"
             // ]

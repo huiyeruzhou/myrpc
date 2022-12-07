@@ -8,7 +8,6 @@
  */
 
 #include "erpc_config_internal.h"
-#include "erpc_manually_constructed.hpp"
 #include "erpc_mbf_setup.h"
 #include "erpc_message_buffer.hpp"
 
@@ -47,10 +46,9 @@ public:
 // Variables
 ////////////////////////////////////////////////////////////////////////////////
 
-ERPC_MANUALLY_CONSTRUCTED(DynamicMessageBufferFactory, s_msgFactory);
 
 erpc_mbf_t erpc_mbf_dynamic_init(void)
 {
-    s_msgFactory.construct();
-    return reinterpret_cast<erpc_mbf_t>(s_msgFactory.get());
+    auto msgFactory = new DynamicMessageBufferFactory();
+    return reinterpret_cast<erpc_mbf_t>(msgFactory);
 }

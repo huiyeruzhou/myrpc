@@ -12,6 +12,30 @@
 
 #include "erpc_config_internal.h"
 #include "erpc_codec.hpp"
+#include <cstdio>
+extern "C" {
+#if CONFIG_HAS_POSIX
+#include <err.h>
+#endif
+#include <netinet/tcp.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/epoll.h>
+#include <fcntl.h>
+#include <netdb.h>
+#include <errno.h>
+}
+
+#define TCP_TRANSPORT_DEBUG_LOG (1)
+#if TCP_TRANSPORT_DEBUG_LOG 
+#define TCP_DEBUG_PRINT(_fmt_, ...) printf(_fmt_, ##__VA_ARGS__)
+#define TCP_DEBUG_ERR(_msg_) err(errno, _msg_)
+void print_net_info(const sockaddr *__sockaddr, int __len);
+int getPortFormAddr(const sockaddr *__sockaddr, int __len);
+#else
+#define TCP_DEBUG_PRINT(_fmt_, ...)
+#define TCP_DEBUG_ERR(_msg_)
+#endif
 
 
 /*!
@@ -37,8 +61,9 @@ public:
     /*!
      * @brief ClientServerCommon constructor.
      */
-    ClientServerCommon(void):
-        m_messageFactory(NULL), m_codecFactory(NULL), m_transport(NULL){};
+    ClientServerCommon(const char *host, uint16_t port):
+        m_host(host), m_port(port),m_sockfd(-1),
+        m_messageFactory(NULL), m_codecFactory(NULL), m_transport(NULL) {};
 
     /*!
      * @brief ClientServerCommon destructor
@@ -80,12 +105,17 @@ public:
      *
      * @return Transport * Pointer to transport instance.
      */
-    Transport * getTransport(void) { return m_transport; }
+    Transport *getTransport(void) { return m_transport; }
+    const char *m_host;    /*!< Specify the host name or IP address of the computer. */
+    uint16_t m_port;       /*!< Specify the listening port number. */
+    int m_sockfd;
 
 protected:
     MessageBufferFactory *m_messageFactory; //!< Message buffer factory to use.
     CodecFactory *m_codecFactory;           //!< Codec to use.
     Transport *m_transport;                 //!< Transport layer to use.
+
+
 };
 
 } // namespace erpc

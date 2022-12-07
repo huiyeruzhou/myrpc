@@ -24,19 +24,6 @@
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include "task.h"
-#elif ERPC_THREADS_IS(ZEPHYR)
-#include "kernel.h"
-#elif ERPC_THREADS_IS(MBED)
-#if MBED_CONF_RTOS_PRESENT
-#include "rtos.h"
-#else
-#warning mbed-rpc: Threading is enabled but Mbed RTOS is not present!
-#endif
-#elif ERPC_THREADS_IS(WIN32)
-#include "windows.h"
-#elif ERPC_THREADS_IS(THREADX)
-#include "tx_api.h"
-
 #endif // ERPC_THREADS
 
 /*!

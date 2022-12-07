@@ -40,10 +40,7 @@ public:
      *
      * This function initializes object attributes.
      */
-    SimpleServer(void)
-    : m_isServerOn(true)
-    {
-    }
+    SimpleServer(const char *host, uint16_t port);
 
     /*!
      * @brief Run server in infinite loop.
@@ -68,6 +65,19 @@ public:
      */
     virtual void stop(void) override;
 
+
+    virtual erpc_status_t open(void) override;
+    
+    /*!
+     * @brief This function disconnects client or stop server host.
+     *
+     * @param[in] stopServer Specify is server shall be closed as well (stop listen())
+     * @retval #kErpcStatus_Success Always return this.
+     */
+    virtual erpc_status_t close(bool stopServer = true);
+    
+
+
     
     void onNewSocket(int socketfd, int port);
 
@@ -78,9 +88,26 @@ public:
 //      */
 //     void disposeBufferAndCodec(Codec *codec);
 
-    bool m_isServerOn; /*!< Information if server is ON or OFF. */
-    
+    bool  m_isServerOn; /*!< Information if server is ON or OFF. */
+    Thread m_serverThread; /*!< Pointer to server thread. */
+    bool m_runServer;      /*!< Thread is executed while this is true. */
+    bool m_isServer;       /*!< If true then server is using transport, else client. */
 
+protected:
+    /*!
+ * @brief Server thread function.
+ */
+    void serverThread(void);
+    /*!
+ * @brief Thread entry point.
+ *
+ * Control is passed to the serverThread() method of the TCPTransport instance pointed to
+ * by the @c arg parameter.
+ *
+ * @param arg Thread argument. The pointer to the TCPTransport instance is passed through
+ *  this argument.
+ */
+    static void serverThreadStub(void *arg);
 };
 
 } // namespace erpc

@@ -16,18 +16,13 @@ int main(int argc,char** argv)
 {
     /* Matrices definitions */
     Matrix matrix1, matrix2, result_matrix = {{0}};
-
-    /* Init eRPC client environment */
-    /* UART transport layer initialization */
-    erpc_transport_t transport = erpc_transport_tcp_init("localhost", 12345, false); /* DEMO_UART defined in fsl_uart_cmsis.h */
-
     /* MessageBufferFactory initialization */
     erpc_mbf_t message_buffer_factory = erpc_mbf_dynamic_init();
 
     /* eRPC client side initialization */
-    erpc_client_init(transport, message_buffer_factory);
-
-
+    erpc_client_t client = erpc_client_init("localhost", 12345, message_buffer_factory);
+    
+    
     int num1 = argv[1][0] - '0';
     int num2 = argv[2][0] - '0';
     /* call eRPC functions */
