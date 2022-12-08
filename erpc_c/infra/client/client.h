@@ -25,10 +25,14 @@
  */
 
 
-
-typedef void (*client_error_handler_t)(erpc_status_t err,
-                                       uint32_t functionID); /*!< eRPC error handler function type. */
-
+#ifdef __cplusplus
+extern "C" {
+#endif
+    typedef void (*client_error_handler_t)(erpc_status_t err,
+        uint32_t functionID); /*!< eRPC error handler function type. */
+#ifdef __cplusplus
+}
+#endif
 
 
 ////////////////////////////////////////////////////////////////////////////////

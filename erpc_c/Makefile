@@ -50,7 +50,6 @@ INCLUDES += $(ERPC_C_ROOT)/infra \
 			$(ERPC_C_ROOT)/infra/server \
 			$(ERPC_C_ROOT)/infra/transport \
 			$(ERPC_C_ROOT)/setup \
-			$(ERPC_C_ROOT)/port \
 			
 
 SOURCES += 	$(ERPC_C_ROOT)/infra/codec/erpc_basic_codec.cpp \

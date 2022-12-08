@@ -1,4 +1,9 @@
 #include "erpc_client_server_common.hpp"
+int getnameinfo(const struct sockaddr *addr, socklen_t addrlen,
+    char *host, socklen_t hostlen,
+    char *serv, socklen_t servlen, int flags) {
+    return 0;
+}
 void print_net_info(const sockaddr *__sockaddr, int __len) {
     char host[32];
     char service[32];
