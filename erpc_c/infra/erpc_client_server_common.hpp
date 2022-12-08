@@ -18,10 +18,6 @@ extern "C" {
 #include <err.h>
 #endif
 #include <netinet/tcp.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/epoll.h>
-#include <fcntl.h>
 #include <netdb.h>
 #include <errno.h>
 }

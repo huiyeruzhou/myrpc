@@ -10,8 +10,6 @@
 
 #include "erpc_message_buffer.hpp"
 #include "erpc_config_internal.h"
-#include <new>
-#include <cstring>
 
 using namespace erpc;
 using namespace std;

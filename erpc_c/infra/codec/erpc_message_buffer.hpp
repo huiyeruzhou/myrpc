@@ -13,7 +13,9 @@
 #include "erpc_status.h"
 
 #include <cstddef>
-#include <stdint.h>
+#include <new>
+#include <cstring>
+#include <cstdint>
 
 /*!
  * @addtogroup infra_codec

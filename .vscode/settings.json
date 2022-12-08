@@ -44,6 +44,7 @@
         "string_view": "cpp",
         "*.ipp": "cpp",
         "atomic": "cpp",
-        "exception": "cpp"
+        "exception": "cpp",
+        "cstdio": "cpp"
     }
 }

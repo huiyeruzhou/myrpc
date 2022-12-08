@@ -19,6 +19,8 @@
 #include "erpc_server.hpp"
 #include "server_worker.hpp"
 
+ #include <sys/epoll.h>
+ #include <fcntl.h>
 
  /*!
  * @addtogroup infra_server

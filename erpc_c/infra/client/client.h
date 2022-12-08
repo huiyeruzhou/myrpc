@@ -11,7 +11,6 @@
 #ifndef _EMBEDDED_RPC__CLIENT_MANAGER_H_
 #define _EMBEDDED_RPC__CLIENT_MANAGER_H_
 
-#ifdef __cplusplus
 #include "erpc_status.h"
 #include "erpc_config_internal.h"
 #include "erpc_client_server_common.hpp"
@@ -25,19 +24,12 @@
  * @file
  */
 
-extern "C" {
-#include <stdbool.h>
-#include <stdint.h>
-#endif
+
 
 typedef void (*client_error_handler_t)(erpc_status_t err,
                                        uint32_t functionID); /*!< eRPC error handler function type. */
 
-//! @brief Opaque client object type.
-typedef struct ClientType *erpc_client_t;
 
-#ifdef __cplusplus
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Classes
@@ -209,7 +201,5 @@ protected:
 } // namespace erpc
 
 /*! @} */
-
-#endif
 
 #endif // _EMBEDDED_RPC__CLIENT_MANAGER_H_

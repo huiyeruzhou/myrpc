@@ -217,15 +217,6 @@
     #endif
 #endif
 
-// Determine if we are targeting WIN32 environment
-#if !defined(CONFIG_HAS_WIN32)
-    #if defined(_WIN32)
-        #define CONFIG_HAS_WIN32 (1)
-    #else
-        #define CONFIG_HAS_WIN32 (0)
-    #endif
-#endif
-
 // Safely detect FreeRTOSConfig.h.
 #if !defined(CONFIG_HAS_FREERTOS)
     #define CONFIG_HAS_FREERTOS (0)
@@ -257,17 +248,6 @@
     #endif
 #endif
 
-#if ERPC_ALLOCATION_POLICY == ERPC_ALLOCATION_POLICY_STATIC
-    #if !defined(ERPC_CODEC_COUNT)
-        #define ERPC_CODEC_COUNT (2U)
-    #endif
-    #if !defined(ERPC_MESSAGE_LOGGERS_COUNT)
-        #define ERPC_MESSAGE_LOGGERS_COUNT (0U)
-    #endif
-    #if !defined(ERPC_CLIENTS_THREADS_AMOUNT)
-        #define ERPC_CLIENTS_THREADS_AMOUNT (1U)
-    #endif
-#endif
 
 // Detect threading model if not already set.
 #if !defined(ERPC_THREADS)
@@ -277,11 +257,6 @@
     #elif CONFIG_HAS_FREERTOS
         // Use FreeRTOS if we can auto detect it.
         #define ERPC_THREADS (ERPC_THREADS_FREERTOS)
-    #elif CONFIG_HAS_WIN32
-        #define ERPC_THREADS (ERPC_THREADS_WIN32）
-    #else
-        // Otherwise default to no threads.
-        #define ERPC_THREADS (ERPC_THREADS_NONE)
     #endif
 #endif
 
@@ -295,11 +270,6 @@
     #define ERPC_DEFAULT_BUFFER_SIZE (256U)
 #endif
 
-// Set default buffers count.
-#if !defined(ERPC_DEFAULT_BUFFERS_COUNT)
-    //! @brief Count of buffers allocated by StaticMessageBufferFactory.
-    #define ERPC_DEFAULT_BUFFERS_COUNT (2U)
-#endif
 
 // Disable/enable noexcept.
 #if !defined(ERPC_NOEXCEPT)
@@ -317,15 +287,6 @@
     #define NOEXCEPT
 #endif // NOEXCEPT
 
-
-// Enabling nesting calls detection as default for debug.
-#if !defined(ERPC_NESTED_CALLS_DETECTION)
-    #if defined(NDEBUG) || (ERPC_NESTED_CALLS == ERPC_NESTED_CALLS_ENABLED)
-        #define ERPC_NESTED_CALLS_DETECTION (ERPC_NESTED_CALLS_DETECTION_DISABLED)
-    #else
-        #define ERPC_NESTED_CALLS_DETECTION (ERPC_NESTED_CALLS_DETECTION_ENABLED)
-    #endif
-#endif
 
 // Disabling tracing the eRPC.
 #if !defined(ERPC_MESSAGE_LOGGING)
@@ -363,11 +324,6 @@
         #define erpc_assert(condition) assert(condition)
     #endif
 #endif
-
-// // Disabling endianness agnostic feature.
-// #ifndef ENDIANNESS_HEADER
-//     #define ENDIANNESS_HEADER "erpc_endianness_undefined.h"
-// #endif
 
 /* clang-format on */
 #endif // _ERPC_DETECT_H_

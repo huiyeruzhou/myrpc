@@ -15,8 +15,6 @@
 #include "erpc_message_buffer.hpp"
 #include "erpc_transport.hpp"
 
-#include <cstring>
-
 #if !ERPC_THREADS_IS(NONE)
 #include "erpc_threading.h"
 #endif

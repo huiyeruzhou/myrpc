@@ -13,7 +13,6 @@
 #include "erpc_status.h"
 #include "erpc_message_buffer.hpp"
 
-#include <cstring>
 
 /*!
  * @addtogroup infra_transport

@@ -1,6 +1,5 @@
 #ifndef _TCP_WORKER_H_
 #define _TCP_WORKER_H_
-#include <cstdint>
 #include "erpc_status.h"
 #include "erpc_framed_transport.hpp"
 

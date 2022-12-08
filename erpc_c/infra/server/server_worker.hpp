@@ -5,7 +5,9 @@
 #include "service.hpp"
 #include "tcp_worker.hpp"
 #include <cstdio>
+extern "C" {
 #include <unistd.h>
+}
 namespace erpc
 {
     class ServerWorker {
