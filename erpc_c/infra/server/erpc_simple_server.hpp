@@ -18,9 +18,7 @@
 #include "tcp_worker.hpp"
 #include "erpc_server.hpp"
 #include "server_worker.hpp"
-
- #include <sys/epoll.h>
- #include <fcntl.h>
+#include <fcntl.h>
 
  /*!
  * @addtogroup infra_server
@@ -104,17 +102,17 @@ protected:
     /*!
  * @brief Server thread function.
  */
-    void serverThread(void);
+    void networkpollerThread(void);
     /*!
  * @brief Thread entry point.
  *
- * Control is passed to the serverThread() method of the TCPTransport instance pointed to
+ * Control is passed to the networkpollerThread() method of the TCPTransport instance pointed to
  * by the @c arg parameter.
  *
  * @param arg Thread argument. The pointer to the TCPTransport instance is passed through
  *  this argument.
  */
-    static void serverThreadStub(void *arg);
+    static void networkpollerStub(void *arg);
 };
 
 } // namespace erpc

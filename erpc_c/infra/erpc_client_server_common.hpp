@@ -12,23 +12,32 @@
 
 #include "erpc_config_internal.h"
 #include "erpc_codec.hpp"
+#include "erpc_transport.hpp"
+#if CONFIG_HAS_FREERTOS
 #include <cstdio>
 extern "C" {
-#if CONFIG_HAS_POSIX
-#include <err.h>
-#endif
+#include <lwip/netdb.h>
+#include <lwip/sockets.h>
 #include <netinet/tcp.h>
-#include <netdb.h>
 #include <errno.h>
 }
-
-#define TCP_TRANSPORT_DEBUG_LOG (1)
-#if TCP_TRANSPORT_DEBUG_LOG 
-#define TCP_DEBUG_PRINT(_fmt_, ...) printf(_fmt_, ##__VA_ARGS__)
-#define TCP_DEBUG_ERR(_msg_) err(errno, _msg_)
-void print_net_info(const sockaddr *__sockaddr, int __len);
-int getPortFormAddr(const sockaddr *__sockaddr, int __len);
 #else
+#include <cstdio>
+extern "C" {
+#include <netdb.h>
+#include <netinet/tcp.h>
+#include <errno.h>
+}
+#endif
+#define TCP_TRANSPORT_DEBUG_LOG (1)
+#if TCP_TRANSPORT_DEBUG_LOG
+char* print_net_info(const sockaddr *__sockaddr, int __len);
+int getPortFormAddr(const sockaddr * __sockaddr, int __len);
+#else
+#define LOGE
+#define LOGI
+#define LOGD
+#define LOGV
 #define TCP_DEBUG_PRINT(_fmt_, ...)
 #define TCP_DEBUG_ERR(_msg_)
 #endif

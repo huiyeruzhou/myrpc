@@ -26,9 +26,12 @@ namespace erpc
         erpc_status_t processMessage(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId, uint32_t sequence);
         erpc_status_t readHeadOfMessage(Codec *codec, message_type_t &msgType, uint32_t &serviceId, uint32_t &methodId,
             uint32_t &sequence);
-        Thread m_workerThread;
+        
         static void workerStub(void *arg);
+        void start(void);
     private:
+        Thread m_workerThread;
+        char TAG[CONFIG_MAX_TASK_NAME_LEN];
         Service *m_firstService;
         MessageBufferFactory *m_messageFactory; //!< Message buffer factory to use.
         CodecFactory *m_codecFactory;           //!< Codec to use.

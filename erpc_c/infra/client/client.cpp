@@ -21,6 +21,7 @@ extern "C" {
 }
 using namespace erpc;
 
+const static char *TAG = "client";
 ////////////////////////////////////////////////////////////////////////////////
 // Code
 ////////////////////////////////////////////////////////////////////////////////
@@ -35,6 +36,7 @@ Client::Client(const char *host, uint16_t port, MessageBufferFactory *messageFac
     , m_sequence(0)
     , m_errorHandler(NULL)
 {
+    (void *) (TAG);
     BasicCodecFactory *codecFactory;
 
     // Init factories.
@@ -179,7 +181,7 @@ erpc_status_t Client::open(void)
 
     if (m_sockfd != -1)
     {
-        TCP_DEBUG_PRINT("%s", "socket already connected\n");
+        LOGI("%s", "socket already connected\n");
     }
     else
     {
@@ -192,7 +194,7 @@ erpc_status_t Client::open(void)
         result = snprintf(portString, sizeof(portString), "%d", m_port);
         if (result < 0)
         {
-            TCP_DEBUG_ERR("snprintf failed");
+            LOGE(TAG, "snprintf failed");
             status = kErpcStatus_Fail;
         }
 
@@ -203,7 +205,7 @@ erpc_status_t Client::open(void)
             if (result != 0)
             {
                 // TODO check EAI_NONAME
-                TCP_DEBUG_ERR("gettaddrinfo failed");
+                LOGE(TAG, "gettaddrinfo failed");
                 status = kErpcStatus_UnknownName;
             }
         }
@@ -228,8 +230,8 @@ erpc_status_t Client::open(void)
                     continue;
                 }
                 // Exit the loop for the first successful connection.
-                TCP_DEBUG_PRINT("client:    successful connection to ");
-                print_net_info(res->ai_addr, res->ai_addrlen);
+                
+                LOGI(TAG, "successful connection to %s", print_net_info(res->ai_addr, res->ai_addrlen));
                 break;
             }
 
@@ -240,7 +242,7 @@ erpc_status_t Client::open(void)
             if (sock < 0)
             {
                 // TODO check EADDRNOTAVAIL:
-                TCP_DEBUG_ERR("connecting failed");
+                LOGE(TAG, "connecting failed");
                 status = kErpcStatus_ConnectionFailure;
             }
         }
@@ -251,7 +253,7 @@ erpc_status_t Client::open(void)
             if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (void *) &set, sizeof(int)) < 0)
             {
                 ::close(sock);
-                TCP_DEBUG_ERR("setsockopt failed");
+                LOGE(TAG, "setsockopt failed");
                 status = kErpcStatus_Fail;
             }
         }
@@ -268,7 +270,7 @@ erpc_status_t Client::open(void)
             if (setsockopt(sock, SOL_SOCKET, SO_NOSIGPIPE, (void *) &set, sizeof(int)) < 0)
             {
                 ::close(sock);
-                TCP_DEBUG_ERR("setsockopt failed");
+                LOGE(TAG, "setsockopt failed");
                 status = kErpcStatus_Fail;
             }
         }

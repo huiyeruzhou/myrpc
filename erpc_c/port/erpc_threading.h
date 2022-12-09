@@ -13,17 +13,16 @@
 
 #include "erpc_config_internal.h"
 
-#include <stdint.h>
+#include <cstdint>
+#include <cstring>
 
 // Exclude the rest of the file if threading is disabled.
-#if !ERPC_THREADS_IS(NONE)
-
 #if ERPC_THREADS_IS(PTHREADS)
 #include <pthread.h>
 #elif ERPC_THREADS_IS(FREERTOS)
-#include "FreeRTOS.h"
-#include "semphr.h"
-#include "task.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
+#include "freertos/task.h"
 #endif // ERPC_THREADS
 
 /*!
@@ -58,11 +57,7 @@ class   Thread
 public:
     //! @brief Unique identifier for a thread.
     typedef void *thread_id_t;
-#if ERPC_THREADS_IS(FREERTOS)
-    typedef StackType_t *thread_stack_pointer;
-#else
-    typedef void *thread_stack_pointer;
-#endif
+
 
     /*!
      * @brief Default constructor for use with the init() method.
@@ -85,8 +80,7 @@ public:
      * @param[in] name Optional name for the thread.
      * @param[in] stackPtr Mandatory task stack pointer for static api usage.
      */
-    Thread(thread_entry_t entry, uint32_t priority = 0, uint32_t stackSize = 0, const char *name = 0,
-           thread_stack_pointer stackPtr = 0);
+    Thread(thread_entry_t entry, uint32_t priority = 0, uint32_t stackSize = 2048, const char *name = "");
 
     /*!
      * @brief Destructor.
@@ -98,7 +92,7 @@ public:
      *
      * @param[in] name Name for thread.
      */
-    void setName(const char *name) { m_name = name; }
+    void setName(const char *name) { strncpy(m_name, name, CONFIG_MAX_TASK_NAME_LEN); }
 
     /*!
      * @brief This function returns name of thread.
@@ -113,9 +107,8 @@ public:
      * @param[in] entry Entry function.
      * @param[in] priority Task priority.
      * @param[in] stackSize Stack size.
-     * @param[in] stackPtr Mandatory task stack pointer for static api usage.
      */
-    void init(thread_entry_t entry, uint32_t priority = 0, uint32_t stackSize = 0, thread_stack_pointer stackPtr = 0);
+    void init(thread_entry_t entry, uint32_t priority = 0, uint32_t stackSize = 0);
 
     /*!
      * @brief This function starts thread execution.
@@ -142,14 +135,6 @@ public:
         return reinterpret_cast<thread_id_t>(m_thread);
 #elif ERPC_THREADS_IS(FREERTOS)
         return reinterpret_cast<thread_id_t>(m_task);
-#elif ERPC_THREADS_IS(ZEPHYR)
-        return reinterpret_cast<thread_id_t>(m_thread);
-#elif ERPC_THREADS_IS(MBED)
-        return reinterpret_cast<thread_id_t>(m_thread->get_id());
-#elif ERPC_THREADS_IS(WIN32)
-        return reinterpret_cast<thread_id_t>(m_thread);
-#elif ERPC_THREADS_IS(THREADX)
-        return reinterpret_cast<thread_id_t>(m_thread.tx_thread_id);
 #endif
     }
 
@@ -164,14 +149,6 @@ public:
         return reinterpret_cast<thread_id_t>(pthread_self());
 #elif ERPC_THREADS_IS(FREERTOS)
         return reinterpret_cast<thread_id_t>(xTaskGetCurrentTaskHandle());
-#elif ERPC_THREADS_IS(ZEPHYR)
-        return reinterpret_cast<thread_id_t>(k_current_get());
-#elif ERPC_THREADS_IS(MBED)
-        return reinterpret_cast<thread_id_t>(rtos::ThisThread::get_id());
-#elif ERPC_THREADS_IS(WIN32)
-        return reinterpret_cast<thread_id_t>(GetCurrentThread());
-#elif ERPC_THREADS_IS(THREADX)
-        return reinterpret_cast<thread_id_t>(tx_thread_identify());
 #endif
     }
 
@@ -184,12 +161,6 @@ public:
     void setStackPointer(k_thread_stack_t *stack) { m_stack = stack; }
 #endif
 
-    /*!
-     * @brief This function returns Thread instance where functions is called.
-     *
-     * @return Thread instance.
-     */
-    static Thread *getCurrentThread(void);
 
     /*!
      * @brief Compare operator compares two threads.
@@ -208,40 +179,21 @@ protected:
     virtual void threadEntryPoint(void);
 
 private:
-    const char *m_name;              /*!< Thread name. */
+#if CONFIG_HAS_FREERTOS
+    char m_name[configMAX_TASK_NAME_LEN];//任务名字
+#else
+    char m_name[CONFIG_MAX_TASK_NAME_LEN];//任务名字
+#endif
     thread_entry_t m_entry;          /*!< Thread entry function. */
     void *m_arg;                     /*!< Entry parameter. */
     uint32_t m_stackSize;            /*!< Stack size. */
     uint32_t m_priority;             /*!< Task priority. */
-    thread_stack_pointer m_stackPtr; /*!< Task pointer. */
 #if ERPC_THREADS_IS(PTHREADS)
     static pthread_key_t s_threadObjectKey; /*!< Thread key. */
     pthread_t m_thread;                     /*!< Current thread. */
 #elif ERPC_THREADS_IS(FREERTOS)
     TaskHandle_t m_task;       /*!< Current task. */
     Thread *m_next;            /*!< Pointer to next Thread. */
-    static Thread *s_first;    /*!< Pointer to first Thread. */
-#if ERPC_ALLOCATION_POLICY == ERPC_ALLOCATION_POLICY_STATIC
-    StaticTask_t m_staticTask; /*!< Hold static task data. */
-#endif
-#elif ERPC_THREADS_IS(ZEPHYR)
-    struct k_thread m_thread;  /*!< Current thread. */
-    k_thread_stack_t *m_stack; /*!< Pointer to stack. */
-#elif ERPC_THREADS_IS(MBED)
-    rtos::Thread *m_thread; /*!< Underlying Thread instance */
-    Thread *m_next;         /*!< Pointer to next Thread. */
-    static Thread *s_first; /*!< Pointer to first Thread. */
-#elif ERPC_THREADS_IS(WIN32)
-    HANDLE m_thread;
-    unsigned int m_thrdaddr;
-    Thread *m_next;         /*!< Pointer to next Thread. */
-    static Thread *s_first; /*!< Pointer to first Thread. */
-    static CRITICAL_SECTION m_critical_section;
-    static BOOL m_critical_section_inited;
-#elif ERPC_THREADS_IS(THREADX)
-    TX_THREAD m_thread;     /*!< Underlying Thread instance */
-    Thread *m_next;         /*!< Pointer to next Thread. */
-    static Thread *s_first; /*!< Pointer to first Thread. */
 #endif
 
 #if ERPC_THREADS_IS(PTHREADS)
@@ -260,43 +212,6 @@ private:
      * @param[in] arg Thread to execute.
      */
     static void threadEntryPointStub(void *arg);
-#elif ERPC_THREADS_IS(ZEPHYR)
-
-    /*!
-     * @brief This function execute threadEntryPoint function.
-     *
-     * @param[in] arg1 Thread to execute.
-     * @param[in] arg2
-     * @param[in] arg3
-     */
-    static void *threadEntryPointStub(void *arg1, void *arg2, void *arg3);
-
-#elif ERPC_THREADS_IS(MBED)
-
-    /*!
-     * @brief This function execute threadEntryPoint function.
-     *
-     * @param[in] arg Thread to execute.
-     */
-    static void threadEntryPointStub(void *arg);
-
-#elif ERPC_THREADS_IS(WIN32)
-
-    /*!
-     * @brief This function execute threadEntryPoint function.
-     *
-     * @param[in] arg Thread to execute.
-     */
-    static unsigned WINAPI threadEntryPointStub(void *arg);
-
-#elif ERPC_THREADS_IS(THREADX)
-
-    /*!
-     * @brief This function execute threadEntryPoint function.
-     *
-     * @param[in] arg Thread to execute.
-     */
-    static void threadEntryPointStub(ULONG arg);
 #endif
 
 private:
@@ -399,14 +314,6 @@ private:
 #elif ERPC_THREADS_IS(FREERTOS)
     SemaphoreHandle_t m_mutex;       /*!< Mutex.*/
     StaticSemaphore_t m_staticQueue; /*!< Static queue. */
-#elif ERPC_THREADS_IS(ZEPHYR)
-    struct k_mutex m_mutex; /*!< Mutex.*/
-#elif ERPC_THREADS_IS(MBED)
-    rtos::Mutex *m_mutex;   /*!< Mutex. */
-#elif ERPC_THREADS_IS(WIN32)
-    HANDLE m_mutex;
-#elif ERPC_THREADS_IS(THREADX)
-    TX_MUTEX m_mutex;
 #endif
 
 private:
@@ -487,17 +394,6 @@ private:
 #elif ERPC_THREADS_IS(FREERTOS)
     SemaphoreHandle_t m_sem;         /*!< Semaphore. */
     StaticSemaphore_t m_staticQueue; /*!< Static queue. */
-#elif ERPC_THREADS_IS(ZEPHYR)
-    struct k_sem m_sem;     /*!< Semaphore. */
-#elif ERPC_THREADS_IS(MBED)
-    rtos::Semaphore *m_sem; /*!< Semaphore. */
-    int m_count;            /*!< Semaphore count number. */
-#elif ERPC_THREADS_IS(WIN32)
-    Mutex m_mutex; /*!< Mutext. */
-    int m_count;
-    HANDLE m_sem;
-#elif ERPC_THREADS_IS(THREADX)
-    TX_SEMAPHORE m_sem; /*!< Semaphore. */
 #endif
 
 private:
@@ -523,7 +419,6 @@ private:
 
 #endif // ERPC_THREADS
 
-#endif // defined(__embedded_rpc__thread__)
 ////////////////////////////////////////////////////////////////////////////////
 // EOF
 ////////////////////////////////////////////////////////////////////////////////

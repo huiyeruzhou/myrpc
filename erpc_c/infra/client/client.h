@@ -17,6 +17,8 @@
 #include "erpc_basic_codec.hpp"
 #include "erpc_message_buffer.hpp"
 
+#include <netdb.h>
+
 
 /*!
  * @addtogroup infra_client

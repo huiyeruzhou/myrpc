@@ -6,12 +6,14 @@ using namespace erpc;
 ServerWorker::ServerWorker(Service *services, MessageBufferFactory *messageFactory,
     CodecFactory *codecFactory,
     TCPWorker *worker)
-    : m_firstService(services)
+    : m_workerThread(workerStub)
+    , m_firstService(services)
     , m_messageFactory(messageFactory)
     , m_codecFactory(codecFactory)
     , m_worker(worker)
-    , m_workerThread(workerStub)
 {
+    snprintf(TAG, sizeof(TAG) - 1, "worker %d", m_worker->m_port);
+    m_workerThread.setName(TAG);
 }
 
 void ServerWorker::disposeBufferAndCodec(Codec *codec)
@@ -92,8 +94,8 @@ erpc_status_t ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff,
         (*codec)->setBuffer(buff);
 
         err = readHeadOfMessage(*codec, msgType, serviceId, methodId, sequence);
-        printf("port %d:     read head of message\n"
-               "                msgType: %d, serviceId: %d,  methodId: %d, sequence: %d\n",m_worker->m_port,msgType, serviceId, methodId, sequence);
+        LOGI(this->TAG,"read head of message\n"
+               "                msgType: %d, serviceId: %lu,  methodId: %lu, sequence: %lu\n", msgType, serviceId, methodId, sequence);
         if (err != kErpcStatus_Success)
         {
             // Dispose of buffers and codecs.
@@ -102,7 +104,8 @@ erpc_status_t ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff,
     }
     if (err != kErpcStatus_Success)
     {
-        printf("port %d:    runInternalBegin err: %d\n", m_worker->m_port, err);
+        
+        LOGI(this->TAG,"runInternalBegin err: %d\n",   err);
     }
 
     return err;
@@ -121,12 +124,11 @@ erpc_status_t ServerWorker::runInternalEnd(Codec *codec, message_type_t msgType,
             err = m_worker->send(codec->getBuffer());
         }
     }
-
     // Dispose of buffers and codecs.
     disposeBufferAndCodec(codec);
     if (err != kErpcStatus_Success)
     {
-        printf("port %d:    runInternalEnd err: %d\n", m_worker->m_port, err);
+        LOGI(this->TAG,"runInternalEnd err: %d\n",   err);
     }
 
     return err;
@@ -162,12 +164,12 @@ erpc_status_t ServerWorker::processMessage(Codec *codec, message_type_t msgType,
     if (err == kErpcStatus_Success)
     {
         err = service->handleInvocation(methodId, sequence, codec, m_messageFactory);
-        printf("port %d:     service `%s` invoked\n", m_worker->m_port, service->m_name);
+        LOGI(this->TAG,"service `%s` invoked\n",   service->m_name);
     }
 
     if (err != kErpcStatus_Success)
     {
-        printf("port %d:    processMessage err: %d\n", m_worker->m_port, err);
+        LOGI(this->TAG,"processMessage err: %d\n",   err);
     }
 
     return err;
@@ -185,7 +187,7 @@ Service *ServerWorker::findServiceWithId(uint32_t serviceId)
 
         service = service->getNext();
     }
-    printf("port %d:     service No.%d `%s` found\n", m_worker->m_port, serviceId, service->m_name);
+    LOGI(this->TAG,"service No.%lu `%s` found\n",   serviceId, service->m_name);
     return service;
 }
 
@@ -193,7 +195,7 @@ void ServerWorker::workerStub(void *arg)
 {
     int err = kErpcStatus_Fail;
     ServerWorker *This = reinterpret_cast<ServerWorker *>(arg);
-    printf("\nworker:    in worker stub\n");
+    LOGI(This->TAG, "in stub");
     if (This != NULL)
     {
         int i = 1;
@@ -203,6 +205,12 @@ void ServerWorker::workerStub(void *arg)
             i++;
         }
         close(This->m_worker->m_socket);
-
     }
+    LOGI(This->TAG, "work done\n");
+    return;
+}
+
+void ServerWorker::start(void)
+{
+    m_workerThread.start(this);
 }

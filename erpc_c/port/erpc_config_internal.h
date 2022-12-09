@@ -18,38 +18,27 @@
 
    //! @name Threading model options
    //@{
-#include <new>
+
+// Set default buffer size.
+#ifndef ERPC_DEFAULT_BUFFER_SIZE
+    //! @brief Size of buffers allocated by BasicMessageBufferFactory in setup functions.
+#define ERPC_DEFAULT_BUFFER_SIZE (256U)
+#endif
+
+#ifndef CONFIG_MAX_TASK_NAME_LEN
+    //! @brief Size of 
+#define CONFIG_MAX_TASK_NAME_LEN (16U)
+#endif
+
 #define ERPC_ALLOCATION_POLICY_DYNAMIC (0U) //!< Dynamic allocation policy
-#define ERPC_ALLOCATION_POLICY_STATIC (1U)  //!< Static allocation policy
 
 #define ERPC_THREADS_NONE (0U)     //!< No threads.
 #define ERPC_THREADS_PTHREADS (1U) //!< POSIX pthreads.
 #define ERPC_THREADS_FREERTOS (2U) //!< FreeRTOS.
-#define ERPC_THREADS_ZEPHYR (3U)   //!< ZEPHYR.
-#define ERPC_THREADS_MBED (4U)     //!< Mbed OS
-#define ERPC_THREADS_WIN32 (5U)    //!< WIN32
-#define ERPC_THREADS_THREADX (6U)  //!< THREADX
 
 #define ERPC_NOEXCEPT_DISABLED (0U) //!< Disabling noexcept feature.
-#define ERPC_NOEXCEPT_ENABLED (1U)  //!<  Enabling noexcept feature.
+#define ERPC_NOEXCEPT_ENABLED (1U)  //!<  Enabling noexcept feature.n enabled..
 
-#define ERPC_NESTED_CALLS_DISABLED (0U) //!< No nested calls support.
-#define ERPC_NESTED_CALLS_ENABLED (1U)  //!< Nested calls support.
-
-#define ERPC_NESTED_CALLS_DETECTION_DISABLED (0U) //!< Nested calls detection disabled.
-#define ERPC_NESTED_CALLS_DETECTION_ENABLED (1U)  //!< Nested calls detection enabled.
-
-#define ERPC_MESSAGE_LOGGING_DISABLED (0U) //!< Trace functions disabled.
-#define ERPC_MESSAGE_LOGGING_ENABLED (1U)  //!< Trace functions enabled.
-
-#define ERPC_TRANSPORT_MU_USE_MCMGR_DISABLED (0U) //!< Do not use MCMGR for MU ISR management.
-#define ERPC_TRANSPORT_MU_USE_MCMGR_ENABLED (1U)  //!< Use MCMGR for MU ISR management.
-
-#define ERPC_PRE_POST_ACTION_DISABLED (0U) //!< Pre post shim callbacks functions disabled.
-#define ERPC_PRE_POST_ACTION_ENABLED (1U)  //!< Pre post shim callback functions enabled.
-
-#define ERPC_PRE_POST_ACTION_DEFAULT_DISABLED (0U) //!< Pre post shim default callbacks functions disabled.
-#define ERPC_PRE_POST_ACTION_DEFAULT_ENABLED (1U)  //!< Pre post shim default callback functions enabled.
 //@}
 
 //! @name Configuration options
@@ -68,27 +57,6 @@
 //! ERPC_CLIENTS_THREADS_AMOUNT).
 // #define ERPC_ALLOCATION_POLICY (ERPC_ALLOCATION_POLICY_STATIC)
 
-//! @def ERPC_CODEC_COUNT
-//!
-//! @brief Set amount of codecs objects used simultaneously in case of ERPC_ALLOCATION_POLICY is set to
-//! ERPC_ALLOCATION_POLICY_STATIC. For example if client or server is used in one thread then 1. If both are used in one
-//! thread per each then 2, ... Default value 2.
-// #define ERPC_CODEC_COUNT (2U)
-
-//! @def ERPC_MESSAGE_LOGGERS_COUNT
-//!
-//! @brief Set amount of message loggers objects used simultaneously  in case of ERPC_ALLOCATION_POLICY is set to
-//! ERPC_ALLOCATION_POLICY_STATIC.
-//! For example if client or server is used in one thread then 1. If both are used in one thread per each then 2, ...
-//! For arbitrated client 1 is enough.
-//! Default value 0 (May not be used).
-// #define ERPC_MESSAGE_LOGGERS_COUNT (0U)
-
-//! @def ERPC_CLIENTS_THREADS_AMOUNT
-//!
-//! @brief Set amount of client threads objects used in case of ERPC_ALLOCATION_POLICY is set to
-//! ERPC_ALLOCATION_POLICY_STATIC. Default value 1 (Most of current cases).
-// #define ERPC_CLIENTS_THREADS_AMOUNT (1U)
 
 //! @def ERPC_THREADS
 //!
@@ -108,74 +76,12 @@
 //! For RPMsg transport layer, ERPC_DEFAULT_BUFFER_SIZE must be 2^n - 16.
 //#define ERPC_DEFAULT_BUFFER_SIZE (256U)
 
-//! @def ERPC_DEFAULT_BUFFERS_COUNT
-//!
-//! Uncomment to change the count of buffers allocated by one of statically allocated messages.
-//! Default value is set to 2.
-//#define ERPC_DEFAULT_BUFFERS_COUNT (2U)
-
 //! @def ERPC_NOEXCEPT
 //!
 //! @brief Disable/enable noexcept support.
 //!
 //! Uncomment for using noexcept feature.
 //#define ERPC_NOEXCEPT (ERPC_NOEXCEPT_ENABLED)
-
-//! @def ERPC_NESTED_CALLS
-//!
-//! Default set to ERPC_NESTED_CALLS_DISABLED. Uncomment when callbacks, or other eRPC
-//! functions are called from server implementation of another eRPC call. Nested functions
-//! need to be marked as @nested in IDL.
-//#define ERPC_NESTED_CALLS (ERPC_NESTED_CALLS_ENABLED)
-
-//! @def ERPC_NESTED_CALLS_DETECTION
-//!
-//! Default set to ERPC_NESTED_CALLS_DETECTION_ENABLED when NDEBUG macro is presented.
-//! This serve for locating nested calls in code. Nested calls are calls where inside eRPC function
-//! on server side is called another eRPC function (like callbacks). Code need be a bit changed
-//! to support nested calls. See ERPC_NESTED_CALLS macro.
-//#define ERPC_NESTED_CALLS_DETECTION (ERPC_NESTED_CALLS_DETECTION_DISABLED)
-
-//! @def ERPC_MESSAGE_LOGGING
-//!
-//! Enable eRPC message logging code through the eRPC. Take look into "erpc_message_loggers.h". Can be used for base
-//! printing messages, or sending data to another system for data analysis. Default set to
-//! ERPC_MESSAGE_LOGGING_DISABLED.
-//!
-//! Uncomment for using logging feature.
-//#define ERPC_MESSAGE_LOGGING (ERPC_MESSAGE_LOGGING_ENABLED)
-
-//! @def ERPC_TRANSPORT_MU_USE_MCMGR
-//!
-//! @brief MU transport layer configuration.
-//!
-//! Set to one of the @c ERPC_TRANSPORT_MU_USE_MCMGR_x macros to configure the MCMGR usage in MU transport layer.
-//!
-//! MU transport layer could leverage the Multicore Manager (MCMGR) component for Inter-Core
-//! interrupts / MU interrupts management or the Inter-Core interrupts can be managed by itself (MUX_IRQHandler
-//! overloading). By default, ERPC_TRANSPORT_MU_USE_MCMGR is set to ERPC_TRANSPORT_MU_USE_MCMGR_ENABLED when mcmgr.h
-//! is part of the project, otherwise the ERPC_TRANSPORT_MU_USE_MCMGR_DISABLED option is used. This settings can be
-//! overwritten from the erpc_config.h by uncommenting the ERPC_TRANSPORT_MU_USE_MCMGR macro definition. Do not forget
-//! to add the MCMGR library into your project when ERPC_TRANSPORT_MU_USE_MCMGR_ENABLED option is used! See the
-//! erpc_mu_transport.h for additional MU settings.
-//#define ERPC_TRANSPORT_MU_USE_MCMGR ERPC_TRANSPORT_MU_USE_MCMGR_DISABLED
-//@}
-
-//! @def ERPC_PRE_POST_ACTION
-//!
-//! Enable eRPC pre and post callback functions shim code. Take look into "erpc_pre_post_action.h". Can be used for
-//! detection of eRPC call freeze, ... Default set to ERPC_PRE_POST_ACTION_DISABLED.
-//!
-//! Uncomment for using pre post callback feature.
-//#define ERPC_PRE_POST_ACTION (ERPC_PRE_POST_ACTION_ENABLED)
-
-//! @def ERPC_PRE_POST_ACTION_DEFAULT
-//!
-//! Enable eRPC pre and post default callback functions. Take look into "erpc_setup_extensions.h". Can be used for
-//! detection of eRPC call freeze, ... Default set to ERPC_PRE_POST_ACTION_DEFAULT_DISABLED.
-//!
-//! Uncomment for using pre post default callback feature.
-//#define ERPC_PRE_POST_ACTION_DEFAULT (ERPC_PRE_POST_ACTION_DEFAULT_ENABLED)
 
 //! @name Assert function definition
 //@{
@@ -207,7 +113,7 @@
 /* clang-format off */
 
 // Determine if this is a POSIX system.
-#if !defined(CONFIG_HAS_POSIX)
+#ifndef CONFIG_HAS_POSIX
     // Detect Linux, BSD, Cygwin, and Mac OS X.
     #if defined(__linux__) || defined(__GNU__) || defined(__FreeBSD__) || defined(__NetBSD__) || \
         defined(__OpenBSD__) || defined(__DragonFly__) || defined(__CYGWIN__) || defined(__MACH__)
@@ -218,39 +124,54 @@
 #endif
 
 // Safely detect FreeRTOSConfig.h.
-#if !defined(CONFIG_HAS_FREERTOS)
+#ifndef CONFIG_HAS_FREERTOS
     #define CONFIG_HAS_FREERTOS (0)
     #if defined(__has_include)
-        #if __has_include("FreeRTOSConfig.h")
-            #undef CONFIG_HAS_FREERTOS
+    #if __has_include("FreeRTOSConfig.h")
+    #pragma message("FreeRTOS detected")
+    #undef CONFIG_HAS_FREERTOS
             #define CONFIG_HAS_FREERTOS (1)
         #endif
     #endif
 #endif
 
-// Detect allocation policy if not already set.
-#if !defined(ERPC_ALLOCATION_POLICY)
-    #if CONFIG_HAS_FREERTOS
-        #ifdef __cplusplus
-            extern "C" {
-        #endif
-        #include "FreeRTOSConfig.h"
-        #ifdef __cplusplus
-            }
-        #endif
-        #if defined(configSUPPORT_STATIC_ALLOCATION) && configSUPPORT_STATIC_ALLOCATION
-            #define ERPC_ALLOCATION_POLICY (ERPC_ALLOCATION_POLICY_STATIC)
-        #else
-            #define ERPC_ALLOCATION_POLICY (ERPC_ALLOCATION_POLICY_DYNAMIC)
-        #endif
-    #else
-        #define ERPC_ALLOCATION_POLICY (ERPC_ALLOCATION_POLICY_DYNAMIC)
-    #endif
+
+
+#include <new>
+#define ERPC_ALLOCATION_POLICY (ERPC_ALLOCATION_POLICY_DYNAMIC)
+
+#if CONFIG_HAS_FREEROS
+#include "esp_log.h"
+#if defined(__cplusplus) && (__cplusplus >  201703L)
+#define LOGE( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_ERROR,   tag, format __VA_OPT__(,) __VA_ARGS__)
+#define LOGW( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_WARN,    tag, format __VA_OPT__(,) __VA_ARGS__)
+#define LOGI( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_INFO,    tag, format __VA_OPT__(,) __VA_ARGS__)
+#define LOGD( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_DEBUG,   tag, format __VA_OPT__(,) __VA_ARGS__)
+#define LOGV( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_VERBOSE, tag, format __VA_OPT__(,) __VA_ARGS__)
+#else // !(defined(__cplusplus) && (__cplusplus >  201703L))
+#define LOGE( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_ERROR,   tag, format, ##__VA_ARGS__)
+#define LOGW( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_WARN,    tag, format, ##__VA_ARGS__)
+#define LOGI( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_INFO,    tag, format, ##__VA_ARGS__)
+#define LOGD( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_DEBUG,   tag, format, ##__VA_ARGS__)
+#define LOGV( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_VERBOSE, tag, format, ##__VA_ARGS__)
+#endif // !(defined(__cplusplus) && (__cplusplus >  201703L))
+#elif CONFIG_HAS_POSIX
+// #include <ctime>
+// #include <iostream>
+// #include <iomanip>
+// static std::time_t time_now = std::time(nullptr);
+// #define __FILENAME__ (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)    // only show filename and not it's path (less clutter)
+// #define LOG(LEVEL) std::cout << std::put_time(std::localtime(&time_now), "%y-%m-%d %OH:%OM:%OS") << " [LEVEL] " << __FILENAME__ << "(" << __FUNCTION__ << ":" << __LINE__ << ") >> "
+
+#define LOGE( tag, format, ... ) 
+#define LOGW( tag, format, ... ) 
+#define LOGI( tag, format, ... )
+#define LOGD( tag, format, ... )
+#define LOGV( tag, format, ... ) 
 #endif
 
-
 // Detect threading model if not already set.
-#if !defined(ERPC_THREADS)
+#ifndef ERPC_THREADS
     #if CONFIG_HAS_POSIX
         // Default to pthreads for POSIX systems.
         #define ERPC_THREADS (ERPC_THREADS_PTHREADS)
@@ -264,15 +185,11 @@
 // support, i.e. "#if ERPC_THREADS", because ERPC_THREADS_NONE has a value of 0.
 #define ERPC_THREADS_IS(_n_) (ERPC_THREADS == (ERPC_THREADS_##_n_))
 
-// Set default buffer size.
-#if !defined(ERPC_DEFAULT_BUFFER_SIZE)
-    //! @brief Size of buffers allocated by BasicMessageBufferFactory in setup functions.
-    #define ERPC_DEFAULT_BUFFER_SIZE (256U)
-#endif
+
 
 
 // Disable/enable noexcept.
-#if !defined(ERPC_NOEXCEPT)
+#ifndef ERPC_NOEXCEPT
     #if CONFIG_HAS_POSIX
         #define ERPC_NOEXCEPT (ERPC_NOEXCEPT_ENABLED)
     #else
@@ -288,11 +205,6 @@
 #endif // NOEXCEPT
 
 
-// Disabling tracing the eRPC.
-#if !defined(ERPC_MESSAGE_LOGGING)
-    #define ERPC_MESSAGE_LOGGING (ERPC_MESSAGE_LOGGING_DISABLED)
-#endif
-
 #if defined(__CC_ARM) || defined(__ARMCC_VERSION) /* Keil MDK */
     #define THROW_BADALLOC throw(std::bad_alloc)
     #define THROW throw()
@@ -304,13 +216,13 @@
 #define ERPC_TRANSPORT_MU_USE_MCMGR (ERPC_TRANSPORT_MU_USE_MCMGR_DISABLED)
 
 
-#if !defined(erpc_assert)
+#ifndef erpc_assert
     #if CONFIG_HAS_FREERTOS
         #ifdef __cplusplus
             extern "C" {
         #endif
-        #include "FreeRTOS.h"
-        #include "task.h"
+        #include "freertos/FreeRTOS.h"
+        #include "freertos/task.h"
         #ifdef __cplusplus
             }
         #endif

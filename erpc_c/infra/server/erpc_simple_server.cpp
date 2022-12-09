@@ -10,24 +10,24 @@
 
 #include "erpc_simple_server.hpp"
 using namespace erpc;
-
-#define EPOLL_SIZE 1024
-int setnonblocking(int sockfd)//非阻塞模式设置
-{
-    fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFD, 0) | O_NONBLOCK);
-    return 0;
-}
-void addfd(int epollfd, int fd, bool enable_et)//将fd加入到epoll中，并设置边缘触发模式
-{
-    struct epoll_event ev;
-    ev.data.fd = fd;
-    ev.events = EPOLLIN;
-    if (enable_et)
-        ev.events = EPOLLIN | EPOLLET;
-    epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev);
-    setnonblocking(fd);
-    printf("server:    fd No.%d added to epoll!\n", fd);
-}
+static const char *TAG = "server";
+// #define EPOLL_SIZE 1024
+// int setnonblocking(int sockfd)//非阻塞模式设置
+// {
+//     fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFD, 0) | O_NONBLOCK);
+//     return 0;
+// }
+// void addfd(int epollfd, int fd, bool enable_et)//将fd加入到epoll中，并设置边缘触发模式
+// {
+//     struct epoll_event ev;
+//     ev.data.fd = fd;
+//     ev.events = EPOLLIN;
+//     if (enable_et)
+//         ev.events = EPOLLIN | EPOLLET;
+//     epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev);
+//     setnonblocking(fd);
+//     printf(TAG, "fd No.%d added to epoll!\n", fd);
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Code
@@ -36,9 +36,10 @@ void addfd(int epollfd, int fd, bool enable_et)//将fd加入到epoll中，并设
 SimpleServer::SimpleServer(const char *host, uint16_t port, MessageBufferFactory *message_buffer_factory)
     : Server(host, port)
     , m_isServerOn(true)
-    , m_serverThread(SimpleServer::serverThreadStub)
+    , m_serverThread(SimpleServer::networkpollerStub)
     , m_runServer(false)
 {
+    (void *) (TAG);
     BasicCodecFactory *codecFactory = new BasicCodecFactory();
 
     // Init server with the provided transport.
@@ -92,10 +93,9 @@ void SimpleServer::stop(void)
 }
 
 void SimpleServer::onNewSocket(int sockfd, int port) {
-    printf("%d\n", sockfd);
     TCPWorker *transport_worker = new TCPWorker(sockfd, port);
     ServerWorker *worker = new ServerWorker(m_firstService, m_messageFactory, m_codecFactory, transport_worker);
-    worker->m_workerThread.start(worker);
+    worker->start();
 }
 
 erpc_status_t SimpleServer::close(bool stopServer)
@@ -116,7 +116,7 @@ erpc_status_t SimpleServer::close(bool stopServer)
 
 
 
-void SimpleServer::serverThread(void)
+void SimpleServer::networkpollerThread(void)
 {
     int yes = 1;
     int result;
@@ -125,16 +125,16 @@ void SimpleServer::serverThread(void)
     int incomingSocket;
     bool status = false;
     struct sockaddr_in serverAddress;
-    int epfd;
-    static struct epoll_event events[EPOLL_SIZE];
+    // int epfd;
+    // static struct epoll_event events[EPOLL_SIZE];
 
-    TCP_DEBUG_PRINT("server:    %s", "in server thread\n");
+    LOGI(TAG, "%s", "networkpollerThread");
 
     // Create socket.
     m_sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (m_sockfd < 0)
     {
-        TCP_DEBUG_ERR("failed to create server socket");
+        LOGE(TAG, "failed to create server socket");
         status = true;
     }
     if (!status)
@@ -149,7 +149,7 @@ void SimpleServer::serverThread(void)
         result = setsockopt(m_sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
         if (result < 0)
         {
-            TCP_DEBUG_ERR("setsockopt failed");
+            LOGE(TAG, "setsockopt failed");
             status = true;
         }
     }
@@ -161,12 +161,12 @@ void SimpleServer::serverThread(void)
         //on Failed
         if (result < 0)
         {
-            TCP_DEBUG_ERR("server:    bind failed");
+            LOGE(TAG, "bind failed");
             status = true;
         }
         //on Success
-        TCP_DEBUG_PRINT("server:    bind to ");
-        print_net_info((struct sockaddr *) &serverAddress, sizeof(serverAddress));
+        LOGI(TAG, "bind to %s", print_net_info((struct sockaddr *) &serverAddress, sizeof(serverAddress)));
+        
     }
 
     if (!status)
@@ -176,24 +176,24 @@ void SimpleServer::serverThread(void)
         //on Failed
         if (result < 0)
         {
-            TCP_DEBUG_ERR("server:    listen failed");
+            LOGE(TAG, "listen failed");
             status = true;
         }
         //on Success
-        TCP_DEBUG_PRINT("server:    %s", "Listening for connections\n");
+        LOGI(TAG, "%s", "Listening for connections\n");
     }
     if (!status)
     {
-        //在内核中创建事件表
-        epfd = epoll_create(EPOLL_SIZE);
-        if (epfd < 0)
-        {
-            TCP_DEBUG_ERR("server:    epfd error");
-            status = true;
-        }
-        TCP_DEBUG_PRINT("server:    epoll created, epollfd = %d\n", epfd);
-        //往内核事件表里添加事件
-        addfd(epfd, m_sockfd, true);
+        // //在内核中创建事件表
+        // epfd = epoll_create(EPOLL_SIZE);
+        // if (epfd < 0)
+        // {
+        //     LOGE(TAG, "epfd error");
+        //     status = true;
+        // }
+        // LOGI(TAG, "epoll created, epollfd = %d\n", epfd);
+        // //往内核事件表里添加事件
+        // addfd(epfd, m_sockfd, true);
 
     }
     if (!status)
@@ -201,69 +201,87 @@ void SimpleServer::serverThread(void)
 
         while (m_runServer)
         {
+            incomingSocket = accept(m_sockfd, &incomingAddress, &incomingAddressLength);
 
-            int epoll_events_count = epoll_wait(epfd, events, EPOLL_SIZE, -1);
-            if (epoll_events_count < 0)
+            if (incomingSocket > 0)
             {
-                perror("epoll failure");
-                break;
+                // Successfully accepted a connection.
+                LOGI(TAG, "accepted connection from %s", print_net_info(&incomingAddress, incomingAddressLength));
+                
+
+                // should be inherited from accept() socket but it's not always ...
+                yes = 1;
+                setsockopt(m_sockfd, IPPROTO_TCP, TCP_NODELAY, (void *) &yes, sizeof(yes));
+                // addfd(epfd, incomingSocket, true);
+                onNewSocket(incomingSocket, getPortFormAddr(&incomingAddress, incomingAddressLength));
             }
-            //处理所有已经就绪的事件
-            for (int i = 0; i < epoll_events_count; ++i)
+            else
             {
-                int sockfd = events[i].data.fd;
-                //新用户连接
-                if (sockfd == m_sockfd)
-                {
-                    incomingAddressLength = sizeof(struct sockaddr);
-                    // we should use select() otherwise we can't end the server properly
-                    incomingSocket = accept(m_sockfd, &incomingAddress, &incomingAddressLength);
-
-                    if (incomingSocket > 0)
-                    {
-                        // Successfully accepted a connection.
-                        TCP_DEBUG_PRINT("server:    accepted connection from ");
-                        print_net_info(&incomingAddress, incomingAddressLength);
-
-                        // should be inherited from accept() socket but it's not always ...
-                        yes = 1;
-                        setsockopt(m_sockfd, IPPROTO_TCP, TCP_NODELAY, (void *) &yes, sizeof(yes));
-                        addfd(epfd, incomingSocket, true);
-                        onNewSocket(incomingSocket, getPortFormAddr(&incomingAddress, incomingAddressLength));
-                    }
-                    else
-                    {
-                        TCP_DEBUG_ERR("accept failed");
-                    }
-                }
-                //TODO:处理客户端的进一步输入
-                else
-                {
-                }
+                LOGE(TAG, "accept failed");
             }
+            // int epoll_events_count = epoll_wait(epfd, events, EPOLL_SIZE, -1);
+            // if (epoll_events_count < 0)
+            // {
+            //     perror("epoll failure");
+            //     break;
+            // }
+            // //处理所有已经就绪的事件
+            // for (int i = 0; i < epoll_events_count; ++i)
+            // {
+            //     int sockfd = events[i].data.fd;
+            //     //新用户连接
+            //     if (sockfd == m_sockfd)
+            //     {
+            //         incomingAddressLength = sizeof(struct sockaddr);
+            //         // we should use select() otherwise we can't end the server properly
+            //         incomingSocket = accept(m_sockfd, &incomingAddress, &incomingAddressLength);
+
+            //         if (incomingSocket > 0)
+            //         {
+            //             // Successfully accepted a connection.
+            //             LOGI(TAG, "accepted connection from ");
+            //             print_net_info(&incomingAddress, incomingAddressLength);
+
+            //             // should be inherited from accept() socket but it's not always ...
+            //             yes = 1;
+            //             setsockopt(m_sockfd, IPPROTO_TCP, TCP_NODELAY, (void *) &yes, sizeof(yes));
+            //             addfd(epfd, incomingSocket, true);
+            //             onNewSocket(incomingSocket, getPortFormAddr(&incomingAddress, incomingAddressLength));
+            //         }
+            //         else
+            //         {
+            //             LOGE("accept failed");
+            //         }
+            //     }
+            //     //TODO:处理客户端的进一步输入
+            //     else
+            //     {
+            //     }
+            // }
         }
     }
     close(m_sockfd);
 }
 
 
-void SimpleServer::serverThreadStub(void *arg)
+void SimpleServer::networkpollerStub(void *arg)
 {
     SimpleServer *This = reinterpret_cast<SimpleServer *>(arg);
 
-    TCP_DEBUG_PRINT("server:    in serverThreadStub (arg=%p)\n", arg);
+    LOGI(TAG, "in networkpollerStub (arg=%p)", arg);
     if (This != NULL)
     {
-        This->serverThread();
+        This->networkpollerThread();
     }
 }
 
 erpc_status_t SimpleServer::open(void)
 {
     erpc_status_t status;
+    m_serverThread.setName("Network Poller");
     m_runServer = true;
-    TCP_DEBUG_PRINT("server:    start running serverThread\n");
     m_serverThread.start(this);
+    LOGI(TAG, "start running networkpollerThread");
     status = kErpcStatus_Success;
     return status;
 }
