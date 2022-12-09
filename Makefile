@@ -1,5 +1,7 @@
 #-------------------------------------------------------------------------------
-# Copyright (C) 2014-2016 Freescale Semiconductor
+# Copyright (C) 2016 Freescale Semiconductor, Inc.
+# Copyright 2016-2020 NXP
+# All rights reserved.
 #
 # THIS SOFTWARE IS PROVIDED BY FREESCALE "AS IS" AND ANY EXPRESS OR IMPLIED
 # WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -13,52 +15,70 @@
 # OF SUCH DAMAGE.
 #-------------------------------------------------------------------------------
 
-#
-# Top-level Makefile.
-#
-# This file is responsible for building all libraries and applications.
-#
+.NOTPARALLEL:
 
-include mk/erpc_common.mk
+this_makefile := $(firstword $(MAKEFILE_LIST))
+ERPC_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))../)
 
-# Turn off parallel jobs for this makefile only. Child makefiles will still use the
-# specified number of jobs. This isn't strictly necessary, and actually slows the build
-# a little bit, but greatly improves the readability of the log output.
-#.NOTPARALLEL:
+include $(ERPC_ROOT)/mk/erpc_common.mk
 
-ifeq "$(is_linux)" "1"
-ERPCSNIFFER = erpcsniffer
-endif
+ERPC_C_ROOT = $(ERPC_ROOT)/erpc_c
+
+# TARGET_OUTPUT_ROOT = $(OUTPUT_ROOT)/$(DEBUG_OR_RELEASE)/$(os_name)/$(APP_NAME)
+
+#-----------------------------------------------
+# setup variables
+# ----------------------------------------------
+
+LIB_NAME = erpc
+
+TARGET_OUTPUT_ROOT = $(OUTPUT_ROOT)/$(DEBUG_OR_RELEASE)/$(os_name)/$(LIB_NAME)
+
+TARGET_LIB = $(LIBS_ROOT)/lib$(LIB_NAME).a
+
+OBJS_ROOT = $(TARGET_OUTPUT_ROOT)/obj
+
+LIBS_ROOT = $(TARGET_OUTPUT_ROOT)/lib
+
+#-----------------------------------------------
+# Include path. Add the include paths like this:
+# INCLUDES += ./include/
+#-----------------------------------------------
+INCLUDES += $(ERPC_C_ROOT)/infra \
+			$(ERPC_C_ROOT)/infra/codec \
+			$(ERPC_C_ROOT)/infra/client \
+			$(ERPC_C_ROOT)/infra/server \
+			$(ERPC_C_ROOT)/infra/transport \
+			$(ERPC_C_ROOT)/port \
+
+			
+
+SOURCES += 	$(ERPC_C_ROOT)/infra/codec/erpc_basic_codec.cpp \
+			$(ERPC_C_ROOT)/infra/codec/erpc_message_buffer.cpp \
+			\
+			$(ERPC_C_ROOT)/infra/client/client.cpp \
+			\
+			$(ERPC_C_ROOT)/infra/server/erpc_server.cpp \
+			$(ERPC_C_ROOT)/infra/server/erpc_simple_server.cpp \
+			$(ERPC_C_ROOT)/infra/server/server_worker.cpp\
+			\
+			$(ERPC_C_ROOT)/infra/transport/erpc_framed_transport.cpp \
+			$(ERPC_C_ROOT)/infra/transport/tcp_worker.cpp\
+			$(ERPC_C_ROOT)/infra/client_server_common.cpp \
+			\
+			$(ERPC_C_ROOT)/port/erpc_port_stdlib.cpp \
+			$(ERPC_C_ROOT)/port/erpc_threading_pthreads.cpp \
 
 
-# Default target.
-.PHONY: default
-default: refresh 
+MAKE_TARGET = $(TARGET_LIB)($(OBJECTS_ALL))
 
-.PHONY: erpc
-erpc:
-	@$(MAKE) $(silent_make) -j$(MAKETHREADS) -r -C erpc_c
+include $(ERPC_ROOT)/mk/targets.mk
 
-.PHONY: example
-example: erpc
-	@$(MAKE) $(silent_make) -j$(MAKETHREADS) -r -C example
+$(TARGET_LIB)(%): %
+	@$(call printmessage,ar,Archiving, $(?F) in $(@F))
+	$(at)mkdir -p $(dir $(@))
+	$(AR) $(ARFLAGS) $@ $?
 
-# Force rebuild
-.PHONY: refresh
-refresh: clean erpc example
 
-# Target to clean everything.
-.PHONY: clean
 clean::
-	@echo "Deleting output directories..."
-	@rm -rf Debug Release
-	@rm -rf out*.*
-	@rm -rf erpc_outputs
-	@echo "done."
-
-# Process subdirs
-include $(ERPC_ROOT)/mk/subdirs.mk
-
-.PHONY: os_name
-os_name:
-	@echo $(os_name)
+	$(at)rm -rf $(OBJS_ROOT)/*.cpp $(OBJS_ROOT)/*.hpp $(OBJS_ROOT)/*.c
