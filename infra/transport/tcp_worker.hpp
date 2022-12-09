@@ -14,7 +14,7 @@ namespace erpc {
             m_socket(sockfd),
             m_port(port)
         {}
-        virtual ~TCPWorker(void);
+        ~TCPWorker() override;
         erpc_status_t underlyingReceive(uint8_t *data, uint32_t size);
         erpc_status_t underlyingSend(const uint8_t *data, uint32_t size);
         int m_socket;

@@ -13,16 +13,16 @@ namespace erpc
          *
          * This function initializes object attributes.
          */
-        Service(uint32_t serviceId)
+        explicit Service(uint32_t serviceId)
             : m_serviceId(serviceId)
-            , m_next(NULL)
+            , m_next(nullptr)
         {
         }
 
         /*!
          * @brief Service destructor
          */
-        virtual ~Service(void) {}
+        virtual ~Service() = default;
 
         /*!
          * @brief Return service id number.

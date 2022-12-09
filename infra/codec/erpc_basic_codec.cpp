@@ -41,7 +41,7 @@ void BasicCodec::writeData(const void *value, uint32_t length)
 void BasicCodec::write(bool value)
 {
     // Make sure the bool is a single byte.
-    uint8_t v = (uint8_t) value;
+    auto v = (uint8_t) value;
 
     writeData(&v, sizeof(v));
 }
@@ -114,7 +114,7 @@ void BasicCodec::write(double value)
 
 void BasicCodec::writePtr(uintptr_t value)
 {
-    uint8_t ptrSize = (uint8_t) sizeof(value);
+    auto ptrSize = (uint8_t) sizeof(value);
 
     write(ptrSize);
 
@@ -316,7 +316,7 @@ void BasicCodec::readBinary(uint32_t *length, uint8_t **value)
     }
     if (!isStatusOk()) {
         *length = 0;
-        *value = NULL;
+        *value = nullptr;
     }
 }
 
@@ -359,7 +359,7 @@ void BasicCodec::readCallback(arrayOfFunPtr callbacks, uint8_t callbacksCount, f
             *callback = callbacks[_tmp_local];
         }
         else {
-            *callback = NULL;
+            *callback = nullptr;
             m_status = kErpcStatus_UnknownCallback;
         }
     }
@@ -371,7 +371,7 @@ void BasicCodec::readCallback(funPtr callbacks1, funPtr *callback2)
     *callback2 = callbacks1;
 }
 
-Codec *BasicCodecFactory::create(void)
+Codec *BasicCodecFactory::create()
 {
     return new BasicCodec();
 }

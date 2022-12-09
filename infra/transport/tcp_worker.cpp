@@ -73,7 +73,7 @@ erpc_status_t TCPWorker::underlyingSend(const uint8_t *data, uint32_t size)
             }
             else
             {
-                if (result == EPIPE)
+                if (errno == EPIPE)
                 {
                     // close socket, not server
                     close(false);

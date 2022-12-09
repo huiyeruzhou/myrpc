@@ -65,7 +65,7 @@ public:
     /*!
      * @brief Client destructor
      */
-    virtual ~Client(void);
+    virtual ~Client();
 
     /*!
      * @brief This function creates request context.
@@ -111,7 +111,7 @@ public:
 * @retval kErpcStatus_Success When client connected successfully.
 * @retval kErpcStatus_Fail When client doesn't connected successfully.
 */
-    virtual erpc_status_t open(void);
+    virtual erpc_status_t open();
 
 protected:
     uint32_t m_sequence;                    //!< Sequence number.
@@ -138,7 +138,7 @@ protected:
      *
      * @return Pointer to created codec with message buffer.
      */
-    Codec *createBufferAndCodec(void);
+    Codec *createBufferAndCodec();
 
 
 private:
@@ -175,21 +175,21 @@ public:
      *
      * @return Inout codec.
      */
-    Codec *getCodec(void) { return m_codec; }
+    Codec *getCodec() { return m_codec; }
 
     /*!
      * @brief Get sequence number (be sure that reply belong to current request).
      *
      * @return Sequence number.
      */
-    uint32_t getSequence(void) const { return m_sequence; }
+    [[nodiscard]] uint32_t getSequence() const { return m_sequence; }
 
     /*!
      * @brief Returns information if request context is oneway or not.
      *
      * @retval True when request context is oneway direction, else false.
      */
-    bool isOneway(void) const { return m_oneway; }
+    [[nodiscard]] bool isOneway() const { return m_oneway; }
 
     /*!
      * @brief Set request context to be oneway type (only send data).

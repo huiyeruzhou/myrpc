@@ -15,9 +15,9 @@ namespace erpc
         ServerWorker(Service *services, MessageBufferFactory *messageFactory,
             CodecFactory *codecFactory,
             TCPWorker *worker);
-        ~ServerWorker(){}
+        ~ServerWorker()= default;
         void disposeBufferAndCodec(Codec *codec);
-        erpc_status_t runInternal(void);
+        erpc_status_t runInternal();
         erpc_status_t runInternalBegin(Codec **codec, MessageBuffer &buff, message_type_t &msgType,
             uint32_t &serviceId, uint32_t &methodId, uint32_t &sequence);
         erpc_status_t runInternalEnd(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId,
@@ -28,10 +28,10 @@ namespace erpc
             uint32_t &sequence);
         
         static void workerStub(void *arg);
-        void start(void);
+        void start();
     private:
         Thread m_workerThread;
-        char TAG[CONFIG_MAX_TASK_NAME_LEN];
+        char TAG[CONFIG_MAX_TASK_NAME_LEN]{};
         Service *m_firstService;
         MessageBufferFactory *m_messageFactory; //!< Message buffer factory to use.
         CodecFactory *m_codecFactory;           //!< Codec to use.

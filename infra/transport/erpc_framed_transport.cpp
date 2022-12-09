@@ -30,12 +30,12 @@ FramedTransport::FramedTransport(void)
 {
 }
 
-FramedTransport::~FramedTransport(void) {}
+FramedTransport::~FramedTransport(void) = default;
 
 
 erpc_status_t FramedTransport::receive(MessageBuffer *message)
 {
-    Header h;
+    Header h{};
     erpc_status_t retVal;
 
     {
@@ -85,7 +85,7 @@ erpc_status_t FramedTransport::send(MessageBuffer *message)
 {
     erpc_status_t ret;
     uint16_t messageLength;
-    Header h;
+    Header h{};
 
 #if !ERPC_THREADS_IS(NONE)
     Mutex::Guard lock(m_sendLock);

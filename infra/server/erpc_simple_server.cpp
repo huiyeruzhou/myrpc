@@ -39,7 +39,7 @@ SimpleServer::SimpleServer(const char *host, uint16_t port, MessageBufferFactory
     , m_serverThread(SimpleServer::networkpollerStub)
     , m_runServer(false)
 {
-    BasicCodecFactory *codecFactory = new BasicCodecFactory();
+    auto *codecFactory = new BasicCodecFactory();
 
     // Init server with the provided transport.
     this->setCodecFactory(codecFactory);
@@ -52,10 +52,10 @@ SimpleServer::~SimpleServer()
     delete m_codecFactory;
 }
 
-erpc_status_t SimpleServer::run(void)
+erpc_status_t SimpleServer::run()
 {
     erpc_status_t err = kErpcStatus_Success;
-    while ((err == kErpcStatus_Success) && m_isServerOn)
+    while (m_isServerOn)
     {
         // Sleep 10 ms.
          Thread::sleep(10000);
@@ -86,14 +86,14 @@ erpc_status_t SimpleServer::run(void)
 //     return err;
 // }
 
-void SimpleServer::stop(void)
+void SimpleServer::stop()
 {
     m_isServerOn = false;
 }
 
 void SimpleServer::onNewSocket(int sockfd, int port) {
-    TCPWorker *transport_worker = new TCPWorker(sockfd, port);
-    ServerWorker *worker = new ServerWorker(m_firstService, m_messageFactory, m_codecFactory, transport_worker);
+    auto *transport_worker = new TCPWorker(sockfd, port);
+    auto *worker = new ServerWorker(m_firstService, m_messageFactory, m_codecFactory, transport_worker);
     worker->start();
 }
 
@@ -115,7 +115,7 @@ erpc_status_t SimpleServer::close(bool stopServer)
 
 
 
-void SimpleServer::networkpollerThread(void)
+void SimpleServer::networkpollerThread()
 {
     int yes = 1;
     int result;
@@ -265,16 +265,16 @@ void SimpleServer::networkpollerThread(void)
 
 void SimpleServer::networkpollerStub(void *arg)
 {
-    SimpleServer *This = reinterpret_cast<SimpleServer *>(arg);
+    auto *This = reinterpret_cast<SimpleServer *>(arg);
 
     LOGI(TAG, "in networkpollerStub (arg=%p)", arg);
-    if (This != NULL)
+    if (This != nullptr)
     {
         This->networkpollerThread();
     }
 }
 
-erpc_status_t SimpleServer::open(void)
+erpc_status_t SimpleServer::open()
 {
     erpc_status_t status;
     m_serverThread.setName("Network Poller");

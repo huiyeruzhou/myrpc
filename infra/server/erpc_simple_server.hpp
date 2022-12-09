@@ -46,7 +46,7 @@ public:
      */
     SimpleServer(const char *host, uint16_t port, MessageBufferFactory *message_buffer_factory);
 
-    ~SimpleServer();
+    ~SimpleServer() override;
     /*!
      * @brief Run server in infinite loop.
      *
@@ -96,7 +96,6 @@ public:
     bool  m_isServerOn; /*!< Information if server is ON or OFF. */
     Thread m_serverThread; /*!< Pointer to server thread. */
     bool m_runServer;      /*!< Thread is executed while this is true. */
-    bool m_isServer;       /*!< If true then server is using transport, else client. */
 
 protected:
     /*!

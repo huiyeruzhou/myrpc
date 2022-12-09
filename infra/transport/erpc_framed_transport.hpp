@@ -62,7 +62,7 @@ public:
     /*!
      * @brief FramedTransport destructor
      */
-    virtual ~FramedTransport(void);
+    ~FramedTransport(void) override;
 
     /*!
      * @brief Receives an entire message.

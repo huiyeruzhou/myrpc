@@ -16,14 +16,11 @@ using namespace erpc;
 // Code
 ////////////////////////////////////////////////////////////////////////////////
 
-#if ERPC_NESTED_CALLS_DETECTION
-extern bool nestingDetection;
-bool nestingDetection = false;
-#endif
 
 void Server::addService(Service *service)
 {
-    if (m_firstService == NULL)
+//    if(service == NULL)
+    if (m_firstService == nullptr)
     {
         m_firstService = service;
     }
@@ -31,7 +28,7 @@ void Server::addService(Service *service)
     {
 
         Service *link = m_firstService;
-        while (link->getNext() != NULL)
+        while (link->getNext() != nullptr)
         {
             link = link->getNext();
         }
@@ -50,7 +47,7 @@ void Server::removeService(Service *service)
     }
     else
     {
-        while (link != NULL)
+        while (link != nullptr)
         {
             if (link->getNext() == service)
             {

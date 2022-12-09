@@ -13,7 +13,6 @@
 #if CONFIG_HAS_FREERTOS
 
 #include <cstdlib>
-#include <new>
 
 using namespace std;
 

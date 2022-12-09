@@ -47,7 +47,7 @@ public:
      */
     Server(const char *host, uint16_t port)
     : ClientServerCommon(host, port)
-    , m_firstService(NULL)
+    , m_firstService(nullptr)
     {
     }
 

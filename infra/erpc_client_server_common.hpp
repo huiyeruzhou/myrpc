@@ -31,8 +31,8 @@ extern "C" {
 #endif
 #define TCP_TRANSPORT_DEBUG_LOG (1)
 #if TCP_TRANSPORT_DEBUG_LOG
-char* print_net_info(const sockaddr *__sockaddr, int __len);
-int getPortFormAddr(const sockaddr * __sockaddr, int __len);
+char* print_net_info(const sockaddr *_sockaddr, int _len);
+int getPortFormAddr(const sockaddr * _sockaddr, int _len);
 #else
 #define LOGE
 #define LOGI
@@ -68,12 +68,12 @@ public:
      */
     ClientServerCommon(const char *host, uint16_t port):
         m_host(host), m_port(port),m_sockfd(-1),
-        m_messageFactory(NULL), m_codecFactory(NULL), m_transport(NULL) {};
+        m_messageFactory(nullptr), m_codecFactory(nullptr), m_transport(nullptr) {};
 
     /*!
      * @brief ClientServerCommon destructor
      */
-    ~ClientServerCommon(void){};
+    ~ClientServerCommon(void)= default;
 
     /*!
      * @brief This function sets message buffer factory to use.

@@ -18,9 +18,9 @@ ServerWorker::ServerWorker(Service *services, MessageBufferFactory *messageFacto
 
 void ServerWorker::disposeBufferAndCodec(Codec *codec)
 {
-    if (codec != NULL)
+    if (codec != nullptr)
     {
-        if (codec->getBuffer() != NULL)
+        if (codec->getBuffer() != nullptr)
         {
             m_messageFactory->dispose(codec->getBuffer());
         }
@@ -28,10 +28,10 @@ void ServerWorker::disposeBufferAndCodec(Codec *codec)
     }
 }
 
-erpc_status_t ServerWorker::runInternal(void)
+erpc_status_t ServerWorker::runInternal()
 {
     MessageBuffer buff;
-    Codec *codec = NULL;
+    Codec *codec = nullptr;
 
     // Handle the request.
     message_type_t msgType;
@@ -57,7 +57,7 @@ erpc_status_t ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff,
     if (m_messageFactory->createServerBuffer() == true)
     {
         buff = m_messageFactory->create();
-        if (NULL == buff.get())
+        if (nullptr == buff.get())
         {
             err = kErpcStatus_MemoryError;
         }
@@ -73,7 +73,7 @@ erpc_status_t ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff,
     if (err == kErpcStatus_Success)
     {
         *codec = m_codecFactory->create();
-        if (*codec == NULL)
+        if (*codec == nullptr)
         {
             err = kErpcStatus_MemoryError;
         }
@@ -83,7 +83,7 @@ erpc_status_t ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff,
     if (err != kErpcStatus_Success)
     {
         // Dispose of buffers.
-        if (buff.get() != NULL)
+        if (buff.get() != nullptr)
         {
             m_messageFactory->dispose(&buff);
         }
@@ -155,7 +155,7 @@ erpc_status_t ServerWorker::processMessage(Codec *codec, message_type_t msgType,
     if (err == kErpcStatus_Success)
     {
         service = findServiceWithId(serviceId);
-        if (service == NULL)
+        if (service == nullptr)
         {
             err = kErpcStatus_InvalidArgument;
         }
@@ -178,7 +178,7 @@ erpc_status_t ServerWorker::processMessage(Codec *codec, message_type_t msgType,
 Service *ServerWorker::findServiceWithId(uint32_t serviceId)
 {
     Service *service = m_firstService;
-    while (service != NULL)
+    while (service != nullptr)
     {
         if (service->getServiceId() == serviceId)
         {
@@ -194,9 +194,9 @@ Service *ServerWorker::findServiceWithId(uint32_t serviceId)
 void ServerWorker::workerStub(void *arg)
 {
     int err = kErpcStatus_Fail;
-    ServerWorker *This = reinterpret_cast<ServerWorker *>(arg);
+    auto *This = reinterpret_cast<ServerWorker *>(arg);
     LOGI(This->TAG, "in stub");
-    if (This != NULL)
+    if (This != nullptr)
     {
         int i = 1;
         while (err != kErpcStatus_Success && i <= 5)
@@ -207,10 +207,9 @@ void ServerWorker::workerStub(void *arg)
         close(This->m_worker->m_socket);
     }
     LOGI(This->TAG, "work done\n");
-    return;
 }
 
-void ServerWorker::start(void)
+void ServerWorker::start()
 {
     m_workerThread.start(this);
 }

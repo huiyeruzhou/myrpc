@@ -67,7 +67,7 @@ public:
      *
      * @param[in] name Optional name for the thread.
      */
-    Thread(const char *name = 0);
+    explicit Thread(const char *name = nullptr);
 
     /*!
      * @brief Constructor.
@@ -80,7 +80,7 @@ public:
      * @param[in] name Optional name for the thread.
      * @param[in] stackPtr Mandatory task stack pointer for static api usage.
      */
-    Thread(thread_entry_t entry, uint32_t priority = 0, uint32_t stackSize = 2048, const char *name = "");
+    explicit Thread(thread_entry_t entry, uint32_t priority = 0, uint32_t stackSize = 2048, const char *name = "");
 
     /*!
      * @brief Destructor.
@@ -115,7 +115,7 @@ public:
      *
      * @param[in] arg Function argument.
      */
-    void start(void *arg = 0);
+    void start(void *arg = nullptr);
 
     /*!
      * @brief This function puts thread to sleep.
@@ -193,7 +193,6 @@ private:
     pthread_t m_thread;                     /*!< Current thread. */
 #elif ERPC_THREADS_IS(FREERTOS)
     TaskHandle_t m_task;       /*!< Current task. */
-    Thread *m_next;            /*!< Pointer to next Thread. */
 #endif
 
 #if ERPC_THREADS_IS(PTHREADS)

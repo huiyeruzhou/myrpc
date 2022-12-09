@@ -175,7 +175,7 @@
         // Default to pthreads for POSIX systems.
         #define ERPC_THREADS (ERPC_THREADS_PTHREADS)
     #elif CONFIG_HAS_FREERTOS
-        // Use FreeRTOS if we can auto detect it.
+        // Use FreeRTOS if we can autodetect it.
         #define ERPC_THREADS (ERPC_THREADS_FREERTOS)
     #endif
 #endif
@@ -208,11 +208,9 @@
     #define THROW_BADALLOC throw(std::bad_alloc)
     #define THROW throw()
 #else
-    #define THROW_BADALLOC
-    #define THROW
+    #define THROW_BADALLOC throw(std::bad_alloc)
+    #define THROW throw()
 #endif
-
-#define ERPC_TRANSPORT_MU_USE_MCMGR (ERPC_TRANSPORT_MU_USE_MCMGR_DISABLED)
 
 
 #ifndef erpc_assert

@@ -34,7 +34,7 @@ __attribute__((unused)) const static char *TAG = "client";
 Client::Client(const char *host, uint16_t port, MessageBufferFactory *messageFactory)
     : ClientServerCommon(host, port)
     , m_sequence(0)
-    , m_errorHandler(NULL)
+    , m_errorHandler(nullptr)
 {
     BasicCodecFactory *codecFactory;
 
@@ -48,7 +48,7 @@ Client::Client(const char *host, uint16_t port, MessageBufferFactory *messageFac
 /*!
  * @brief Client destructor
  */
-Client::~Client(void)
+Client::~Client()
 {
     delete this->m_messageFactory;
     delete this->m_transport;
@@ -58,7 +58,7 @@ RequestContext Client::createRequest(bool isOneway)
     // Create codec to read and write the request.
     Codec *codec = createBufferAndCodec();
 
-    return RequestContext(++m_sequence, codec, isOneway);
+    return {++m_sequence, codec, isOneway};
 }
 
 void Client::performRequest(RequestContext &request)
@@ -79,7 +79,7 @@ void Client::performClientRequest(RequestContext &request)
     erpc_status_t err;
 
     // Send invocation request to server.
-    if (request.getCodec()->isStatusOk() == true)
+    if (request.getCodec()->isStatusOk())
     {
         err = m_transport->send(request.getCodec()->getBuffer());
         request.getCodec()->updateStatus(err);
@@ -88,7 +88,7 @@ void Client::performClientRequest(RequestContext &request)
     // If the request is oneway, then there is nothing more to do.
     if (!request.isOneway())
     {
-        if (request.getCodec()->isStatusOk() == true)
+        if (request.getCodec()->isStatusOk())
         {
             // Receive reply.
             err = m_transport->receive(request.getCodec()->getBuffer());
@@ -96,7 +96,7 @@ void Client::performClientRequest(RequestContext &request)
         }
 
         // Check the reply.
-        if (request.getCodec()->isStatusOk() == true)
+        if (request.getCodec()->isStatusOk())
         {
             verifyReply(request);
         }
@@ -118,7 +118,7 @@ void Client::verifyReply(RequestContext &request)
     // Extract the reply header.
     request.getCodec()->startReadMessage(&msgType, &service, &requestNumber, &sequence);
 
-    if (request.getCodec()->isStatusOk() == true)
+    if (request.getCodec()->isStatusOk())
     {
         // Verify that this is a reply to the request we just sent.
         if ((msgType != kReplyMessage) || (sequence != request.getSequence()))
@@ -128,15 +128,15 @@ void Client::verifyReply(RequestContext &request)
     }
 }
 
-Codec *Client::createBufferAndCodec(void)
+Codec *Client::createBufferAndCodec()
 {
     Codec *codec = m_codecFactory->create();
     MessageBuffer message;
 
-    if (codec != NULL)
+    if (codec != nullptr)
     {
         message = m_messageFactory->create();
-        if (NULL != message.get())
+        if (nullptr != message.get())
         {
             codec->setBuffer(message);
         }
@@ -144,7 +144,7 @@ Codec *Client::createBufferAndCodec(void)
         {
             // Dispose of buffers and codecs.
             m_codecFactory->dispose(codec);
-            codec = NULL;
+            codec = nullptr;
         }
     }
 
@@ -153,7 +153,7 @@ Codec *Client::createBufferAndCodec(void)
 
 void Client::releaseRequest(RequestContext &request)
 {
-    if (request.getCodec() != NULL)
+    if (request.getCodec() != nullptr)
     {
         m_messageFactory->dispose(request.getCodec()->getBuffer());
         m_codecFactory->dispose(request.getCodec());
@@ -162,13 +162,13 @@ void Client::releaseRequest(RequestContext &request)
 
 void Client::callErrorHandler(erpc_status_t err, uint32_t functionID)
 {
-    if (m_errorHandler != NULL)
+    if (m_errorHandler != nullptr)
     {
         m_errorHandler(err, functionID);
     }
 }
 
-erpc_status_t Client::open(void)
+erpc_status_t Client::open()
 {
     erpc_status_t status = kErpcStatus_Success;
     struct addrinfo hints = {};

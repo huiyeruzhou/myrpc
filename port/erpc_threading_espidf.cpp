@@ -31,7 +31,6 @@ Thread::Thread(const char *name)
     , m_stackSize(0)
     , m_priority(0)
     , m_task(0)
-    , m_next(0)
 {
     strncpy(m_name, name, CONFIG_MAX_TASK_NAME_LEN);
 }
@@ -42,7 +41,6 @@ Thread::Thread(thread_entry_t entry, uint32_t priority, uint32_t stackSize, cons
     , m_stackSize(stackSize)
     , m_priority(priority)
     , m_task(0)
-    , m_next(0)
 {
     strncpy(m_name, name, CONFIG_MAX_TASK_NAME_LEN);
 }

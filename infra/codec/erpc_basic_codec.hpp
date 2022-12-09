@@ -43,7 +43,7 @@ class BasicCodec : public Codec
 public:
     static const uint32_t kBasicCodecVersion; /*!< Codec version. */
 
-    BasicCodec(void)
+    BasicCodec()
     : Codec()
     {
     }
@@ -383,7 +383,7 @@ public:
      *
      * @return Pointer to created codec.
      */
-    virtual Codec *create(void) override;
+    virtual Codec *create() override;
 
     /*!
      * @brief Dispose codec.

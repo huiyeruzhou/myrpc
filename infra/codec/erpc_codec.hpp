@@ -67,7 +67,7 @@ public:
     /*!
      * @brief Codec destructor
      */
-    virtual ~Codec(void) {}
+    virtual ~Codec(void) = default;
 
     /*!
      * @brief Return message buffer used for read and write data.
@@ -443,12 +443,12 @@ public:
     /*!
      * @brief Constructor.
      */
-    CodecFactory(void) {}
+    CodecFactory(void) = default;
 
     /*!
      * @brief CodecFactory destructor
      */
-    virtual ~CodecFactory(void) {}
+    virtual ~CodecFactory(void) = default;
 
     /*!
      * @brief Return created codec.

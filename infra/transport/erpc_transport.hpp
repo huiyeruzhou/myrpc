@@ -37,12 +37,12 @@ public:
     /*!
      * @brief Constructor.
      */
-    Transport(void) {}
+    Transport() = default;
 
     /*!
      * @brief Transport destructor
      */
-    virtual ~Transport(void) {}
+    virtual ~Transport() = default;
 
     /*!
      * @brief Prototype for receiving message.
@@ -75,7 +75,7 @@ public:
      *
      * @retval True when a message is available to process, else false.
      */
-    virtual bool hasMessage(void) { return true; }
+    virtual bool hasMessage() { return true; }
 };
 
 /*!
@@ -89,17 +89,17 @@ public:
     /*!
      * @brief Constructor.
      */
-    TransportFactory(void) {}
+    TransportFactory() = default;
     /*!
      * @brief TransportFactory destructor
      */
-    virtual ~TransportFactory(void) {}
+    virtual ~TransportFactory() = default;
     /*!
      * @brief Return created transport object.
      *
      * @return Pointer to created transport object.
      */
-    virtual Transport *create(void) = 0;
+    virtual Transport *create() = 0;
 };
 
 } // namespace erpc

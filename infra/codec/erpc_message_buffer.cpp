@@ -31,7 +31,7 @@ erpc_status_t MessageBuffer::read(uint16_t offset, void *data, uint32_t length)
 
     if (length > 0U)
     {
-        if (data == NULL)
+        if (data == nullptr)
         {
             err = kErpcStatus_MemoryError;
         }
@@ -54,7 +54,7 @@ erpc_status_t MessageBuffer::write(uint16_t offset, const void *data, uint32_t l
 
     if (length > 0U)
     {
-        if (data == NULL)
+        if (data == nullptr)
         {
             err = kErpcStatus_MemoryError;
         }
@@ -75,7 +75,7 @@ erpc_status_t MessageBuffer::copy(const MessageBuffer *other)
 {
     erpc_status_t err;
 
-    erpc_assert(other != NULL);
+    erpc_assert(other != nullptr);
     erpc_assert(m_len >= other->m_len);
 
     m_used = other->m_used;
@@ -86,7 +86,7 @@ erpc_status_t MessageBuffer::copy(const MessageBuffer *other)
 
 void MessageBuffer::swap(MessageBuffer *other)
 {
-    erpc_assert(other != NULL);
+    erpc_assert(other != nullptr);
 
     MessageBuffer temp(*other);
 
@@ -100,7 +100,7 @@ void MessageBuffer::swap(MessageBuffer *other)
 
 void MessageBuffer::Cursor::set(MessageBuffer *buffer)
 {
-    erpc_assert(buffer != NULL);
+    erpc_assert(buffer != nullptr);
 
     m_buffer = buffer;
     // RPMSG when nested calls are enabled can set NULL buffer.
@@ -141,7 +141,7 @@ MessageBuffer::Cursor &MessageBuffer::Cursor::operator-=(uint16_t n)
     return *this;
 }
 
-MessageBuffer::Cursor &MessageBuffer::Cursor::operator++(void)
+MessageBuffer::Cursor &MessageBuffer::Cursor::operator++()
 {
     erpc_assert((uint16_t)(m_pos - m_buffer->get()) < m_buffer->getLength());
 
@@ -150,7 +150,7 @@ MessageBuffer::Cursor &MessageBuffer::Cursor::operator++(void)
     return *this;
 }
 
-MessageBuffer::Cursor &MessageBuffer::Cursor::operator--(void)
+MessageBuffer::Cursor &MessageBuffer::Cursor::operator--()
 {
     erpc_assert(m_pos > m_buffer->get());
 
@@ -161,13 +161,13 @@ MessageBuffer::Cursor &MessageBuffer::Cursor::operator--(void)
 
 erpc_status_t MessageBuffer::Cursor::read(void *data, uint32_t length)
 {
-    erpc_assert((m_pos != NULL) && ("Data buffer wasn't set to MessageBuffer." != NULL));
+    erpc_assert((m_pos != nullptr) && ("Data buffer wasn't set to MessageBuffer." != nullptr));
 
     erpc_status_t err = kErpcStatus_Success;
 
     if (length > 0U)
     {
-        if (data == NULL)
+        if (data == nullptr)
         {
             err = kErpcStatus_MemoryError;
         }
@@ -191,14 +191,14 @@ erpc_status_t MessageBuffer::Cursor::read(void *data, uint32_t length)
 
 erpc_status_t MessageBuffer::Cursor::write(const void *data, uint32_t length)
 {
-    erpc_assert((m_pos != NULL) && ("Data buffer wasn't set to MessageBuffer." != NULL));
+    erpc_assert((m_pos != nullptr) && ("Data buffer wasn't set to MessageBuffer." != nullptr));
     erpc_assert(m_pos == (m_buffer->get() + m_buffer->getUsed()));
 
     erpc_status_t err = kErpcStatus_Success;
 
     if (length > 0U)
     {
-        if (data == NULL)
+        if (data == nullptr)
         {
             err = kErpcStatus_MemoryError;
         }
@@ -222,15 +222,15 @@ erpc_status_t MessageBufferFactory::prepareServerBufferForSend(MessageBuffer *me
     message->setUsed(0);
     return kErpcStatus_Success;
 }
-MessageBuffer MessageBufferFactory::create(void)
+MessageBuffer MessageBufferFactory::create()
 {
-    uint8_t *buf = new (nothrow) uint8_t[ERPC_DEFAULT_BUFFER_SIZE];
+    auto *buf = new (nothrow) uint8_t[ERPC_DEFAULT_BUFFER_SIZE];
     return MessageBuffer(buf, ERPC_DEFAULT_BUFFER_SIZE);
 }
 void MessageBufferFactory::dispose(MessageBuffer *buf)
     {
-        erpc_assert(buf != NULL);
-        if (buf->get() != NULL)
+        erpc_assert(buf != nullptr);
+        if (buf->get() != nullptr)
         {
             delete[] buf->get();
         }

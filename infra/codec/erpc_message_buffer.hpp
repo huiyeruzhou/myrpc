@@ -44,8 +44,8 @@ public:
      *
      * This function initializes object attributes.
      */
-    MessageBuffer(void)
-    : m_buf(NULL)
+    MessageBuffer()
+    : m_buf(nullptr)
     , m_len(0)
     , m_used(0)
     {
@@ -86,7 +86,7 @@ public:
      *
      * @return Pointer to buffer to read/write.
      */
-    uint8_t *get(void) { return m_buf; }
+    uint8_t *get() { return m_buf; }
 
     /*!
      * @brief This function returns pointer to buffer to read/write.
@@ -197,8 +197,8 @@ public:
          * This function initializes object attributes.
          */
         Cursor(void)
-        : m_buffer(NULL)
-        , m_pos(NULL)
+        : m_buffer(nullptr)
+        , m_pos(nullptr)
         {
         }
 
@@ -356,12 +356,12 @@ public:
      *
      * This function initializes object attributes.
      */
-    MessageBufferFactory(void) {}
+    MessageBufferFactory(void) = default;
 
     /*!
      * @brief MessageBufferFactory destructor
      */
-    virtual ~MessageBufferFactory(void) {}
+    virtual ~MessageBufferFactory(void) = default;
 
     /*!
      * @brief This function creates new message buffer.
