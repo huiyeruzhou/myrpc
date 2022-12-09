@@ -32,7 +32,6 @@
 
 #define ERPC_ALLOCATION_POLICY_DYNAMIC (0U) //!< Dynamic allocation policy
 
-#define ERPC_THREADS_NONE (0U)     //!< No threads.
 #define ERPC_THREADS_PTHREADS (1U) //!< POSIX pthreads.
 #define ERPC_THREADS_FREERTOS (2U) //!< FreeRTOS.
 
@@ -140,7 +139,7 @@
 #include <new>
 #define ERPC_ALLOCATION_POLICY (ERPC_ALLOCATION_POLICY_DYNAMIC)
 
-#if CONFIG_HAS_FREEROS
+#if CONFIG_HAS_FREERTOS
 #include "esp_log.h"
 #if defined(__cplusplus) && (__cplusplus >  201703L)
 #define LOGE( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_ERROR,   tag, format __VA_OPT__(,) __VA_ARGS__)
