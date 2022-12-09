@@ -66,8 +66,8 @@ SOURCES += 	$(ERPC_C_ROOT)/infra/codec/erpc_basic_codec.cpp \
 			$(ERPC_C_ROOT)/infra/transport/tcp_worker.cpp\
 			$(ERPC_C_ROOT)/infra/client_server_common.cpp \
 			\
-			$(ERPC_C_ROOT)/port/erpc_port_stdlib.cpp \
-			$(ERPC_C_ROOT)/port/erpc_threading_pthreads.cpp \
+			$(ERPC_C_ROOT)/infra/port/erpc_port_stdlib.cpp \
+			$(ERPC_C_ROOT)/infra/port/erpc_threading_pthreads.cpp \
 
 
 MAKE_TARGET = $(TARGET_LIB)($(OBJECTS_ALL))

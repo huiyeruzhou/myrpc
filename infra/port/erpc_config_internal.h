@@ -132,7 +132,7 @@
     #define CONFIG_HAS_FREERTOS (0)
     #if defined(__has_include)
     #if __has_include("FreeRTOSConfig.h")
-    #pragma message("FreeRTOS detected")
+//    #pragma message("FreeRTOS detected")
     #undef CONFIG_HAS_FREERTOS
             #define CONFIG_HAS_FREERTOS (1)
         #endif
@@ -154,9 +154,19 @@
 
 
 #include <new>
-#define ERPC_ALLOCATION_POLICY (ERPC_ALLOCATION_POLICY_DYNAMIC)
-
-#if CONFIG_HAS_FREEROS
+#define color_default     \033[00m
+#define color_bold     \033[01m
+#define color_red     \033[31m
+#define color_green     \033[32m
+#define color_yellow     \033[33m
+#define color_blue     \033[34m
+#define color_magenta     \\033[35m
+#define color_cyan     \033[36m
+#define color_orange     033[38;5;172m
+#define color_light_blue     033[38;5;039m
+#define color_gray     033[38;5;008m
+#define color_purple     033[38;5;097m
+#if CONFIG_HAS_FREERTOS
 #include "esp_log.h"
 #if defined(__cplusplus) && (__cplusplus >  201703L)
 #define LOGE( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_ERROR,   tag, format __VA_OPT__(,) __VA_ARGS__)
@@ -206,21 +216,28 @@ static std::time_t begin = getTimeStamp();
 //     printf("%02d:%02d:%02d.%06ld", info->tm_hour, info->tm_min, info->tm_sec, timep % 1000000);
 //     return tmp;
 // }
-static void getTimeStr()
+static void printTime()
 {
     time_t timep;
     timep = getTimeStamp();
 
-    printf("%ld",timep-begin);
+    printf("(%ld)",timep-begin);
 }
+#define levelcolor(level) color##level
+#define colorE color_red
+#define colorW color_yellow
+#define colorI color_green
+#define colorD
+#define colorV
+#define printLevel(level) printf(level_color(level)##level);
 #define FILENAME basename(__FILE__)
 #define FUNCNAME __func__
 
-#define LOGE( tag, format, arg... ) getTimeStr();printf(" E %s[%s]: ", FILENAME, FUNCNAME);printf(format, ##arg);printf("\n");
-#define LOGW( tag, format, arg... ) getTimeStr();printf(" W %s[%s]: ", FILENAME, FUNCNAME);printf(format, ##arg);printf("\n");
-#define LOGI( tag, format, arg... ) getTimeStr();printf(" I %s[%s]: ", FILENAME, FUNCNAME);printf(format, ##arg);printf("\n");
-#define LOGD( tag, format, arg... ) getTimeStr();printf(" D %s[%s]: ", FILENAME, FUNCNAME);printf(format, ##arg);printf("\n");
-#define LOGV( tag, format, arg... ) getTimeStr();printf(" V %s[%s]: ", FILENAME, FUNCNAME);printf(format, ##arg);printf("\n");
+#define LOGE( tag, format, arg... ) printLevel(E);printTime();printf("%s[%s]: ", FILENAME, FUNCNAME);printf(format, ##arg);printf("\n");
+#define LOGW( tag, format, arg... ) printLevel(W);printTime();printf("%s[%s]: ", FILENAME, FUNCNAME);printf(format, ##arg);printf("\n");
+#define LOGI( tag, format, arg... ) printLevel(I);printTime();printf("%s[%s]: ", FILENAME, FUNCNAME);printf(format, ##arg);printf("\n");
+#define LOGD( tag, format, arg... ) printLevel(D);printTime();printf("%s[%s]: ", FILENAME, FUNCNAME);printf(format, ##arg);printf("\n");
+#define LOGV( tag, format, arg... ) printLevel(V);printTime();printf("%s[%s]: ", FILENAME, FUNCNAME);printf(format, ##arg);printf("\n");
 #endif
 
 // Detect threading model if not already set.

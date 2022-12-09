@@ -10,7 +10,7 @@
 
 #include "erpc_simple_server.hpp"
 using namespace erpc;
-static const char *TAG = "server";
+__attribute__((unused)) static const char *TAG = "server";
 // #define EPOLL_SIZE 1024
 // int setnonblocking(int sockfd)//非阻塞模式设置
 // {
@@ -39,7 +39,6 @@ SimpleServer::SimpleServer(const char *host, uint16_t port, MessageBufferFactory
     , m_serverThread(SimpleServer::networkpollerStub)
     , m_runServer(false)
 {
-    (void *) (TAG);
     BasicCodecFactory *codecFactory = new BasicCodecFactory();
 
     // Init server with the provided transport.

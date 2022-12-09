@@ -21,7 +21,7 @@ extern "C" {
 }
 using namespace erpc;
 
-const static char *TAG = "client";
+__attribute__((unused)) const static char *TAG = "client";
 ////////////////////////////////////////////////////////////////////////////////
 // Code
 ////////////////////////////////////////////////////////////////////////////////
@@ -36,7 +36,6 @@ Client::Client(const char *host, uint16_t port, MessageBufferFactory *messageFac
     , m_sequence(0)
     , m_errorHandler(NULL)
 {
-    (void *) (TAG);
     BasicCodecFactory *codecFactory;
 
     // Init factories.
