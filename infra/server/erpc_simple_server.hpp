@@ -79,7 +79,7 @@ public:
      * @param[in] stopServer Specify is server shall be closed as well (stop listen())
      * @retval #kErpcStatus_Success Always return this.
      */
-    virtual erpc_status_t close(bool stopServer = true);
+    virtual erpc_status_t close();
     
 
 

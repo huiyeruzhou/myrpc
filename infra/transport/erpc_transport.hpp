@@ -65,17 +65,6 @@ public:
      * @return based on send implementation.
      */
     virtual erpc_status_t send(MessageBuffer *message) = 0;
-
-    /*!
-     * @brief Poll for an incoming message.
-     *
-     * This function should return true if are some messages to process by server,
-     * the return value should be tested before calling receive function to avoid
-     * waiting for a new message (receive can be implemented as blocking function).
-     *
-     * @retval True when a message is available to process, else false.
-     */
-    virtual bool hasMessage() { return true; }
 };
 
 /*!

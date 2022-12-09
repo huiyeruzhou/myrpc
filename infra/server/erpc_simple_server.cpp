@@ -97,15 +97,12 @@ void SimpleServer::onNewSocket(int sockfd, int port) {
     worker->start();
 }
 
-erpc_status_t SimpleServer::close(bool stopServer)
+erpc_status_t SimpleServer::close()
 {
-    if (stopServer)
-    {
-        m_runServer = false;
-    }
-
+    m_runServer = false;
     if (m_sockfd != -1)
     {
+//        throw nullptr;
         ::close(m_sockfd);
         m_sockfd = -1;
     }
@@ -259,7 +256,7 @@ void SimpleServer::networkpollerThread()
             // }
         }
     }
-    close(m_sockfd);
+    ::close(m_sockfd);
 }
 
 

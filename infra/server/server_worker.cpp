@@ -12,7 +12,7 @@ ServerWorker::ServerWorker(Service *services, MessageBufferFactory *messageFacto
     , m_codecFactory(codecFactory)
     , m_worker(worker)
 {
-    snprintf(TAG, sizeof(TAG) - 1, "worker %d", m_worker->m_port);
+    snprintf(TAG, sizeof(TAG) - 1, "worker %d", m_worker->getport());
     m_workerThread.setName(TAG);
 }
 
@@ -204,7 +204,7 @@ void ServerWorker::workerStub(void *arg)
             err = This->runInternal();
             i++;
         }
-        close(This->m_worker->m_socket);
+        This->m_worker->close();
     }
     LOGI(This->TAG, "work done\n");
 }

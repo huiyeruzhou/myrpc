@@ -9,7 +9,7 @@
  */
 
 #include "erpc_threading.h"
-#include <errno.h>
+#include <cerrno>
 static const char *TAG = "Thread";
 #if ERPC_THREADS_IS(FREERTOS)
 
@@ -26,26 +26,26 @@ using namespace erpc;
 ////////////////////////////////////////////////////////////////////////////////
 
 Thread::Thread(const char *name)
-    : m_entry(0)
-    , m_arg(0)
+    : m_entry(nullptr)
+    , m_arg(nullptr)
     , m_stackSize(0)
     , m_priority(0)
-    , m_task(0)
+    , m_task(nullptr)
 {
     strncpy(m_name, name, CONFIG_MAX_TASK_NAME_LEN);
 }
 
 Thread::Thread(thread_entry_t entry, uint32_t priority, uint32_t stackSize, const char *name)
     : m_entry(entry)
-    , m_arg(0)
+    , m_arg(nullptr)
     , m_stackSize(stackSize)
     , m_priority(priority)
-    , m_task(0)
+    , m_task(nullptr)
 {
     strncpy(m_name, name, CONFIG_MAX_TASK_NAME_LEN);
 }
 
-Thread::~Thread(void) {}
+Thread::~Thread(void) = default;
 
 void Thread::init(thread_entry_t entry, uint32_t priority, uint32_t stackSize)
 {
@@ -89,9 +89,9 @@ void Thread::sleep(uint32_t usecs)
 #endif
 }
 
-void Thread::threadEntryPoint(void)
+void Thread::threadEntryPoint()
 {
-    if (m_entry != NULL)
+    if (m_entry != nullptr)
     {
         LOGI(TAG, "start running");
         m_entry(m_arg);
@@ -100,8 +100,8 @@ void Thread::threadEntryPoint(void)
 
 void Thread::threadEntryPointStub(void *arg)
 {
-    Thread *_this = reinterpret_cast<Thread *>(arg);
-    erpc_assert((_this != NULL) && ("Reinterpreting 'void *arg' to 'Thread *' failed." != NULL));
+    auto *_this = reinterpret_cast<Thread *>(arg);
+    erpc_assert((_this != nullptr) && ("Reinterpreting 'void *arg' to 'Thread *' failed." != nullptr));
     _this->threadEntryPoint();
 
     // Handle a task returning from its function. Delete or suspend the task, if the API is
@@ -109,8 +109,8 @@ void Thread::threadEntryPointStub(void *arg)
     // is available, the loop sleeps this task the maximum time each cycle. If not, it just
     // yields.
 #if INCLUDE_vTaskDelete
-    _this->m_task = 0;
-    vTaskDelete(NULL);
+    _this->m_task = nullptr;
+    vTaskDelete(nullptr);
 #elif INCLUDE_vTaskSuspend
     vTaskSuspend(NULL);
 #else // INCLUDE_vTaskSuspend
@@ -126,15 +126,9 @@ void Thread::threadEntryPointStub(void *arg)
 }
 
 Mutex::Mutex(void)
-    : m_mutex(0)
+    : m_mutex(nullptr)
 {
-#if ERPC_ALLOCATION_POLICY == ERPC_ALLOCATION_POLICY_STATIC
-    m_mutex = xSemaphoreCreateRecursiveMutexStatic(&m_staticQueue);
-#elif configSUPPORT_DYNAMIC_ALLOCATION
     m_mutex = xSemaphoreCreateRecursiveMutex();
-#else
-#error "Allocation method didn't match"
-#endif
 }
 
 Mutex::~Mutex(void)
@@ -159,7 +153,7 @@ bool Mutex::unlock(void)
 }
 
 Semaphore::Semaphore(int count)
-    : m_sem(0)
+    : m_sem(nullptr)
 {
     m_sem = xSemaphoreCreateCounting(0x7fffffffu, (UBaseType_t) count);
 }

@@ -6,7 +6,7 @@
 #include <stdio.h>
 using namespace erpc;
 
-TCPWorker::~TCPWorker(void) {}
+TCPWorker::~TCPWorker(void) {close();}
 
 erpc_status_t TCPWorker::underlyingReceive(uint8_t *data, uint32_t size)
 {
@@ -35,13 +35,13 @@ erpc_status_t TCPWorker::underlyingReceive(uint8_t *data, uint32_t size)
             if (length == 0)
             {
                 // close socket, not server
-                close(false);
+                close();
                 status = kErpcStatus_ConnectionClosed;
             }
             else
             {
                 status = kErpcStatus_ReceiveFailed;
-                printf("transport:   unknown error from tcp, return value of read is %zu\n", length);
+                printf("transport:   unknown error from tcp, return value of read is %zu, errno=%s", length, strerror(errno));
             }
             break;
         }
@@ -76,7 +76,7 @@ erpc_status_t TCPWorker::underlyingSend(const uint8_t *data, uint32_t size)
                 if (errno == EPIPE)
                 {
                     // close socket, not server
-                    close(false);
+                    close();
                     status = kErpcStatus_ConnectionClosed;
                 }
                 else

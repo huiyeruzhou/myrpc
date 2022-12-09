@@ -180,7 +180,7 @@ protected:
 
 private:
 #if CONFIG_HAS_FREERTOS
-    char m_name[configMAX_TASK_NAME_LEN];//任务名字
+    char m_name[configMAX_TASK_NAME_LEN]{};//任务名字
 #else
     char m_name[CONFIG_MAX_TASK_NAME_LEN];//任务名字
 #endif

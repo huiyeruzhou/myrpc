@@ -102,10 +102,8 @@ public:
 
 protected:
 
-#if !ERPC_THREADS_IS(NONE)
     Mutex m_sendLock;    //!< Mutex protecting send.
     Mutex m_receiveLock; //!< Mutex protecting receive.
-#endif
 
     /*!
      * @brief Subclasses must implement this function to send data.

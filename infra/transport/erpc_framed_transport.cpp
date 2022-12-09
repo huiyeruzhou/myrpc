@@ -37,15 +37,12 @@ erpc_status_t FramedTransport::receive(MessageBuffer *message)
 {
     Header h{};
     erpc_status_t retVal;
-
     {
-#if !ERPC_THREADS_IS(NONE)
+
         Mutex::Guard lock(m_receiveLock);
-#endif
 
         // Receive header first.
         retVal = underlyingReceive((uint8_t *)&h, sizeof(h));
-
         if (retVal == kErpcStatus_Success)
         {
 
@@ -74,6 +71,9 @@ erpc_status_t FramedTransport::receive(MessageBuffer *message)
         }
     }
 
+
+
+
     if (retVal == kErpcStatus_Success) {
         // Receive rest of the message now we know its size.
         message->setUsed(h.m_messageSize);
@@ -87,9 +87,8 @@ erpc_status_t FramedTransport::send(MessageBuffer *message)
     uint16_t messageLength;
     Header h{};
 
-#if !ERPC_THREADS_IS(NONE)
     Mutex::Guard lock(m_sendLock);
-#endif
+
 
     messageLength = message->getUsed();
 
