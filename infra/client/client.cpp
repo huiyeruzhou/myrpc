@@ -224,14 +224,17 @@ erpc_status_t Client::open(void)
                 // Attempt to connect.
                 if (connect(sock, res->ai_addr, res->ai_addrlen) < 0)
                 {
+                    LOGW(TAG, "try to connect for one of socket, but failed");
                     ::close(sock);
                     sock = -1;
                     continue;
                 }
-                // Exit the loop for the first successful connection.
-                
-                LOGI(TAG, "successful connection to %s", print_net_info(res->ai_addr, res->ai_addrlen));
-                break;
+                else
+                {
+                    // Exit the loop for the first successful connection.
+                    LOGI(TAG, "successful connection to %s", print_net_info(res->ai_addr, res->ai_addrlen));
+                    break;
+                }
             }
 
             // Free the result list.
@@ -286,6 +289,10 @@ erpc_status_t Client::open(void)
     if (kErpcStatus_Success == status)
     {
         m_transport = new TCPWorker(m_sockfd, m_port);
+    }
+    else
+    {
+        LOGE(TAG, "connecting failed");
     }
     return status;
 }
