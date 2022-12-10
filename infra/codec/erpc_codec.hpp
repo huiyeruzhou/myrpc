@@ -12,6 +12,7 @@
 #define _EMBEDDED_RPC__CODEC_H_
 
 #include "erpc_status.h"
+#include "erpc_config_internal.h"
 #include "erpc_message_buffer.hpp"
 
 #include <cstring>

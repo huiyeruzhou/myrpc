@@ -15,10 +15,6 @@
 #include "erpc_message_buffer.hpp"
 #include "erpc_transport.hpp"
 
-#if !ERPC_THREADS_IS(NONE)
-#include "erpc_threading.h"
-#endif
-
 /*!
  * @addtogroup infra_transport
  * @{

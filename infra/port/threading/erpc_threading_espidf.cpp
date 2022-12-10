@@ -9,7 +9,6 @@
  */
 
 #include "erpc_threading.h"
-#include <errno.h>
 static const char *TAG = "Thread";
 #if ERPC_THREADS_IS(FREERTOS)
 
@@ -33,7 +32,7 @@ Thread::Thread(const char *name)
     , m_task(0)
     , m_next(0)
 {
-    strncpy(m_name, name, CONFIG_MAX_TASK_NAME_LEN);
+    strncpy(m_name, name, configMAX_TASK_NAME_LEN);
 }
 
 Thread::Thread(thread_entry_t entry, uint32_t priority, uint32_t stackSize, const char *name)
@@ -44,7 +43,7 @@ Thread::Thread(thread_entry_t entry, uint32_t priority, uint32_t stackSize, cons
     , m_task(0)
     , m_next(0)
 {
-    strncpy(m_name, name, CONFIG_MAX_TASK_NAME_LEN);
+    strncpy(m_name, name, configMAX_TASK_NAME_LEN);
 }
 
 Thread::~Thread(void) {}
@@ -67,7 +66,7 @@ void Thread::start(void *arg)
     // higher priority than the current thread, and the new thread calls getCurrenThread(),
     // which will scan the linked list.
 
-    LOGI(TAG, "stacksize = %luB", (configSTACK_DEPTH_TYPE) (m_stackSize));
+    LOGI(TAG, "stacksize = %"  "B", (configSTACK_DEPTH_TYPE) (m_stackSize));
 
     if (pdPASS ==
         xTaskCreate(threadEntryPointStub, (m_name[0] ? m_name : "task"),

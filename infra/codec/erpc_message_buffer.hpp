@@ -11,7 +11,7 @@
 #define _EMBEDDED_RPC__MESSAGE_BUFFER_H_
 
 #include "erpc_status.h"
-
+#include "erpc_config_internal.h"
 #include <cstddef>
 #include <new>
 #include <cstring>

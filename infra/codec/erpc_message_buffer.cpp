@@ -9,7 +9,7 @@
  */
 
 #include "erpc_message_buffer.hpp"
-#include "erpc_config_internal.h"
+
 
 using namespace erpc;
 using namespace std;

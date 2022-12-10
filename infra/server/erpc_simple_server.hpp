@@ -11,12 +11,10 @@
 #ifndef _EMBEDDED_RPC__SIMPLE_SERVER_H_
 #define _EMBEDDED_RPC__SIMPLE_SERVER_H_
 
-#include "erpc_threading.h"
-#include "erpc_basic_codec.hpp"
-#include "erpc_message_buffer.hpp"
-#include "erpc_simple_server.hpp"
-#include "tcp_worker.hpp"
+#include "erpc_config_internal.h"
 #include "erpc_server.hpp"
+#include "erpc_basic_codec.hpp"
+#include "tcp_worker.hpp"
 #include "server_worker.hpp"
 #include <fcntl.h>
 
