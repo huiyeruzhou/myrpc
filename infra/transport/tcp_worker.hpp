@@ -18,7 +18,7 @@ namespace erpc {
         erpc_status_t underlyingReceive(uint8_t *data, uint32_t size);
         erpc_status_t underlyingSend(const uint8_t *data, uint32_t size);
         int m_socket;
-        int m_port;
+        uint16_t m_port;
     };
 }
 #endif//_TCP_WORKER_H_

@@ -6,7 +6,8 @@ set(RPC_INCLUDE infra/
                 infra/client 
                 infra/server 
                 infra/transport
-        infra/port)
+                infra/port)
+
 idf_component_register(SRCS "${RPC_SRC}"
                        INCLUDE_DIRS "${RPC_INCLUDE}"
                        REQUIRES lwip)

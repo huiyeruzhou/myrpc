@@ -12,7 +12,7 @@ ServerWorker::ServerWorker(Service *services, MessageBufferFactory *messageFacto
     , m_codecFactory(codecFactory)
     , m_worker(worker)
 {
-    snprintf(TAG, sizeof(TAG) - 1, "worker %d", m_worker->m_port);
+    snprintf(TAG, sizeof(TAG) - 1, "worker %" PRId16, m_worker->m_port);
     m_workerThread.setName(TAG);
 }
 
@@ -192,7 +192,7 @@ Service *ServerWorker::findServiceWithId(uint32_t serviceId)
 
         service = service->getNext();
     }
-    // LOGI(this->TAG,"service No.%lu `%s` found\n",   serviceId, service->m_name);
+    LOGI(this->TAG,"service No.%" PRIu32 " `%s` found\n",   serviceId, service->m_name);
     return service;
 }
 

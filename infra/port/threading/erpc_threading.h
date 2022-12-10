@@ -10,11 +10,28 @@
 
 #ifndef __embedded_rpc__thread__
 #define __embedded_rpc__thread__
-
-#include "erpc_config_internal.h"
-
 #include <cstdint>
 #include <cstring>
+#include "erpc_config_internal.h"
+// Threading model
+#define ERPC_THREADS_NONE (0U)     //!< No threads.
+#define ERPC_THREADS_PTHREADS (1U) //!< POSIX pthreads.
+#define ERPC_THREADS_FREERTOS (2U) //!< FreeRTOS.
+
+// Handy macro to test threading model. You can also ERPC_THREADS directly to test for threading
+// support, i.e. "#if ERPC_THREADS", because ERPC_THREADS_NONE has a value of 0.
+#define ERPC_THREADS_IS(_n_) (ERPC_THREADS == (ERPC_THREADS_##_n_))
+
+// Detect threading model if not already set.
+#ifndef ERPC_THREADS
+#if CONFIG_HAS_POSIX
+// Default to pthreads for POSIX systems.
+        #define ERPC_THREADS (ERPC_THREADS_PTHREADS)
+#elif CONFIG_HAS_FREERTOS
+// Use FreeRTOS if we can auto detect it.
+        #define ERPC_THREADS (ERPC_THREADS_FREERTOS)
+#endif
+#endif
 
 // Exclude the rest of the file if threading is disabled.
 #if ERPC_THREADS_IS(PTHREADS)
@@ -92,7 +109,13 @@ public:
      *
      * @param[in] name Name for thread.
      */
-    void setName(const char *name) { strncpy(m_name, name, CONFIG_MAX_TASK_NAME_LEN); }
+    void setName(const char *name) {
+#if ERPC_THREADS_IS(PTHREAD)
+        strncpy(m_name, name, CONFIG_MAX_PTHREAD_NAME_LEN);
+#elif ERPC_THREADS_IS(FREERTOS)
+        strncpy(m_name, name, configMAX_TASK_NAME_LEN);
+#endif
+    }
 
     /*!
      * @brief This function returns name of thread.

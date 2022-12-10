@@ -10,8 +10,36 @@
 #ifndef _EMBEDDED_RPC__PORT_H_
 #define _EMBEDDED_RPC__PORT_H_
 
-#include "erpc_config_internal.h"
+#include "../config_detect_platform.h"
+#include <new>
 
+#define ERPC_NOEXCEPT_DISABLED (0U) //!< Disabling noexcept feature.
+#define ERPC_NOEXCEPT_ENABLED (1U)  //!<  Enabling noexcept feature.n enabled..
+
+// Disable/enable noexcept.
+#ifndef ERPC_NOEXCEPT
+#if CONFIG_HAS_POSIX
+#define ERPC_NOEXCEPT (ERPC_NOEXCEPT_ENABLED)
+#else
+#define ERPC_NOEXCEPT (ERPC_NOEXCEPT_DISABLED)
+#endif
+#endif
+
+//NOEXCEPT support
+#if defined(__cplusplus) && __cplusplus >= 201103 && ERPC_NOEXCEPT
+#define NOEXCEPT noexcept
+#else
+#define NOEXCEPT
+#endif // NOEXCEPT
+
+
+#if defined(__CC_ARM) || defined(__ARMCC_VERSION) /* Keil MDK */
+#define THROW_BADALLOC throw(std::bad_alloc)
+    #define THROW throw()
+#else
+#define THROW_BADALLOC
+#define THROW
+#endif
 /*!
  * @addtogroup port_mem
  * @{

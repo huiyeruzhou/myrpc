@@ -8,14 +8,11 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "erpc_port.h"
-
+#include "dynamic_memory_manage.h"
+#include "../config_detect_platform.h"
 
 #if CONFIG_HAS_POSIX
 #include <cstdlib>
-#include <new>
-
-using namespace std;
 
 void *erpc_malloc(size_t size)
 {
@@ -27,6 +24,18 @@ void erpc_free(void *ptr)
 {
     free(ptr);
 }
+#elif CONFIG_HAS_FREERTOS
+void *erpc_malloc(size_t size)
+{
+    void *p = pvPortMalloc(size);
+    return p;
+}
+
+void erpc_free(void *ptr)
+{
+    vPortFree(ptr);
+}
+#endif//CONFIG_HAS_POSIX
 
 /* Provide function for pure virtual call to avoid huge demangling code being linked in ARM GCC */
 #if ((defined(__GNUC__)) && (defined(__arm__)))
@@ -38,4 +47,3 @@ extern "C" void __cxa_pure_virtual(void)
 }
 #endif
 
-#endif//CONFIG_HAS_POSIX

@@ -9,8 +9,6 @@
  */
 
 #include "erpc_basic_codec.hpp"
-#include "erpc_config_internal.h"
-#include <new>
 
 
 using namespace erpc;
