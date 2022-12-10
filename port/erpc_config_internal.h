@@ -20,6 +20,10 @@
    //@{
 
 // Set default buffer size.
+
+
+
+
 #ifndef ERPC_DEFAULT_BUFFER_SIZE
     //! @brief Size of buffers allocated by BasicMessageBufferFactory in setup functions.
 #define ERPC_DEFAULT_BUFFER_SIZE (256U)
@@ -136,6 +140,18 @@
 #endif
 
 
+#define MSGTYPE_FORMATTER FORMATTER_int
+#define SERVICEID_FORMATTER FORMATTER_uint32
+#define METHODID_FORMATTER FORMATTER_uint32
+#define SEQUENCE_FORMATTER FORMATTER_uint32
+#if CONFIG_HAS_POSIX
+#define FORMATTER_int "%d"
+#define FORMATTER_uint32 "%u"
+#elif CONFIG_HAS_FREERTOS
+#define FORMATTER_int "%d"
+#define FORMATTER_uint32 "%lu"
+#endif
+
 
 #include <new>
 #define ERPC_ALLOCATION_POLICY (ERPC_ALLOCATION_POLICY_DYNAMIC)
@@ -156,18 +172,55 @@
 #define LOGV( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_VERBOSE, tag, format, ##__VA_ARGS__)
 #endif // !(defined(__cplusplus) && (__cplusplus >  201703L))
 #elif CONFIG_HAS_POSIX
-// #include <ctime>
-// #include <iostream>
-// #include <iomanip>
-// static std::time_t time_now = std::time(nullptr);
-// #define __FILENAME__ (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)    // only show filename and not it's path (less clutter)
-// #define LOG(LEVEL) std::cout << std::put_time(std::localtime(&time_now), "%y-%m-%d %OH:%OM:%OS") << " [LEVEL] " << __FILENAME__ << "(" << __FUNCTION__ << ":" << __LINE__ << ") >> "
 
-#define LOGE( tag, format, ... ) 
-#define LOGW( tag, format, ... ) 
-#define LOGI( tag, format, ... )
-#define LOGD( tag, format, ... )
-#define LOGV( tag, format, ... ) 
+#include <string>
+#include <chrono>
+
+static std::time_t getTimeStamp()
+{
+    std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> tp = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now());
+    auto tmp = std::chrono::duration_cast<std::chrono::milliseconds>(tp.time_since_epoch());
+    std::time_t timestamp = tmp.count();
+    return timestamp;
+}
+static std::time_t begin = getTimeStamp();
+// static std::tm *gettm(uint64_t timestamp)
+// {
+//     uint64_t milli = timestamp;
+//     milli += (uint64_t) 8 * 60 * 60 * 1000;//add to beijing time zone.
+//     auto mTime = std::chrono::milliseconds(milli);
+//     auto tp = std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds>(mTime);
+//     auto tt = std::chrono::system_clock::to_time_t(tp);
+//     std::tm *now = std::gmtime(&tt);
+//     return now;
+// }
+
+// static std::string getTimeStr()
+// {
+//     time_t timep;
+//     timep = getTimeStamp();
+//     struct tm *info;
+//     info = gettm(timep);
+
+//     char tmp[27] = { 0 };
+//     printf("%02d:%02d:%02d.%06ld", info->tm_hour, info->tm_min, info->tm_sec, timep % 1000000);
+//     return tmp;
+// }
+static void getTimeStr()
+{
+    time_t timep;
+    timep = getTimeStamp();
+
+    printf("%ld",timep-begin);
+}
+#define FILENAME basename(__FILE__)
+#define FUNCNAME __func__
+
+#define LOGE( tag, format, arg... ) getTimeStr();printf(" E %s[%s]: ", FILENAME, FUNCNAME);printf(format, ##arg);printf("\n");
+#define LOGW( tag, format, arg... ) getTimeStr();printf(" W %s[%s]: ", FILENAME, FUNCNAME);printf(format, ##arg);printf("\n");
+#define LOGI( tag, format, arg... ) getTimeStr();printf(" I %s[%s]: ", FILENAME, FUNCNAME);printf(format, ##arg);printf("\n");
+#define LOGD( tag, format, arg... ) getTimeStr();printf(" D %s[%s]: ", FILENAME, FUNCNAME);printf(format, ##arg);printf("\n");
+#define LOGV( tag, format, arg... ) getTimeStr();printf(" V %s[%s]: ", FILENAME, FUNCNAME);printf(format, ##arg);printf("\n");
 #endif
 
 // Detect threading model if not already set.

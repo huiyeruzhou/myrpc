@@ -18,11 +18,11 @@
 .NOTPARALLEL:
 
 this_makefile := $(firstword $(MAKEFILE_LIST))
-ERPC_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))../)
+ERPC_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
 include $(ERPC_ROOT)/mk/erpc_common.mk
 
-ERPC_C_ROOT = $(ERPC_ROOT)/erpc_c
+ERPC_C_ROOT = $(ERPC_ROOT)
 
 # TARGET_OUTPUT_ROOT = $(OUTPUT_ROOT)/$(DEBUG_OR_RELEASE)/$(os_name)/$(APP_NAME)
 
@@ -77,7 +77,7 @@ include $(ERPC_ROOT)/mk/targets.mk
 $(TARGET_LIB)(%): %
 	@$(call printmessage,ar,Archiving, $(?F) in $(@F))
 	$(at)mkdir -p $(dir $(@))
-	$(AR) $(ARFLAGS) $@ $?
+	$(at)$(AR) $(ARFLAGS) $@ $?
 
 
 clean::
