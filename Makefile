@@ -49,7 +49,7 @@ INCLUDES += $(ERPC_C_ROOT)/infra \
 			$(ERPC_C_ROOT)/infra/client \
 			$(ERPC_C_ROOT)/infra/server \
 			$(ERPC_C_ROOT)/infra/transport \
-			$(ERPC_C_ROOT)/port \
+			$(ERPC_C_ROOT)/infra/port \
 
 			
 
