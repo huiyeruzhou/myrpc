@@ -94,8 +94,13 @@ erpc_status_t ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff,
         (*codec)->setBuffer(buff);
 
         err = readHeadOfMessage(*codec, msgType, serviceId, methodId, sequence);
-        LOGI(this->TAG,"read head of message\n"
-               "                msgType: %d, serviceId: %lu,  methodId: %lu, sequence: %lu\n", msgType, serviceId, methodId, sequence);
+        
+        LOGI(this->TAG, "read head of message\n                "
+            "msgType: %" "d" 
+            ", serviceId: %" PRIu32
+            ",  methodId: %" PRIu32
+            ", sequence: %" PRIu32 "\n",
+            msgType, serviceId, methodId, sequence);
         if (err != kErpcStatus_Success)
         {
             // Dispose of buffers and codecs.
@@ -187,7 +192,7 @@ Service *ServerWorker::findServiceWithId(uint32_t serviceId)
 
         service = service->getNext();
     }
-    LOGI(this->TAG,"service No.%lu `%s` found\n",   serviceId, service->m_name);
+    // LOGI(this->TAG,"service No.%lu `%s` found\n",   serviceId, service->m_name);
     return service;
 }
 

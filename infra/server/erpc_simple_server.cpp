@@ -39,7 +39,7 @@ SimpleServer::SimpleServer(const char *host, uint16_t port, MessageBufferFactory
     , m_serverThread(SimpleServer::networkpollerStub)
     , m_runServer(false)
 {
-    auto *codecFactory = new BasicCodecFactory();
+    BasicCodecFactory *codecFactory = new BasicCodecFactory();
 
     // Init server with the provided transport.
     this->setCodecFactory(codecFactory);
@@ -52,10 +52,10 @@ SimpleServer::~SimpleServer()
     delete m_codecFactory;
 }
 
-erpc_status_t SimpleServer::run()
+erpc_status_t SimpleServer::run(void)
 {
     erpc_status_t err = kErpcStatus_Success;
-    while (m_isServerOn)
+    while ((err == kErpcStatus_Success) && m_isServerOn)
     {
         // Sleep 10 ms.
          Thread::sleep(10000);
@@ -86,23 +86,26 @@ erpc_status_t SimpleServer::run()
 //     return err;
 // }
 
-void SimpleServer::stop()
+void SimpleServer::stop(void)
 {
     m_isServerOn = false;
 }
 
 void SimpleServer::onNewSocket(int sockfd, int port) {
-    auto *transport_worker = new TCPWorker(sockfd, port);
-    auto *worker = new ServerWorker(m_firstService, m_messageFactory, m_codecFactory, transport_worker);
+    TCPWorker *transport_worker = new TCPWorker(sockfd, port);
+    ServerWorker *worker = new ServerWorker(m_firstService, m_messageFactory, m_codecFactory, transport_worker);
     worker->start();
 }
 
-erpc_status_t SimpleServer::close()
+erpc_status_t SimpleServer::close(bool stopServer)
 {
-    m_runServer = false;
+    if (stopServer)
+    {
+        m_runServer = false;
+    }
+
     if (m_sockfd != -1)
     {
-//        throw nullptr;
         ::close(m_sockfd);
         m_sockfd = -1;
     }
@@ -112,7 +115,7 @@ erpc_status_t SimpleServer::close()
 
 
 
-void SimpleServer::networkpollerThread()
+void SimpleServer::networkpollerThread(void)
 {
     int yes = 1;
     int result;
@@ -256,22 +259,22 @@ void SimpleServer::networkpollerThread()
             // }
         }
     }
-    ::close(m_sockfd);
+    close(m_sockfd);
 }
 
 
 void SimpleServer::networkpollerStub(void *arg)
 {
-    auto *This = reinterpret_cast<SimpleServer *>(arg);
+    SimpleServer *This = reinterpret_cast<SimpleServer *>(arg);
 
     LOGI(TAG, "in networkpollerStub (arg=%p)", arg);
-    if (This != nullptr)
+    if (This != NULL)
     {
         This->networkpollerThread();
     }
 }
 
-erpc_status_t SimpleServer::open()
+erpc_status_t SimpleServer::open(void)
 {
     erpc_status_t status;
     m_serverThread.setName("Network Poller");

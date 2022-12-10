@@ -1,0 +1,21 @@
+/*!
+ * You can write copyrights rules here. These rules will be copied into the outputs.
+ */
+@outputDir("erpc_outputs") // output directory
+program erpc_matrix_multiply; // specify name of output files
+
+/*! This const defines the matrix size. The value has to be the same as the
+    Matrix array dimension. Do not forget to re-generate the eRPC code once the
+    matrix size is changed in the eRPC file */
+const int32 matrix_size = 2;
+
+/*! This is the matrix array type. The dimension has to be the same as the
+    matrix size const. Do not forget to re-generate the eRPC code once the
+    matrix size is changed in the eRPC file */
+type Matrix = int32[matrix_size][matrix_size];
+
+interface MatrixMultiplyService // cover functions for same topic
+{
+    erpcMatrixMultiply(in Matrix matrix1, in Matrix matrix2, out Matrix result_matrix) -> void
+    erpctest(in int32 num1, in int32 num2, out int32 ret) -> void
+}

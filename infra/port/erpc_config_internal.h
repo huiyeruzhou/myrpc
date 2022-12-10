@@ -20,6 +20,10 @@
    //@{
 
 // Set default buffer size.
+
+
+
+
 #ifndef ERPC_DEFAULT_BUFFER_SIZE
     //! @brief Size of buffers allocated by BasicMessageBufferFactory in setup functions.
 #define ERPC_DEFAULT_BUFFER_SIZE (256U)
@@ -32,6 +36,7 @@
 
 #define ERPC_ALLOCATION_POLICY_DYNAMIC (0U) //!< Dynamic allocation policy
 
+#define ERPC_THREADS_NONE (0U)     //!< No threads.
 #define ERPC_THREADS_PTHREADS (1U) //!< POSIX pthreads.
 #define ERPC_THREADS_FREERTOS (2U) //!< FreeRTOS.
 
@@ -127,7 +132,7 @@
     #define CONFIG_HAS_FREERTOS (0)
     #if defined(__has_include)
     #if __has_include("FreeRTOSConfig.h")
-    #pragma message("FreeRTOS detected")
+//    #pragma message("FreeRTOS detected")
     #undef CONFIG_HAS_FREERTOS
             #define CONFIG_HAS_FREERTOS (1)
         #endif
@@ -135,10 +140,27 @@
 #endif
 
 
+#include <cinttypes>
+#if __TIMESIZE == 64
+#define PRItime_t PRIi64
+#else 
+#define PRItime_t PRIi32
+#endif
+
 
 #include <new>
-#define ERPC_ALLOCATION_POLICY (ERPC_ALLOCATION_POLICY_DYNAMIC)
-
+#define color_default     "\033[00m"
+#define color_bold     "\033[01m"
+#define color_red     "\033[31m"
+#define color_green     "\033[32m"
+#define color_yellow     "\033[33m"
+#define color_blue     "\033[34m"
+#define color_magenta     "\033[35m"
+#define color_cyan     "\033[36m"
+#define color_orange     "\033[38;5;172m"
+#define color_light_blue     "\033[38;5;039m"
+#define color_gray     "\033[38;5;008m"
+#define color_purple     "\033[38;5;097m"
 #if CONFIG_HAS_FREERTOS
 #include "esp_log.h"
 #if defined(__cplusplus) && (__cplusplus >  201703L)
@@ -155,18 +177,69 @@
 #define LOGV( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_VERBOSE, tag, format, ##__VA_ARGS__)
 #endif // !(defined(__cplusplus) && (__cplusplus >  201703L))
 #elif CONFIG_HAS_POSIX
-// #include <ctime>
-// #include <iostream>
-// #include <iomanip>
-// static std::time_t time_now = std::time(nullptr);
-// #define __FILENAME__ (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)    // only show filename and not it's path (less clutter)
-// #define LOG(LEVEL) std::cout << std::put_time(std::localtime(&time_now), "%y-%m-%d %OH:%OM:%OS") << " [LEVEL] " << __FILENAME__ << "(" << __FUNCTION__ << ":" << __LINE__ << ") >> "
 
-#define LOGE( tag, format, ... ) 
-#define LOGW( tag, format, ... ) 
-#define LOGI( tag, format, ... )
-#define LOGD( tag, format, ... )
-#define LOGV( tag, format, ... ) 
+#include <string>
+#include <chrono>
+
+static std::time_t getTimeStamp()
+{
+    std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> tp = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now());
+    auto tmp = std::chrono::duration_cast<std::chrono::milliseconds>(tp.time_since_epoch());
+    std::time_t timestamp = tmp.count();
+    return timestamp;
+}
+static std::time_t begin = getTimeStamp();
+// static std::tm *gettm(uint64_t timestamp)
+// {
+//     uint64_t milli = timestamp;
+//     milli += (uint64_t) 8 * 60 * 60 * 1000;//add to beijing time zone.
+//     auto mTime = std::chrono::milliseconds(milli);
+//     auto tp = std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds>(mTime);
+//     auto tt = std::chrono::system_clock::to_time_t(tp);
+//     std::tm *now = std::gmtime(&tt);
+//     return now;
+// }
+
+// static std::string getTimeStr()
+// {
+//     time_t timep;
+//     timep = getTimeStamp();
+//     struct tm *info;
+//     info = gettm(timep);
+
+//     char tmp[27] = { 0 };
+//     printf("%02d:%02d:%02d.%06ld", info->tm_hour, info->tm_min, info->tm_sec, timep % 1000000);
+//     return tmp;
+// }
+static void printTime()
+{
+    time_t timep;
+    timep = getTimeStamp();
+
+    printf("(%" PRItime_t ")",timep-begin);
+}
+#define colorE color_red
+#define colorW color_yellow
+#define colorI color_green
+#define colorD color_default
+#define colorV color_default
+#define Istr "I"
+#define Dstr "D"
+#define Estr "E"
+#define Wstr "W"
+#define Vstr "V"
+#define FILENAME basename(__FILE__)
+#define FUNCNAME __func__
+#define printLevel(level) printf(color##level " " level##str " ");
+#define printTrace() printf("%s[%s]: ", FILENAME, FUNCNAME);
+#define printTAG(tag) printf(" %s: ", tag);
+
+
+#define LOGE( tag, format, arg... ) printLevel(E);printTime();printTAG(tag)printf(format, ##arg);printf(color_default "\n");
+#define LOGW( tag, format, arg... ) printLevel(W);printTime();printTAG(tag)printf(format, ##arg);printf(color_default "\n");
+#define LOGI( tag, format, arg... ) printLevel(I);printTime();printTAG(tag)printf(format, ##arg);printf(color_default "\n");
+#define LOGD( tag, format, arg... ) printLevel(D);printTime();printTAG(tag)printf(format, ##arg);printf(color_default "\n");
+#define LOGV( tag, format, arg... ) printLevel(V);printTime();printTAG(tag)printf(format, ##arg);printf(color_default "\n");
 #endif
 
 // Detect threading model if not already set.
@@ -175,7 +248,7 @@
         // Default to pthreads for POSIX systems.
         #define ERPC_THREADS (ERPC_THREADS_PTHREADS)
     #elif CONFIG_HAS_FREERTOS
-        // Use FreeRTOS if we can autodetect it.
+        // Use FreeRTOS if we can auto detect it.
         #define ERPC_THREADS (ERPC_THREADS_FREERTOS)
     #endif
 #endif
@@ -208,9 +281,11 @@
     #define THROW_BADALLOC throw(std::bad_alloc)
     #define THROW throw()
 #else
-    #define THROW_BADALLOC throw(std::bad_alloc)
-    #define THROW throw()
+    #define THROW_BADALLOC
+    #define THROW
 #endif
+
+#define ERPC_TRANSPORT_MU_USE_MCMGR (ERPC_TRANSPORT_MU_USE_MCMGR_DISABLED)
 
 
 #ifndef erpc_assert
