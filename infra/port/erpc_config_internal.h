@@ -140,20 +140,11 @@
 #endif
 
 
-#define MSGTYPE_FORMATTER FORMATTER_int
-#define SERVICEID_FORMATTER FORMATTER_uint32
-#define METHODID_FORMATTER FORMATTER_uint32
-#define SEQUENCE_FORMATTER FORMATTER_uint32
-#define TIME_FORMATTER FORMATTER_int64
-
-#if CONFIG_HAS_POSIX
-#define FORMATTER_int "%d"
-#define FORMATTER_uint32 "%u"
-#define FORMATTER_int64 "%ld"
-#elif CONFIG_HAS_FREERTOS
-#define FORMATTER_int "%d"
-#define FORMATTER_int64 "%lld"
-#define FORMATTER_uint32 "%lu"
+#include <cinttypes>
+#if __TIMESIZE == 64
+#define PRItime_t PRIi64
+#else 
+#define PRItime_t PRIi32
 #endif
 
 
@@ -225,7 +216,7 @@ static void printTime()
     time_t timep;
     timep = getTimeStamp();
 
-    printf("(" TIME_FORMATTER ")",timep-begin);
+    printf("(%" PRItime_t ")",timep-begin);
 }
 #define colorE color_red
 #define colorW color_yellow
@@ -241,7 +232,7 @@ static void printTime()
 #define FUNCNAME __func__
 #define printLevel(level) printf(color##level " " level##str " ");
 #define printTrace() printf("%s[%s]: ", FILENAME, FUNCNAME);
-#define printTAG(tag) printf("%s: ", tag);
+#define printTAG(tag) printf(" %s: ", tag);
 
 
 #define LOGE( tag, format, arg... ) printLevel(E);printTime();printTAG(tag)printf(format, ##arg);printf(color_default "\n");

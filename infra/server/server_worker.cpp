@@ -96,10 +96,10 @@ erpc_status_t ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff,
         err = readHeadOfMessage(*codec, msgType, serviceId, methodId, sequence);
         
         LOGI(this->TAG, "read head of message\n                "
-            "msgType: " MSGTYPE_FORMATTER
-            ", serviceId: " SERVICEID_FORMATTER
-            ",  methodId: " METHODID_FORMATTER
-            ", sequence: " SEQUENCE_FORMATTER "\n",
+            "msgType: %" "d" 
+            ", serviceId: %" PRIu32
+            ",  methodId: %" PRIu32
+            ", sequence: %" PRIu32 "\n",
             msgType, serviceId, methodId, sequence);
         if (err != kErpcStatus_Success)
         {
