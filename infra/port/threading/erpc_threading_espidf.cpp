@@ -9,9 +9,9 @@
  */
 
 #include "erpc_threading.h"
-static const char *TAG = "Thread";
-#if ERPC_THREADS_IS(FREERTOS)
 
+#if ERPC_THREADS_IS(FREERTOS)
+__attribute__((unused)) static const char *TAG = "Thread";
 using namespace erpc;
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -1,20 +1,81 @@
-#-------------------------------------------------------------------------------
-# Copyright (C) 2016 Freescale Semiconductor, Inc.
-# Copyright 2016-2020 NXP
-# All rights reserved.
-#
-# THIS SOFTWARE IS PROVIDED BY FREESCALE "AS IS" AND ANY EXPRESS OR IMPLIED
-# WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
-# SHALL FREESCALE BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
-# OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
-# IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
-# OF SUCH DAMAGE.
-#-------------------------------------------------------------------------------
+# #-------------------------------------------------------------------------------
+# # Copyright (C) 2016 Freescale Semiconductor, Inc.
+# # Copyright 2016-2020 NXP
+# # All rights reserved.
+# #
+# # THIS SOFTWARE IS PROVIDED BY FREESCALE "AS IS" AND ANY EXPRESS OR IMPLIED
+# # WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+# # SHALL FREESCALE BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# # EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+# # OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# # INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+# # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+# # OF SUCH DAMAGE.
+# #-------------------------------------------------------------------------------
+# PWD=$(shell pwd)
+# #INCS=-I$(PWD)/include
 
+# # change to you project name
+# MYLIB = ${OBJDIR}/lib/liberpc.a
+# # change to you project file dir
+# VPATH = infra:infra/port:infra/codec:infra/port:infra/port/log:infra/port/malloc_free:infra/port/threading:infra/server:infra/transport:
+# # the obj dir
+# OBJDIR = Debug/Linux/erpc
+
+###########################################################################
+# auth lzpong
+# source files
+# SRCS = $(foreach dir,$(subst :, ,$(VPATH)),$(wildcard $(dir)/*.cpp))
+# SRCSC = $(foreach dir,$(subst :, ,$(VPATH)),$(wildcard $(dir)/*.c))
+# # obj files
+# OBJS_1 = $(addsuffix .o,$(basename $(SRCS)))
+# OBJSC_1 = $(addsuffix .o,$(basename $(SRCSC)))
+# OBJS = $(foreach n,$(notdir $(OBJS_1)),$(OBJDIR)/$(n))
+# OBJSC = $(foreach n,$(notdir $(OBJSC_1)),$(OBJDIR)/$(n))
+# # head files
+# HEADERS = $(foreach dir,$(subst :, ,$(VPATH)),$(wildcard $(dir)/*.h))
+# HEADERS += $(foreach dir,$(subst :, ,$(VPATH)),$(wildcard $(dir)/*.hpp))
+# HEADERS += $(foreach dir,$(subst :, ,$(VPATH)),$(wildcard $(dir)/*.inc))
+
+# CC = gcc
+# CXX = g++ -std=c++11
+# INCS = $(patsubst %,-I%,$(subst :, ,$(VPATH)))
+# CFLAGS += $(INCS)
+# CXXFLAGS += $(INCS)
+
+# LIBS += -lncurses -lesl -lpthread -lm
+# LDFLAGS += -L.
+# PICKY = -O2
+# #SOLINK = -shared -Xlinker -x
+
+# #DEBUG = -g -ggdb
+# #LIBEDIT_DIR = ./
+
+
+# all: $(MYLIB)
+
+# $(MYLIB): $(OBJS) $(SRCS) $(OBJSC) $(SRCSC) $(HEADERS)
+# 	echo $>
+# 	ar rcs $(MYLIB) $(OBJS) $(OBJSC)
+# 	ranlib $(MYLIB)
+# # *.cpp files commpare
+# $(OBJS): $(SRCS) $(HEADERS)
+# 	@test -d $(OBJDIR) | mkdir -p $(OBJDIR)
+# 	$(CXX) -c $(SRCS) $(INCS)
+# 	mv *.o $(OBJDIR)/
+
+# # *.c file commpare
+# $(OBJSC): $(SRCSC) $(HEADERS)
+# 	@test -d $(OBJDIR) | mkdir -p $(OBJDIR)
+# 	$(CC) -c $(SRCSC) $(INCS)
+# 	mv *.o $(OBJDIR)/
+
+
+# clean:
+# 	rm -rf $(OBJDIR)
+# 	rm -f *.o *.a
 .NOTPARALLEL:
 
 this_makefile := $(firstword $(MAKEFILE_LIST))
@@ -50,24 +111,14 @@ INCLUDES += $(ERPC_C_ROOT)/infra \
 			$(ERPC_C_ROOT)/infra/server \
 			$(ERPC_C_ROOT)/infra/transport \
 			$(ERPC_C_ROOT)/infra/port \
+			$(ERPC_C_ROOT)/infra/port/threading\
+			$(ERPC_C_ROOT)/infra/port/malloc_free\
+			$(ERPC_C_ROOT)/infra/port/log 
 
 			
 
-SOURCES += 	$(ERPC_C_ROOT)/infra/codec/erpc_basic_codec.cpp \
-			$(ERPC_C_ROOT)/infra/codec/erpc_message_buffer.cpp \
-			\
-			$(ERPC_C_ROOT)/infra/client/client.cpp \
-			\
-			$(ERPC_C_ROOT)/infra/server/erpc_server.cpp \
-			$(ERPC_C_ROOT)/infra/server/erpc_simple_server.cpp \
-			$(ERPC_C_ROOT)/infra/server/server_worker.cpp\
-			\
-			$(ERPC_C_ROOT)/infra/transport/erpc_framed_transport.cpp \
-			$(ERPC_C_ROOT)/infra/transport/tcp_worker.cpp\
-			$(ERPC_C_ROOT)/infra/client_server_common.cpp \
-			\
-			$(ERPC_C_ROOT)/infra/port/erpc_port_stdlib.cpp \
-			$(ERPC_C_ROOT)/infra/port/erpc_threading_pthreads.cpp \
+SOURCES += 	$(foreach dir,$(subst ' ', ,$(INCLUDES)),$(wildcard $(dir)/*.cpp))
+SOURCES +=  $(foreach dir,$(subst ' ', ,$(INCLUDES)),$(wildcard $(dir)/*.c))
 
 
 MAKE_TARGET = $(TARGET_LIB)($(OBJECTS_ALL))

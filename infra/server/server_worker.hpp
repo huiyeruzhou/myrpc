@@ -31,7 +31,12 @@ namespace erpc
         void start(void);
     private:
         Thread m_workerThread;
-        char TAG[CONFIG_MAX_TASK_NAME_LEN];
+#if ERPC_THREADS_IS(PTHREADS)
+        char TAG[CONFIG_MAX_PTHREAD_NAME_LEN];
+#elif ERPC_THREADS_IS(FREERTOS)
+        char TAG[configMAX_TASK_NAME_LEN];
+#endif
+        
         Service *m_firstService;
         MessageBufferFactory *m_messageFactory; //!< Message buffer factory to use.
         CodecFactory *m_codecFactory;           //!< Codec to use.

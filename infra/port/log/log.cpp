@@ -37,10 +37,10 @@ std::time_t _getTimeStamp()
 //     printf("%02d:%02d:%02d.%06ld", info->tm_hour, info->tm_min, info->tm_sec, timep % 1000000);
 //     return tmp;
 // }
-static void _printTime()
+void _printTime()
 {
     time_t timep;
-    timep = getTimeStamp();
+    timep = _getTimeStamp();
 
     printf("(%" PRItime_t ")",timep-begin);
 }

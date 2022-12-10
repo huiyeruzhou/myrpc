@@ -42,7 +42,7 @@ Thread::Thread(const char *name)
 , m_priority(0)
 , m_thread(0)
 {
-    strncpy(m_name, name, CONFIG_MAX_TASK_NAME_LEN);
+    strncpy(m_name, name, CONFIG_MAX_PTHREAD_NAME_LEN);
 }
 
 Thread::Thread(thread_entry_t entry, uint32_t priority, uint32_t stackSize, const char *name)
@@ -52,7 +52,7 @@ Thread::Thread(thread_entry_t entry, uint32_t priority, uint32_t stackSize, cons
 , m_priority(priority)
 , m_thread(0)
 {
-    strncpy(m_name, name, CONFIG_MAX_TASK_NAME_LEN);
+    strncpy(m_name, name, CONFIG_MAX_PTHREAD_NAME_LEN);
 }
 
 Thread::~Thread(void) {}

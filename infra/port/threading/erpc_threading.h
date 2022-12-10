@@ -12,7 +12,7 @@
 #define __embedded_rpc__thread__
 #include <cstdint>
 #include <cstring>
-#include "erpc_config_internal.h"
+#include "config_detect_platform.h"
 // Threading model
 #define ERPC_THREADS_NONE (0U)     //!< No threads.
 #define ERPC_THREADS_PTHREADS (1U) //!< POSIX pthreads.
@@ -110,7 +110,7 @@ public:
      * @param[in] name Name for thread.
      */
     void setName(const char *name) {
-#if ERPC_THREADS_IS(PTHREAD)
+#if ERPC_THREADS_IS(PTHREADS)
         strncpy(m_name, name, CONFIG_MAX_PTHREAD_NAME_LEN);
 #elif ERPC_THREADS_IS(FREERTOS)
         strncpy(m_name, name, configMAX_TASK_NAME_LEN);
@@ -202,10 +202,10 @@ protected:
     virtual void threadEntryPoint(void);
 
 private:
-#if CONFIG_HAS_FREERTOS
+#if ERPC_THREADS_IS(FREERTOS)
     char m_name[configMAX_TASK_NAME_LEN];//任务名字
-#else
-    char m_name[CONFIG_MAX_TASK_NAME_LEN];//任务名字
+#elif ERPC_THREADS_IS(PTHREADS)
+    char m_name[CONFIG_MAX_PTHREAD_NAME_LEN];//任务名字
 #endif
     thread_entry_t m_entry;          /*!< Thread entry function. */
     void *m_arg;                     /*!< Entry parameter. */

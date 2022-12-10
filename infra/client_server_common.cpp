@@ -6,7 +6,7 @@ int getnameinfo(const struct sockaddr *addr, socklen_t addrlen,
     char *serv, socklen_t servlen, int flags) {
     auto casted_addr = reinterpret_cast<const struct sockaddr_in*>(addr);
     inet_ntop(AF_INET, &(casted_addr->sin_addr), host, hostlen);
-    snprintf(serv, servlen, "%" PRIin_port_t, ntohs(casted_addr->sin_port));
+    snprintf(serv, servlen, "%" SCNin_port_t, ntohs(casted_addr->sin_port));
     return 0;
 }
 #endif
@@ -23,7 +23,7 @@ int getPortFormAddr(const sockaddr *__sockaddr, int __len) {
     char service[32] = {};
     in_port_t port;
     getnameinfo(__sockaddr, __len, NULL, 0, service, 32, 0);
-    if (sscanf(service, "%" PRIin_port_t, &port) == 1)
+    if (sscanf(service, "%" SCNin_port_t, &port) == 1)
     {
         return port;
     }
