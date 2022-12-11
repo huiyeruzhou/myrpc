@@ -1,8 +1,8 @@
 #ifndef _SERVICE_H_
 #define _SERVICE_H_
 
-#include "erpc_codec.hpp"
-#include "erpc_config_internal.h"
+#include "codec_base.hpp"
+#include "port.h"
 namespace erpc
 {
     class Service
@@ -57,8 +57,8 @@ namespace erpc
          *
          * @return Based on handleInvocation implementation.
          */
-        virtual erpc_status_t handleInvocation(uint32_t methodId, uint32_t sequence, Codec *codec,
-            MessageBufferFactory *messageFactory) = 0;
+        virtual rpc_status_t handleInvocation(uint32_t methodId, uint32_t sequence, Codec *codec,
+                                              MessageBufferFactory *messageFactory) = 0;
 
         const char *m_name;
 

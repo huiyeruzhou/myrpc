@@ -1,6 +1,8 @@
-#include "erpc_client_server_common.hpp"
-#include <cstring>
+#include "port_net_info.hpp"
+
 #if CONFIG_HAS_FREERTOS
+//only declared but not implemented by esp-idf framework, therefore we should implement one
+//by ourselves, remember to make sure that it is thread-safe
 int getnameinfo(const struct sockaddr *addr, socklen_t addrlen,
     char *host, socklen_t hostlen,
     char *serv, socklen_t servlen, int flags) {
@@ -10,13 +12,11 @@ int getnameinfo(const struct sockaddr *addr, socklen_t addrlen,
     return 0;
 }
 #endif
-char* print_net_info(const sockaddr *__sockaddr, int __len) {
-    static char netinfo[32] = {};
+void sprint_net_info(char *netinfo, int netinfo_len, const sockaddr *__sockaddr, int __len) {
     char host[16];
     char service[6];
     getnameinfo(__sockaddr, __len, host, 32, service, 32, 0);
-    snprintf(netinfo, 24, "%s:%s", host, service);
-    return netinfo;
+    snprintf(netinfo, netinfo_len, "%s:%s", host, service);
 }
 
 int getPortFormAddr(const sockaddr *__sockaddr, int __len) {

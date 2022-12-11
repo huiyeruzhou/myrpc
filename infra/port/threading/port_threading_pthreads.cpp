@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "erpc_threading.h"
+#include "port_threading.h"
 
 #if ERPC_THREADS_IS(PTHREADS)
 #include <errno.h>

@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "erpc_message_buffer.hpp"
+#include "message_buffer.hpp"
 
 
 using namespace erpc;
@@ -25,9 +25,9 @@ void MessageBuffer::setUsed(uint16_t used)
     m_used = used;
 }
 
-erpc_status_t MessageBuffer::read(uint16_t offset, void *data, uint32_t length)
+rpc_status_t MessageBuffer::read(uint16_t offset, void *data, uint32_t length)
 {
-    erpc_status_t err = kErpcStatus_Success;
+    rpc_status_t err = rpc_status_success;
 
     if (length > 0U)
     {
@@ -48,9 +48,9 @@ erpc_status_t MessageBuffer::read(uint16_t offset, void *data, uint32_t length)
     return err;
 }
 
-erpc_status_t MessageBuffer::write(uint16_t offset, const void *data, uint32_t length)
+rpc_status_t MessageBuffer::write(uint16_t offset, const void *data, uint32_t length)
 {
-    erpc_status_t err = kErpcStatus_Success;
+    rpc_status_t err = rpc_status_success;
 
     if (length > 0U)
     {
@@ -71,9 +71,9 @@ erpc_status_t MessageBuffer::write(uint16_t offset, const void *data, uint32_t l
     return err;
 }
 
-erpc_status_t MessageBuffer::copy(const MessageBuffer *other)
+rpc_status_t MessageBuffer::copy(const MessageBuffer *other)
 {
-    erpc_status_t err;
+    rpc_status_t err;
 
     erpc_assert(other != NULL);
     erpc_assert(m_len >= other->m_len);
@@ -159,11 +159,11 @@ MessageBuffer::Cursor &MessageBuffer::Cursor::operator--(void)
     return *this;
 }
 
-erpc_status_t MessageBuffer::Cursor::read(void *data, uint32_t length)
+rpc_status_t MessageBuffer::Cursor::read(void *data, uint32_t length)
 {
     erpc_assert((m_pos != NULL) && ("Data buffer wasn't set to MessageBuffer." != NULL));
 
-    erpc_status_t err = kErpcStatus_Success;
+    rpc_status_t err = rpc_status_success;
 
     if (length > 0U)
     {
@@ -173,7 +173,7 @@ erpc_status_t MessageBuffer::Cursor::read(void *data, uint32_t length)
         }
         else if (length > getRemainingUsed())
         {
-            err = kErpcStatus_Fail;
+            err = rpc_status_fail;
         }
         else if (length > getRemaining())
         {
@@ -189,12 +189,12 @@ erpc_status_t MessageBuffer::Cursor::read(void *data, uint32_t length)
     return err;
 }
 
-erpc_status_t MessageBuffer::Cursor::write(const void *data, uint32_t length)
+rpc_status_t MessageBuffer::Cursor::write(const void *data, uint32_t length)
 {
     erpc_assert((m_pos != NULL) && ("Data buffer wasn't set to MessageBuffer." != NULL));
     erpc_assert(m_pos == (m_buffer->get() + m_buffer->getUsed()));
 
-    erpc_status_t err = kErpcStatus_Success;
+    rpc_status_t err = rpc_status_success;
 
     if (length > 0U)
     {
@@ -217,10 +217,10 @@ erpc_status_t MessageBuffer::Cursor::write(const void *data, uint32_t length)
     return err;
 }
 
-erpc_status_t MessageBufferFactory::prepareServerBufferForSend(MessageBuffer *message)
+rpc_status_t MessageBufferFactory::prepareServerBufferForSend(MessageBuffer *message)
 {
     message->setUsed(0);
-    return kErpcStatus_Success;
+    return rpc_status_success;
 }
 MessageBuffer MessageBufferFactory::create(void)
 {

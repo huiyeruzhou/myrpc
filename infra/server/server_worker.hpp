@@ -1,7 +1,7 @@
-#ifndef _SERVER_WORKER_H_
-#define _SERVER_WORKER_H_
-#include "erpc_config_internal.h"
-#include "erpc_codec.hpp"
+#ifndef SERVER_WORKER_H
+#define SERVER_WORKER_H
+#include "port.h"
+#include "codec_base.hpp"
 #include "service.hpp"
 #include "tcp_worker.hpp"
 #include <cstdio>
@@ -17,15 +17,15 @@ namespace erpc
             TCPWorker *worker);
         ~ServerWorker(){}
         void disposeBufferAndCodec(Codec *codec);
-        erpc_status_t runInternal(void);
-        erpc_status_t runInternalBegin(Codec **codec, MessageBuffer &buff, message_type_t &msgType,
-            uint32_t &serviceId, uint32_t &methodId, uint32_t &sequence);
-        erpc_status_t runInternalEnd(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId,
-            uint32_t sequence);
+        rpc_status_t runInternal(void);
+        rpc_status_t runInternalBegin(Codec **codec, MessageBuffer &buff, message_type_t &msgType,
+                                      uint32_t &serviceId, uint32_t &methodId, uint32_t &sequence);
+        rpc_status_t runInternalEnd(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId,
+                                    uint32_t sequence);
         Service *findServiceWithId(uint32_t serviceId);
-        erpc_status_t processMessage(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId, uint32_t sequence);
-        erpc_status_t readHeadOfMessage(Codec *codec, message_type_t &msgType, uint32_t &serviceId, uint32_t &methodId,
-            uint32_t &sequence);
+        rpc_status_t processMessage(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId, uint32_t sequence);
+        rpc_status_t readHeadOfMessage(Codec *codec, message_type_t &msgType, uint32_t &serviceId, uint32_t &methodId,
+                                       uint32_t &sequence);
         
         static void workerStub(void *arg);
         void start(void);
@@ -46,4 +46,4 @@ namespace erpc
 
 } // namespace erpc
 
-#endif//_SERVER_WORKER_H_
+#endif//SERVER_WORKER_H

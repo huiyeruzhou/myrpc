@@ -8,12 +8,12 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#ifndef _EMBEDDED_RPC__SIMPLE_SERVER_H_
-#define _EMBEDDED_RPC__SIMPLE_SERVER_H_
+#ifndef SIMPLE_SERVER_H
+#define SIMPLE_SERVER_H
 
-#include "erpc_config_internal.h"
-#include "erpc_server.hpp"
-#include "erpc_basic_codec.hpp"
+#include "port.h"
+#include "server_base.hpp"
+#include "basic_codec.hpp"
 #include "tcp_worker.hpp"
 #include "server_worker.hpp"
 #include <fcntl.h>
@@ -50,7 +50,7 @@ public:
      *
      * Will never jump out from this function.
      */
-    virtual erpc_status_t run(void) override;
+    virtual rpc_status_t run(void) override;
 
     // /*!
     //  * @brief Run server implementation only if exist message to process.
@@ -61,7 +61,7 @@ public:
     //  *
     //  * @return Return true when server is ON, else false.
     //  */
-    // virtual erpc_status_t poll(void);
+    // virtual rpc_status_t poll(void);
 
     /*!
      * @brief This function sets server from ON to OFF
@@ -69,15 +69,15 @@ public:
     virtual void stop(void) override;
 
 
-    virtual erpc_status_t open(void) override;
+    virtual rpc_status_t open(void) override;
     
     /*!
      * @brief This function disconnects client or stop server host.
      *
      * @param[in] stopServer Specify is server shall be closed as well (stop listen())
-     * @retval #kErpcStatus_Success Always return this.
+     * @retval #rpc_status_success Always return this.
      */
-    virtual erpc_status_t close(bool stopServer = true);
+    virtual rpc_status_t close(bool stopServer = true);
     
 
 
@@ -117,4 +117,4 @@ protected:
 
 /*! @} */
 
-#endif // _EMBEDDED_RPC__SIMPLE_SERVER_H_
+#endif // SIMPLE_SERVER_H

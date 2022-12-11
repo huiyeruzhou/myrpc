@@ -8,8 +8,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "dynamic_memory_manage.h"
-#include "../config_detect_platform.h"
+#include "port_malloc_free.h"
+#include "../config.h"
 
 #if CONFIG_HAS_POSIX
 #include <cstdlib>
@@ -25,6 +25,7 @@ void erpc_free(void *ptr)
     free(ptr);
 }
 #elif CONFIG_HAS_FREERTOS
+#include "freertos/FreeRTOS.h"
 void *erpc_malloc(size_t size)
 {
     void *p = pvPortMalloc(size);

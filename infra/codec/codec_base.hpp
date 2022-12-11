@@ -8,12 +8,12 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#ifndef _EMBEDDED_RPC__CODEC_H_
-#define _EMBEDDED_RPC__CODEC_H_
+#ifndef MESSAGE_CODEC_BASE_H
+#define MESSAGE_CODEC_BASE_H
 
-#include "erpc_status.h"
-#include "erpc_config_internal.h"
-#include "erpc_message_buffer.hpp"
+#include "rpc_status.h"
+#include "port.h"
+#include "message_buffer.hpp"
 
 #include <cstring>
 #include <cstdint>
@@ -61,7 +61,7 @@ public:
     Codec(void)
     : m_buffer()
     , m_cursor()
-    , m_status(kErpcStatus_Success)
+    , m_status(rpc_status_success)
     {
     }
 
@@ -86,14 +86,14 @@ public:
     {
         m_buffer = buf;
         m_cursor.set(&m_buffer);
-        m_status = kErpcStatus_Success;
+        m_status = rpc_status_success;
     }
 
     /*! @brief Reset the codec to initial state. */
     virtual void reset(void)
     {
         m_cursor.set(&m_buffer);
-        m_status = kErpcStatus_Success;
+        m_status = rpc_status_success;
     }
 
     /*!
@@ -101,22 +101,22 @@ public:
      *
      * @return Current status of eRPC message processing.
      */
-    erpc_status_t getStatus(void) { return m_status; }
+    rpc_status_t getStatus(void) { return m_status; }
 
     /*!
      * @brief Return bool value representing current status.
      *
-     * @retval True Current status value is kErpcStatus_Success.
-     * @retval False Current status is other than kErpcStatus_Success.
+     * @retval True Current status value is rpc_status_success.
+     * @retval False Current status is other than rpc_status_success.
      */
-    bool isStatusOk(void) { return (m_status == kErpcStatus_Success); }
+    bool isStatusOk(void) { return (m_status == rpc_status_success); }
 
     /*!
      * @brief Set current status of eRPC message processing to given value.
      *
      * @param[in] status New current value.
      */
-    void updateStatus(erpc_status_t status)
+    void updateStatus(rpc_status_t status)
     {
         if (isStatusOk())
         {
@@ -430,7 +430,7 @@ public:
 protected:
     MessageBuffer m_buffer;         /*!< Message buffer object */
     MessageBuffer::Cursor m_cursor; /*!< Copy data to message buffers. */
-    erpc_status_t m_status;         /*!< Status of serialized data. */
+    rpc_status_t m_status;         /*!< Status of serialized data. */
 };
 
 /*!
@@ -470,4 +470,4 @@ public:
 
 /*! @} */
 
-#endif // _EMBEDDED_RPC__CODEC_H_
+#endif // MESSAGE_CODEC_BASE_H

@@ -8,8 +8,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#ifndef _EMBEDDED_RPC__ERPC_COMMON_H_
-#define _EMBEDDED_RPC__ERPC_COMMON_H_
+#ifndef RPC_STATUS_H
+#define RPC_STATUS_H
 
 /*!
  * @addtogroup infra
@@ -21,19 +21,19 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 /*! @brief eRPC status return codes. */
-enum _erpc_status
+enum rpc_status_t
 {
     //! No error occurred.
-    kErpcStatus_Success = 0,
+    rpc_status_success = 0,
 
     //! Generic failure.
-    kErpcStatus_Fail = 1,
+    rpc_status_fail = 1,
 
     //! Argument is an invalid value.
-    kErpcStatus_InvalidArgument = 4,
+    rpc_status_invalid_argument = 4,
 
     //! Operated timed out.
-    kErpcStatus_Timeout = 5,
+    rpc_status_timeout = 5,
 
     //! Message header contains an unknown version.
     kErpcStatus_InvalidMessageVersion = 6,
@@ -79,8 +79,8 @@ enum _erpc_status
 };
 
 /*! @brief Type used for all status and error return values. */
-typedef enum _erpc_status erpc_status_t;
+typedef enum rpc_status_t rpc_status_t;
 
 /*! @} */
 
-#endif /* _EMBEDDED_RPC__ERPC_COMMON_H_ */
+#endif /* RPC_STATUS_H */

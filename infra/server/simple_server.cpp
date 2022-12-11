@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "erpc_simple_server.hpp"
+#include "simple_server.hpp"
 using namespace erpc;
 __attribute__((unused)) static const char *TAG = "server";
 // #define EPOLL_SIZE 1024
@@ -52,10 +52,10 @@ SimpleServer::~SimpleServer()
     delete m_codecFactory;
 }
 
-erpc_status_t SimpleServer::run(void)
+rpc_status_t SimpleServer::run(void)
 {
-    erpc_status_t err = kErpcStatus_Success;
-    while ((err == kErpcStatus_Success) && m_isServerOn)
+    rpc_status_t err = rpc_status_success;
+    while ((err == rpc_status_success) && m_isServerOn)
     {
         // Sleep 10 ms.
          Thread::sleep(10000);
@@ -63,9 +63,9 @@ erpc_status_t SimpleServer::run(void)
     return err;
 }
 
-// erpc_status_t SimpleServer::poll(void)
+// rpc_status_t SimpleServer::poll(void)
 // {
-//     erpc_status_t err;
+//     rpc_status_t err;
 
 //     if (m_isServerOn)
 //     {
@@ -75,7 +75,7 @@ erpc_status_t SimpleServer::run(void)
 //         }
 //         else
 //         {
-//             err = kErpcStatus_Success;
+//             err = rpc_status_success;
 //         }
 //     }
 //     else
@@ -97,7 +97,7 @@ void SimpleServer::onNewSocket(int sockfd, int port) {
     worker->start();
 }
 
-erpc_status_t SimpleServer::close(bool stopServer)
+rpc_status_t SimpleServer::close(bool stopServer)
 {
     if (stopServer)
     {
@@ -110,7 +110,7 @@ erpc_status_t SimpleServer::close(bool stopServer)
         m_sockfd = -1;
     }
 
-    return kErpcStatus_Success;
+    return rpc_status_success;
 }
 
 
@@ -164,7 +164,9 @@ void SimpleServer::networkpollerThread(void)
             status = true;
         }
         //on Success
-        LOGI(TAG, "bind to %s", print_net_info((struct sockaddr *) &serverAddress, sizeof(serverAddress)));
+        char netinfo[24];
+        sprint_net_info(netinfo, sizeof(netinfo), (struct sockaddr *) &serverAddress, sizeof(serverAddress));
+        LOGI(TAG, "bind to %s", netinfo);
         
     }
 
@@ -205,7 +207,9 @@ void SimpleServer::networkpollerThread(void)
             if (incomingSocket > 0)
             {
                 // Successfully accepted a connection.
-                LOGI(TAG, "accepted connection from %s", print_net_info(&incomingAddress, incomingAddressLength));
+                char netinfo[24];
+                sprint_net_info(netinfo, sizeof(netinfo), &incomingAddress, incomingAddressLength);
+                LOGI(TAG, "accepted connection from %s", netinfo);
                 
 
                 // should be inherited from accept() socket but it's not always ...
@@ -239,7 +243,7 @@ void SimpleServer::networkpollerThread(void)
             //         {
             //             // Successfully accepted a connection.
             //             LOGI(TAG, "accepted connection from ");
-            //             print_net_info(&incomingAddress, incomingAddressLength);
+            //             sprint_net_info(&incomingAddress, incomingAddressLength);
 
             //             // should be inherited from accept() socket but it's not always ...
             //             yes = 1;
@@ -274,13 +278,13 @@ void SimpleServer::networkpollerStub(void *arg)
     }
 }
 
-erpc_status_t SimpleServer::open(void)
+rpc_status_t SimpleServer::open(void)
 {
-    erpc_status_t status;
+    rpc_status_t status;
     m_serverThread.setName("Network Poller");
     m_runServer = true;
     m_serverThread.start(this);
     LOGI(TAG, "start running networkpollerThread");
-    status = kErpcStatus_Success;
+    status = rpc_status_success;
     return status;
 }

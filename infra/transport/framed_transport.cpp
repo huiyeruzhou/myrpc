@@ -8,10 +8,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "erpc_framed_transport.hpp"
+#include "framed_transport.hpp"
 
-#include "erpc_config_internal.h"
-#include "erpc_message_buffer.hpp"
+#include "port.h"
+#include "message_buffer.hpp"
 
 #include <cstdio>
 
@@ -33,10 +33,10 @@ FramedTransport::FramedTransport(void)
 FramedTransport::~FramedTransport(void) {}
 
 
-erpc_status_t FramedTransport::receive(MessageBuffer *message)
+rpc_status_t FramedTransport::receive(MessageBuffer *message)
 {
     Header h;
-    erpc_status_t retVal;
+    rpc_status_t retVal;
 
     {
 #if !ERPC_THREADS_IS(NONE)
@@ -46,7 +46,7 @@ erpc_status_t FramedTransport::receive(MessageBuffer *message)
         // Receive header first.
         retVal = underlyingReceive((uint8_t *)&h, sizeof(h));
 
-        if (retVal == kErpcStatus_Success)
+        if (retVal == rpc_status_success)
         {
 
             // received size can't be zero.
@@ -57,7 +57,7 @@ erpc_status_t FramedTransport::receive(MessageBuffer *message)
             }
         }
 
-        if (retVal == kErpcStatus_Success)
+        if (retVal == rpc_status_success)
         {
             // received size can't be larger then buffer length.
             if (h.m_messageSize > message->getLength())
@@ -67,23 +67,23 @@ erpc_status_t FramedTransport::receive(MessageBuffer *message)
             }
         }
 
-        if (retVal == kErpcStatus_Success)
+        if (retVal == rpc_status_success)
         {
             // Receive rest of the message now we know its size.
             retVal = underlyingReceive(message->get(), h.m_messageSize);
         }
     }
 
-    if (retVal == kErpcStatus_Success) {
+    if (retVal == rpc_status_success) {
         // Receive rest of the message now we know its size.
         message->setUsed(h.m_messageSize);
     }
     return retVal;
 }
 
-erpc_status_t FramedTransport::send(MessageBuffer *message)
+rpc_status_t FramedTransport::send(MessageBuffer *message)
 {
-    erpc_status_t ret;
+    rpc_status_t ret;
     uint16_t messageLength;
     Header h;
 
@@ -97,7 +97,7 @@ erpc_status_t FramedTransport::send(MessageBuffer *message)
     h.m_messageSize = messageLength;
 
     ret = underlyingSend((uint8_t *)&h, sizeof(h));
-    if (ret == kErpcStatus_Success)
+    if (ret == rpc_status_success)
     {
         ret = underlyingSend(message->get(), messageLength);
     }

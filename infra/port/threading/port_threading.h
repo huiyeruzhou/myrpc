@@ -8,11 +8,11 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#ifndef __embedded_rpc__thread__
-#define __embedded_rpc__thread__
+#ifndef PORT_THREADING_H
+#define PORT_THREADING_H
 #include <cstdint>
 #include <cstring>
-#include "config_detect_platform.h"
+#include "port.h"
 // Threading model
 #define ERPC_THREADS_NONE (0U)     //!< No threads.
 #define ERPC_THREADS_PTHREADS (1U) //!< POSIX pthreads.

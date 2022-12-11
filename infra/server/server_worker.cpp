@@ -28,7 +28,7 @@ void ServerWorker::disposeBufferAndCodec(Codec *codec)
     }
 }
 
-erpc_status_t ServerWorker::runInternal(void)
+rpc_status_t ServerWorker::runInternal(void)
 {
     MessageBuffer buff;
     Codec *codec = NULL;
@@ -39,8 +39,8 @@ erpc_status_t ServerWorker::runInternal(void)
     uint32_t methodId;
     uint32_t sequence;
 
-    erpc_status_t err = runInternalBegin(&codec, buff, msgType, serviceId, methodId, sequence);
-    if (err == kErpcStatus_Success)
+    rpc_status_t err = runInternalBegin(&codec, buff, msgType, serviceId, methodId, sequence);
+    if (err == rpc_status_success)
     {
         err = runInternalEnd(codec, msgType, serviceId, methodId, sequence);
     }
@@ -48,10 +48,10 @@ erpc_status_t ServerWorker::runInternal(void)
     return err;
 }
 
-erpc_status_t ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff, message_type_t &msgType,
-    uint32_t &serviceId, uint32_t &methodId, uint32_t &sequence)
+rpc_status_t ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff, message_type_t &msgType,
+                                            uint32_t &serviceId, uint32_t &methodId, uint32_t &sequence)
 {
-    erpc_status_t err = kErpcStatus_Success;
+    rpc_status_t err = rpc_status_success;
 
     //创建接收缓冲区
     if (m_messageFactory->createServerBuffer() == true)
@@ -64,13 +64,13 @@ erpc_status_t ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff,
     }
 
     // Receive the next invocation request.
-    if (err == kErpcStatus_Success)
+    if (err == rpc_status_success)
     {
         err = m_worker->receive(&buff);
     }
 
     //创建codec
-    if (err == kErpcStatus_Success)
+    if (err == rpc_status_success)
     {
         *codec = m_codecFactory->create();
         if (*codec == NULL)
@@ -80,7 +80,7 @@ erpc_status_t ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff,
     }
 
     //
-    if (err != kErpcStatus_Success)
+    if (err != rpc_status_success)
     {
         // Dispose of buffers.
         if (buff.get() != NULL)
@@ -89,7 +89,7 @@ erpc_status_t ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff,
         }
     }
 
-    if (err == kErpcStatus_Success)
+    if (err == rpc_status_success)
     {
         (*codec)->setBuffer(buff);
 
@@ -101,13 +101,13 @@ erpc_status_t ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff,
             ",  methodId: %" PRIu32
             ", sequence: %" PRIu32 "\n",
             msgType, serviceId, methodId, sequence);
-        if (err != kErpcStatus_Success)
+        if (err != rpc_status_success)
         {
             // Dispose of buffers and codecs.
             disposeBufferAndCodec(*codec);
         }
     }
-    if (err != kErpcStatus_Success)
+    if (err != rpc_status_success)
     {
         
         LOGI(this->TAG,"runInternalBegin err: %d\n",   err);
@@ -116,12 +116,12 @@ erpc_status_t ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff,
     return err;
 }
 
-erpc_status_t ServerWorker::runInternalEnd(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId,
-    uint32_t sequence)
+rpc_status_t ServerWorker::runInternalEnd(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId,
+                                          uint32_t sequence)
 {
-    erpc_status_t err = processMessage(codec, msgType, serviceId, methodId, sequence);
+    rpc_status_t err = processMessage(codec, msgType, serviceId, methodId, sequence);
 
-    if (err == kErpcStatus_Success)
+    if (err == rpc_status_success)
     {
         if (msgType != kOnewayMessage)
         {
@@ -131,7 +131,7 @@ erpc_status_t ServerWorker::runInternalEnd(Codec *codec, message_type_t msgType,
     }
     // Dispose of buffers and codecs.
     disposeBufferAndCodec(codec);
-    if (err != kErpcStatus_Success)
+    if (err != rpc_status_success)
     {
         LOGI(this->TAG,"runInternalEnd err: %d\n",   err);
     }
@@ -139,40 +139,40 @@ erpc_status_t ServerWorker::runInternalEnd(Codec *codec, message_type_t msgType,
     return err;
 }
 
-erpc_status_t ServerWorker::readHeadOfMessage(Codec *codec, message_type_t &msgType, uint32_t &serviceId, uint32_t &methodId,
-    uint32_t &sequence)
+rpc_status_t ServerWorker::readHeadOfMessage(Codec *codec, message_type_t &msgType, uint32_t &serviceId, uint32_t &methodId,
+                                             uint32_t &sequence)
 {
     codec->startReadMessage(&msgType, &serviceId, &methodId, &sequence);
     return codec->getStatus();
 }
 
-erpc_status_t ServerWorker::processMessage(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId,
-    uint32_t sequence)
+rpc_status_t ServerWorker::processMessage(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId,
+                                          uint32_t sequence)
 {
-    erpc_status_t err = kErpcStatus_Success;
+    rpc_status_t err = rpc_status_success;
     Service *service;
 
     if ((msgType != kInvocationMessage) && (msgType != kOnewayMessage))
     {
-        err = kErpcStatus_InvalidArgument;
+        err = rpc_status_invalid_argument;
     }
 
-    if (err == kErpcStatus_Success)
+    if (err == rpc_status_success)
     {
         service = findServiceWithId(serviceId);
         if (service == NULL)
         {
-            err = kErpcStatus_InvalidArgument;
+            err = rpc_status_invalid_argument;
         }
     }
 
-    if (err == kErpcStatus_Success)
+    if (err == rpc_status_success)
     {
         err = service->handleInvocation(methodId, sequence, codec, m_messageFactory);
         LOGI(this->TAG,"service `%s` invoked\n",   service->m_name);
     }
 
-    if (err != kErpcStatus_Success)
+    if (err != rpc_status_success)
     {
         LOGI(this->TAG,"processMessage err: %d\n",   err);
     }
@@ -198,13 +198,13 @@ Service *ServerWorker::findServiceWithId(uint32_t serviceId)
 
 void ServerWorker::workerStub(void *arg)
 {
-    int err = kErpcStatus_Fail;
+    int err = rpc_status_fail;
     ServerWorker *This = reinterpret_cast<ServerWorker *>(arg);
     LOGI(This->TAG, "in stub");
     if (This != NULL)
     {
         int i = 1;
-        while (err != kErpcStatus_Success && i <= 5)
+        while (err != rpc_status_success && i <= 5)
         {
             err = This->runInternal();
             i++;

@@ -2,10 +2,11 @@
 // Created by huiyeruzhou on 2022/12/10.
 //
 
-#ifndef RPC_LOG_H
-#define RPC_LOG_H
-#include "../config_detect_platform.h"
-#include "pri_inttypes.h"
+#ifndef PORT_LOG_H
+#define PORT_LOG_H
+#include "../config.h"
+#include "port_prt_scn.h"
+#include "port_net_info.hpp"
 
 #define color_default     "\033[00m"
 #define color_bold     "\033[01m"
@@ -36,6 +37,8 @@
 #define LOGV( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_VERBOSE, tag, format, ##__VA_ARGS__)
 #endif // !(defined(__cplusplus) && (__cplusplus >  201703L))
 #elif CONFIG_HAS_POSIX
+//线程安全性还有待检查, 但已经避免了对任何全局变量进行操作(begin是全局常量), 不过
+//如果一个线程运行途中发生了上下文切换, 日志打印可能会出现交错
 #include <string>
 #include <chrono>
 extern const std::time_t begin;
@@ -63,4 +66,4 @@ void _printTime();
 #define LOGD( tag, format, arg... ) printLevel(D);_printTime();printTAG(tag)printf(format, ##arg);printf(color_default "\n");
 #define LOGV( tag, format, arg... ) printLevel(V);_printTime();printTAG(tag)printf(format, ##arg);printf(color_default "\n");
 #endif
-#endif //RPC_LOG_H
+#endif //PORT_LOG_H

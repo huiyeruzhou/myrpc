@@ -8,18 +8,17 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#ifndef _ERPC_DETECT_H_
-#define _ERPC_DETECT_H_
+#ifndef CONFIG_INTERNAL_H
+#define CONFIG_INTERNAL_H
 
+#include "const.h"
 #include "config.h"
-#include "config_detect_platform.h"
-#include "malloc_free/dynamic_memory_manage.h"
-#include "log/log.h"
-#include "threading/erpc_threading.h"
+#include "malloc_free/port_malloc_free.h"
+#include "log/port_log.h"
 #include "port_assert.h"
 
 /* clang-format on */
-#endif // _ERPC_DETECT_H_
+#endif // CONFIG_INTERNAL_H
 ////////////////////////////////////////////////////////////////////////////////
 // EOF
 ////////////////////////////////////////////////////////////////////////////////

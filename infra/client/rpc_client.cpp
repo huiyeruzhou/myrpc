@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "client.h"
+#include "rpc_client.h"
 #include "tcp_worker.hpp"
 #include <string>
 
@@ -32,7 +32,7 @@ __attribute__((unused)) const static char *TAG = "client";
      * This function initializes object attributes.
      */
 Client::Client(const char *host, uint16_t port, MessageBufferFactory *messageFactory)
-    : ClientServerCommon(host, port)
+    : CSBase(host, port)
     , m_sequence(0)
     , m_errorHandler(NULL)
 {
@@ -76,7 +76,7 @@ void Client::performRequest(RequestContext &request)
 
 void Client::performClientRequest(RequestContext &request)
 {
-    erpc_status_t err;
+    rpc_status_t err;
 
     // Send invocation request to server.
     if (request.getCodec()->isStatusOk() == true)
@@ -160,7 +160,7 @@ void Client::releaseRequest(RequestContext &request)
     }
 }
 
-void Client::callErrorHandler(erpc_status_t err, uint32_t functionID)
+void Client::callErrorHandler(rpc_status_t err, uint32_t functionID)
 {
     if (m_errorHandler != NULL)
     {
@@ -168,9 +168,9 @@ void Client::callErrorHandler(erpc_status_t err, uint32_t functionID)
     }
 }
 
-erpc_status_t Client::open(void)
+rpc_status_t Client::open(void)
 {
-    erpc_status_t status = kErpcStatus_Success;
+    rpc_status_t status = rpc_status_success;
     struct addrinfo hints = {};
     char portString[8];
     struct addrinfo *res0;
@@ -194,10 +194,10 @@ erpc_status_t Client::open(void)
         if (result < 0)
         {
             LOGE(TAG, "snprintf failed");
-            status = kErpcStatus_Fail;
+            status = rpc_status_fail;
         }
 
-        if (status == kErpcStatus_Success)
+        if (status == rpc_status_success)
         {
             // Perform the name lookup.
             result = getaddrinfo(m_host, portString, &hints, &res0);
@@ -209,7 +209,7 @@ erpc_status_t Client::open(void)
             }
         }
 
-        if (status == kErpcStatus_Success)
+        if (status == rpc_status_success)
         {
             // Iterate over result addresses and try to connect. Exit the loop on the first successful
             // connection.
@@ -232,7 +232,9 @@ erpc_status_t Client::open(void)
                 else
                 {
                     // Exit the loop for the first successful connection.
-                    LOGI(TAG, "successful connection to %s", print_net_info(res->ai_addr, res->ai_addrlen));
+                    char netinfo[24];
+                    sprint_net_info(netinfo, sizeof(netinfo), res->ai_addr, res->ai_addrlen);
+                    LOGI(TAG, "successful connection to %s", netinfo);
                     break;
                 }
             }
@@ -249,44 +251,25 @@ erpc_status_t Client::open(void)
             }
         }
 
-        if (status == kErpcStatus_Success)
+        if (status == rpc_status_success)
         {
             set = 1;
             if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (void *) &set, sizeof(int)) < 0)
             {
                 ::close(sock);
                 LOGE(TAG, "setsockopt failed");
-                status = kErpcStatus_Fail;
+                status = rpc_status_fail;
             }
         }
 
-        if (status == kErpcStatus_Success)
+        if (status == rpc_status_success)
         {
-            // On some systems (BSD) we can disable SIGPIPE on the socket. For others (Linux), we have to
-            // ignore SIGPIPE.
-#if defined(SO_NOSIGPIPE)
-
-            // Disable SIGPIPE for this socket. This will cause write() to return an EPIPE statusor if the
-            // other side has disappeared instead of our process receiving a SIGPIPE.
-            set = 1;
-            if (setsockopt(sock, SOL_SOCKET, SO_NOSIGPIPE, (void *) &set, sizeof(int)) < 0)
-            {
-                ::close(sock);
-                LOGE(TAG, "setsockopt failed");
-                status = kErpcStatus_Fail;
-            }
-        }
-
-        if (status == kErpcStatus_Success)
-        {
-#else
             // globally disable the SIGPIPE signal
             signal(SIGPIPE, SIG_IGN);
-#endif // defined(SO_NOSIGPIPE)
             m_sockfd = sock;
         }
     }
-    if (kErpcStatus_Success == status)
+    if (rpc_status_success == status)
     {
         m_transport = new TCPWorker(m_sockfd, m_port);
     }

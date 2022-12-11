@@ -7,39 +7,35 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#ifndef _EMBEDDED_RPC__CLIENTSERVERCOMMON_H_
-#define _EMBEDDED_RPC__CLIENTSERVERCOMMON_H_
+#ifndef RPC_BASE_H
+#define RPC_BASE_H
 
-#include "erpc_config_internal.h"
-#include "erpc_codec.hpp"
-#include "erpc_transport.hpp"
+#include "port.h"
+#include "codec_base.hpp"
+#include "transport_base.hpp"
 #if CONFIG_HAS_FREERTOS
 #include <cstdio>
+#ifdef __cplusplus
 extern "C" {
+#endif
 #include <lwip/netdb.h>
 #include <lwip/sockets.h>
 #include <netinet/tcp.h>
 #include <errno.h>
+#ifdef __cplusplus
 }
+#endif
 #else
 #include <cstdio>
+#ifdef __cplusplus
 extern "C" {
+#endif
 #include <netdb.h>
 #include <netinet/tcp.h>
 #include <errno.h>
+#ifdef __cplusplus
 }
 #endif
-#define TCP_TRANSPORT_DEBUG_LOG (1)
-#if TCP_TRANSPORT_DEBUG_LOG
-char* print_net_info(const sockaddr *__sockaddr, int __len);
-int getPortFormAddr(const sockaddr * __sockaddr, int __len);
-#else
-#define LOGE
-#define LOGI
-#define LOGD
-#define LOGV
-#define TCP_DEBUG_PRINT(_fmt_, ...)
-#define TCP_DEBUG_ERR(_msg_)
 #endif
 
 
@@ -60,20 +56,20 @@ namespace erpc {
  *
  * @ingroup infra_utility
  */
-class ClientServerCommon
+class CSBase
 {
 public:
     /*!
-     * @brief ClientServerCommon constructor.
+     * @brief CSBase constructor.
      */
-    ClientServerCommon(const char *host, uint16_t port):
+    CSBase(const char *host, uint16_t port):
         m_host(host), m_port(port),m_sockfd(-1),
         m_messageFactory(NULL), m_codecFactory(NULL), m_transport(NULL) {};
 
     /*!
-     * @brief ClientServerCommon destructor
+     * @brief CSBase destructor
      */
-    ~ClientServerCommon(void){};
+    ~CSBase(void){};
 
     /*!
      * @brief This function sets message buffer factory to use.
@@ -127,4 +123,4 @@ protected:
 
 /*! @} */
 
-#endif // _EMBEDDED_RPC__CLIENTSERVERCOMMON_H_
+#endif // RPC_BASE_H

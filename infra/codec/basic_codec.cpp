@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "erpc_basic_codec.hpp"
+#include "basic_codec.hpp"
 
 
 using namespace erpc;
@@ -299,7 +299,7 @@ void BasicCodec::readBinary(uint32_t *length, uint8_t **value)
 
     if (isStatusOk()) {
         if (m_cursor.getRemainingUsed() < *length) {
-            m_status = kErpcStatus_Fail;
+            m_status = rpc_status_fail;
         }
         else if (m_cursor.getRemaining() < *length) {
             m_status = kErpcStatus_BufferOverrun;

@@ -8,14 +8,14 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#ifndef _EMBEDDED_RPC__CLIENT_MANAGER_H_
-#define _EMBEDDED_RPC__CLIENT_MANAGER_H_
+#ifndef RPC_CLIENT_H
+#define RPC_CLIENT_H
 
-#include "erpc_status.h"
-#include "erpc_config_internal.h"
-#include "erpc_client_server_common.hpp"
-#include "erpc_basic_codec.hpp"
-#include "erpc_message_buffer.hpp"
+#include "rpc_status.h"
+#include "port.h"
+#include "rpc_base.hpp"
+#include "basic_codec.hpp"
+#include "message_buffer.hpp"
 
 #include <netdb.h>
 
@@ -30,8 +30,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    typedef void (*client_error_handler_t)(erpc_status_t err,
-        uint32_t functionID); /*!< eRPC error handler function type. */
+    typedef void (*client_error_handler_t)(rpc_status_t err,
+                                           uint32_t functionID); /*!< eRPC error handler function type. */
 #ifdef __cplusplus
 }
 #endif
@@ -52,7 +52,7 @@ class Server;
  *
  * @ingroup infra_client
  */
-class Client : public ClientServerCommon
+class Client : public CSBase
 {
 public:
     /*!
@@ -103,15 +103,15 @@ public:
      * @param[in] err Specify function status at the end of eRPC call.
      * @param[in] functionID Specify eRPC function call.
      */
-    void callErrorHandler(erpc_status_t err, uint32_t functionID);
+    void callErrorHandler(rpc_status_t err, uint32_t functionID);
 
     /*!
 * @brief This function connect client to the server.
 *
-* @retval kErpcStatus_Success When client connected successfully.
-* @retval kErpcStatus_Fail When client doesn't connected successfully.
+* @retval rpc_status_success When client connected successfully.
+* @retval rpc_status_fail When client doesn't connected successfully.
 */
-    virtual erpc_status_t open(void);
+    virtual rpc_status_t open(void);
 
 protected:
     uint32_t m_sequence;                    //!< Sequence number.
@@ -208,4 +208,4 @@ protected:
 
 /*! @} */
 
-#endif // _EMBEDDED_RPC__CLIENT_MANAGER_H_
+#endif // RPC_CLIENT_H

@@ -8,10 +8,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#ifndef _EMBEDDED_RPC__BASIC_SERIALIZATION_H_
-#define _EMBEDDED_RPC__BASIC_SERIALIZATION_H_
+#ifndef BASIC_CODEC_H
+#define BASIC_CODEC_H
 
-#include "erpc_codec.hpp"
+#include "codec_base.hpp"
 
 /*!
  * @addtogroup infra_codec
@@ -397,4 +397,4 @@ public:
 
 /*! @} */
 
-#endif // _EMBEDDED_RPC__BASIC_SERIALIZATION_H_
+#endif // BASIC_CODEC_H

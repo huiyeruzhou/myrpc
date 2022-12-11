@@ -7,10 +7,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#ifndef _EMBEDDED_RPC__PORT_H_
-#define _EMBEDDED_RPC__PORT_H_
+#ifndef PORT_MALLOC_FREE_H
+#define PORT_MALLOC_FREE_H
 
-#include "../config_detect_platform.h"
+#include "../config.h"
 #include <new>
 
 #define ERPC_NOEXCEPT_DISABLED (0U) //!< Disabling noexcept feature.
@@ -78,4 +78,4 @@ void erpc_free(void *ptr);
 
 /*! @} */
 
-#endif // _EMBEDDED_RPC__PORT_H_
+#endif // PORT_MALLOC_FREE_H

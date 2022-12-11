@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "erpc_threading.h"
+#include "port_threading.h"
 
 #if ERPC_THREADS_IS(FREERTOS)
 __attribute__((unused)) static const char *TAG = "Thread";
@@ -66,7 +66,7 @@ void Thread::start(void *arg)
     // higher priority than the current thread, and the new thread calls getCurrenThread(),
     // which will scan the linked list.
 
-    LOGI(TAG, "stacksize = %"  "B", (configSTACK_DEPTH_TYPE) (m_stackSize));
+    LOGI(TAG, "stacksize = %"  PRIu32, (configSTACK_DEPTH_TYPE) (m_stackSize));
 
     if (pdPASS ==
         xTaskCreate(threadEntryPointStub, (m_name[0] ? m_name : "task"),

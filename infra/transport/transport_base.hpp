@@ -7,11 +7,13 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#ifndef _EMBEDDED_RPC__TRANSPORT_H_
-#define _EMBEDDED_RPC__TRANSPORT_H_
+#ifndef TRANSPORT_BASE_H
+#define TRANSPORT_BASE_H
 
-#include "erpc_status.h"
-#include "erpc_message_buffer.hpp"
+#include "rpc_status.h"
+#include "port.h"
+#include "message_buffer.hpp"
+#include "port_threading.h"
 
 
 /*!
@@ -53,7 +55,7 @@ public:
      *
      * @return based on receive implementation.
      */
-    virtual erpc_status_t receive(MessageBuffer *message) = 0;
+    virtual rpc_status_t receive(MessageBuffer *message) = 0;
 
     /*!
      * @brief Prototype for send message.
@@ -64,7 +66,7 @@ public:
      *
      * @return based on send implementation.
      */
-    virtual erpc_status_t send(MessageBuffer *message) = 0;
+    virtual rpc_status_t send(MessageBuffer *message) = 0;
 
     /*!
      * @brief Poll for an incoming message.
@@ -106,4 +108,4 @@ public:
 
 /*! @} */
 
-#endif // _EMBEDDED_RPC__TRANSPORT_H_
+#endif // TRANSPORT_BASE_H
