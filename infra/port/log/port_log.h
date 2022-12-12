@@ -60,10 +60,10 @@ void _printTime();
 #define printTrace() printf("%s[%s]: ", FILENAME, FUNCNAME);
 #define printTAG(tag) printf(" %s: ", tag);
 
-#define LOGE( tag, format, arg... ) printLevel(E);_printTime();printTAG(tag)printf(format, ##arg);printf(color_default "\n");
-#define LOGW( tag, format, arg... ) printLevel(W);_printTime();printTAG(tag)printf(format, ##arg);printf(color_default "\n");
-#define LOGI( tag, format, arg... ) printLevel(I);_printTime();printTAG(tag)printf(format, ##arg);printf(color_default "\n");
-#define LOGD( tag, format, arg... ) printLevel(D);_printTime();printTAG(tag)printf(format, ##arg);printf(color_default "\n");
-#define LOGV( tag, format, arg... ) printLevel(V);_printTime();printTAG(tag)printf(format, ##arg);printf(color_default "\n");
+#define LOGE( tag, format, arg... ) printLevel(E);_printTime();printTAG(tag)printf(format, ##arg);printf(color_default "\n");fflush(stdout);
+#define LOGW( tag, format, arg... ) printLevel(W);_printTime();printTAG(tag)printf(format, ##arg);printf(color_default "\n");fflush(stdout);
+#define LOGI( tag, format, arg... ) printLevel(I);_printTime();printTAG(tag)printf(format, ##arg);printf(color_default "\n");fflush(stdout);
+#define LOGD( tag, format, arg... ) printLevel(D);_printTime();printTAG(tag)printf(format, ##arg);printf(color_default "\n");fflush(stdout);
+#define LOGV( tag, format, arg... ) printLevel(V);_printTime();printTAG(tag)printf(format, ##arg);printf(color_default "\n");fflush(stdout);
 #endif
 #endif //PORT_LOG_H
