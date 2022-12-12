@@ -10,6 +10,6 @@
 //! @brief Size of
 #define CONFIG_MAX_PTHREAD_NAME_LEN (16U)
 #endif
-#define CONFIG_HAS_POSIX 1
-#define CONFIG_HAS_FREERTOS 0
+//#define CONFIG_HAS_POSIX 1
+//#define CONFIG_HAS_FREERTOS 0
 #endif
