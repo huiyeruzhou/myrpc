@@ -173,7 +173,7 @@ void SimpleServer::networkpollerThread(void)
     if (!status)
     {
         // Listen for connections.
-        result = listen(m_sockfd, 1);
+        result = listen(m_sockfd, 4);
         //on Failed
         if (result < 0)
         {

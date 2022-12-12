@@ -20,13 +20,13 @@ int main(int argc,char** argv)
     erpc::MessageBufferFactory *message_buffer_factory = new erpc::MessageBufferFactory();
 
     /* eRPC client side initialization */
-    // MatrixMultiplyServiceClient *client = new MatrixMultiplyServiceClient("192.168.0.104", 12345, message_buffer_factory);
-    MatrixMultiplyServiceClient *client = new MatrixMultiplyServiceClient("localhost", 12345, message_buffer_factory);
+    MatrixMultiplyServiceClient *client = new MatrixMultiplyServiceClient("192.168.0.104", 12345, message_buffer_factory);
+    // MatrixMultiplyServiceClient *client = new MatrixMultiplyServiceClient("localhost", 12345, message_buffer_factory);
 
 
     
     int num1 = argv[1][0] - '0';
-    int num2 = argv[2][0] - '0';
+    int num2 = argv[22][0] - '0';
     /* call eRPC functions */
 
         /* other code like init matrix1 and matrix2 values */
@@ -47,7 +47,7 @@ int main(int argc,char** argv)
         /* code */
         // erpcMatrixMultiply(matrix1, matrix2, result_matrix);
     int32_t ret = 0;
-    client->open();
+    if (rpc_status_t::rpc_status_success != client->open()) return -1;
     client->erpctest(num1, num2, &ret);
     printf("response: %" PRId32 "\n", ret);
     // printMatrix(result_matrix);
