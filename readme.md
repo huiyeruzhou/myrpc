@@ -158,8 +158,8 @@ ${ERPC_SERVER} ${ERPC_CLIENT} ${ERPC_HEADER}:
 包含头文件
 
 ```c++
-#include "rpc_client.h"			  //位于myrpc/infra/client中
-#include "erpc_matrix_multiply.h" //生成的代码
+#include "erpc_matrix_multiply_server.h"	// 生成的文件
+#include "simple_server.hpp"				// 位于myrpc/infra/server中
 ```
 
 初始化MessageBufferFactory 
