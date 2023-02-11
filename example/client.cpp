@@ -21,7 +21,7 @@ int main(int argc,char** argv)
     erpc::MessageBufferFactory *message_buffer_factory = new erpc::MessageBufferFactory();
 
     /* eRPC client side initialization */
-    MatrixMultiplyServiceClient *client = new MatrixMultiplyServiceClient("192.168.0.105", 12345, message_buffer_factory);
+    MatrixMultiplyServiceClient *client = new MatrixMultiplyServiceClient("192.168.0.101", 12345, message_buffer_factory);
     // MatrixMultiplyServiceClient *client = new MatrixMultiplyServiceClient("192.168.1.6", 12345, message_buffer_factory);
     // MatrixMultiplyServiceClient *client = new MatrixMultiplyServiceClient("localhost", 12345, message_buffer_factory);
 

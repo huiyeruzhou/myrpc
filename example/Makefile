@@ -19,7 +19,9 @@ CXXFLAGS += -g $(INCLUDE) -lpthread
 ERPC=idl.erpc
 ERPC_SERVER=erpc_matrix_multiply_server.cpp 
 ERPC_CLIENT=erpc_matrix_multiply_client.cpp
-ERPC_HEADER=erpc_matrix_multiply_server.hpp
+ERPC_HEADER=erpc_matrix_multiply_server.hpp \
+			erpc_matrix_multiply.h
+			
 .PHONY:all
 all: client server
 

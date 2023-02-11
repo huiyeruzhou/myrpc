@@ -18,26 +18,23 @@ void erpcMatrixMultiply(Matrix matrix1, Matrix matrix2, Matrix result_matrix)
 
 void erpctest(int32_t num1, int32_t num2, int32_t *ret) {
     printf("called\n");
-    *ret = num1 + 10;
-    usleep(num2 * 1000000);
+    *ret = num1 + num2;
 }
 
 int main()
 {
     printf("qaq\n");
     /* Init eRPC server environment */
-    /* UART transport layer initialization */
 
     /* MessageBufferFactory initialization */
     auto message_buffer_factory = new erpc::MessageBufferFactory();
 
     /* eRPC server side initialization */
     auto server = new erpc::SimpleServer("localhost", 12345, message_buffer_factory);
-    /* connect generated service into server, look into erpc_matrix_multiply_server.h */
-    erpc_service_t service = create_MatrixMultiplyService_service();
-    erpc::Service *ser = (erpc::Service *)(service);
-    ser->setName("Test Service");
-    server->addService(ser);
+    /* add generated service into server, look into erpc_matrix_multiply_server.h */
+    auto service = new MatrixMultiplyService_service();
+    service->setName("Test Service");
+    server->addService(service);
     server->open();
 
     /* run server */
