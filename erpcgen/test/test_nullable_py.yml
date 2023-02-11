@@ -1,0 +1,76 @@
+---
+name: in param struct
+desc:
+idl: |
+ struct Vector {
+   float[3] v
+ }
+ interface foo {
+   bar(Vector v @nullable) -> void
+ }
+lang: py
+test/client.py:
+  - codec.write_null_flag(v is None)
+  - 'if v is not None:'
+  - v._write
+test/server.py:
+  - def _handle_
+  - 'if codec.read_null_flag():'
+  - v = None
+  - else
+  - Vector()._read
+
+---
+name: out param struct
+desc:
+idl: |
+ struct Vector {
+   float[3] v
+ }
+ interface foo {
+   bar(out Vector v @nullable) -> void
+ }
+lang: py
+test/client.py:
+  - assert type(v) is erpc.Reference
+  - Vector()._read
+test/server.py:
+  - v = erpc.Reference
+  - 'if v.value != None:'
+  - v.value._write
+
+---
+name: struct field
+desc:
+params:
+  type:
+    - string
+    - list<bool>
+idl: |
+ struct pair {
+   {type} b @nullable
+ }
+ interface foo {
+   bar(pair s) -> void
+ }
+lang: py
+test/common.py:
+  - _read
+  - read_null_flag
+  - self.b = None
+  - else
+  - if: type=="list<bool>"
+    then:
+      - start_read_list
+      - re: read_[a-z]+
+    else:
+      - read_string
+  - _write
+  - write_null_flag(self.b is None
+  - if self.b is not None
+  - if: type=="list<bool>"
+    then:
+      - start_write_list
+      - write_bool
+    else:
+      - write_string
