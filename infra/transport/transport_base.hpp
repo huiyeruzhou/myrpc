@@ -55,7 +55,7 @@ public:
      *
      * @return based on receive implementation.
      */
-    virtual rpc_status_t receive(MessageBuffer *message) = 0;
+    virtual rpc_status receive(MessageBuffer *message) = 0;
 
     /*!
      * @brief Prototype for send message.
@@ -66,7 +66,7 @@ public:
      *
      * @return based on send implementation.
      */
-    virtual rpc_status_t send(MessageBuffer *message) = 0;
+    virtual rpc_status send(MessageBuffer *message) = 0;
 
     /*!
      * @brief Poll for an incoming message.

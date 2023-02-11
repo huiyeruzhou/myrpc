@@ -186,7 +186,7 @@ void BasicCodec::startReadMessage(message_type_t *type, uint32_t *service, uint3
     read(&header);
 
     if (((header >> 24) & 0xffU) != kBasicCodecVersion) {
-        updateStatus(kErpcStatus_InvalidMessageVersion);
+        updateStatus(InvalidMessageVersion);
     }
 
     if (isStatusOk()) {
@@ -299,7 +299,7 @@ void BasicCodec::readBinary(uint32_t *length, uint8_t **value)
 
     if (isStatusOk()) {
         if (m_cursor.getRemainingUsed() < *length) {
-            m_status = rpc_status_fail;
+            m_status = Fail;
         }
         else if (m_cursor.getRemaining() < *length) {
             m_status = kErpcStatus_BufferOverrun;

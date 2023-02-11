@@ -57,8 +57,8 @@ namespace erpc
          *
          * @return Based on handleInvocation implementation.
          */
-        virtual rpc_status_t handleInvocation(uint32_t methodId, uint32_t sequence, Codec *codec,
-                                              MessageBufferFactory *messageFactory) = 0;
+        virtual rpc_status handleInvocation(uint32_t methodId, uint32_t sequence, Codec *codec,
+                                            MessageBufferFactory *messageFactory) = 0;
 
         const char *m_name;
 

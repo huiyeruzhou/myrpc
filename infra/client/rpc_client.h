@@ -30,7 +30,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    typedef void (*client_error_handler_t)(rpc_status_t err,
+    typedef void (*client_error_handler_t)(rpc_status err,
                                            uint32_t functionID); /*!< eRPC error handler function type. */
 #ifdef __cplusplus
 }
@@ -103,15 +103,15 @@ public:
      * @param[in] err Specify function status at the end of eRPC call.
      * @param[in] functionID Specify eRPC function call.
      */
-    void callErrorHandler(rpc_status_t err, uint32_t functionID);
+    void callErrorHandler(rpc_status err, uint32_t functionID);
 
     /*!
-* @brief This function connect client to the server.
-*
-* @retval rpc_status_success When client connected successfully.
-* @retval rpc_status_fail When client doesn't connected successfully.
-*/
-    virtual rpc_status_t open(void);
+    * @brief This function connect client to the server.
+    *
+    * @retval Success When client connected successfully.
+    * @retval Fail When client doesn't connected successfully.
+    */
+    virtual rpc_status open(void);
 
 protected:
     uint32_t m_sequence;                    //!< Sequence number.

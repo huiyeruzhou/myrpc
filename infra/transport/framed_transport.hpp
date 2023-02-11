@@ -64,7 +64,7 @@ public:
      * @brief Receives an entire message.
      *
      * The frame header and message data are received. The CRC-16 in the frame header is
-     * compared with the computed CRC. If the received CRC is invalid, #rpc_status_fail
+     * compared with the computed CRC. If the received CRC is invalid, #Fail
      * will be returned.
      *
      * The @a message is only filled with the message data, not the frame header.
@@ -73,21 +73,21 @@ public:
      *
      * @param[in] message Message buffer, to which will be stored incoming message.
      *
-     * @retval rpc_status_success When receiving was successful.
+     * @retval Success When receiving was successful.
      * @retval kErpcStatus_CrcCheckFailed When receiving failed.
      * @retval other Subclass may return other errors from the underlyingReceive() method.
      */
-    virtual rpc_status_t receive(MessageBuffer *message) override;
+    virtual rpc_status receive(MessageBuffer *message) override;
 
     /*!
      * @brief Function to send prepared message.
      *
      * @param[in] message Pass message buffer to send.
      *
-     * @retval rpc_status_success When sending was successful.
+     * @retval Success When sending was successful.
      * @retval other Subclass may return other errors from the underlyingSend() method.
      */
-    virtual rpc_status_t send(MessageBuffer *message) override;
+    virtual rpc_status send(MessageBuffer *message) override;
 
     /*! @brief Contents of the header that prefixes each message. */
     struct Header
@@ -109,10 +109,10 @@ protected:
      * @param[in] data Buffer to send.
      * @param[in] size Size of data to send.
      *
-     * @retval rpc_status_success When data was written successfully.
-     * @retval rpc_status_fail When writing data ends with error.
+     * @retval Success When data was written successfully.
+     * @retval Fail When writing data ends with error.
      */
-    virtual rpc_status_t underlyingSend(const uint8_t *data, uint32_t size) = 0;
+    virtual rpc_status underlyingSend(const uint8_t *data, uint32_t size) = 0;
 
     /*!
      * @brief Subclasses must implement this function to receive data.
@@ -120,10 +120,10 @@ protected:
      * @param[inout] data Preallocated buffer for receiving data.
      * @param[in] size Size of data to read.
      *
-     * @retval rpc_status_success When data was read successfully.
-     * @retval rpc_status_fail When reading data ends with error.
+     * @retval Success When data was read successfully.
+     * @retval Fail When reading data ends with error.
      */
-    virtual rpc_status_t underlyingReceive(uint8_t *data, uint32_t size) = 0;
+    virtual rpc_status underlyingReceive(uint8_t *data, uint32_t size) = 0;
 };
 
 } // namespace erpc

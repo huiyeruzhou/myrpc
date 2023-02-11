@@ -3,7 +3,7 @@
 #include "port.h"
 #include "codec_base.hpp"
 #include "service.hpp"
-#include "tcp_worker.hpp"
+#include "tcp_transport.hpp"
 #include <cstdio>
 extern "C" {
 #include <unistd.h>
@@ -17,15 +17,15 @@ namespace erpc
             TCPWorker *worker);
         ~ServerWorker(){}
         void disposeBufferAndCodec(Codec *codec);
-        rpc_status_t runInternal(void);
-        rpc_status_t runInternalBegin(Codec **codec, MessageBuffer &buff, message_type_t &msgType,
-                                      uint32_t &serviceId, uint32_t &methodId, uint32_t &sequence);
-        rpc_status_t runInternalEnd(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId,
-                                    uint32_t sequence);
+        rpc_status runInternal(void);
+        rpc_status runInternalBegin(Codec **codec, MessageBuffer &buff, message_type_t &msgType,
+                                    uint32_t &serviceId, uint32_t &methodId, uint32_t &sequence);
+        rpc_status runInternalEnd(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId,
+                                  uint32_t sequence);
         Service *findServiceWithId(uint32_t serviceId);
-        rpc_status_t processMessage(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId, uint32_t sequence);
-        rpc_status_t readHeadOfMessage(Codec *codec, message_type_t &msgType, uint32_t &serviceId, uint32_t &methodId,
-                                       uint32_t &sequence);
+        rpc_status processMessage(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId, uint32_t sequence);
+        rpc_status readHeadOfMessage(Codec *codec, message_type_t &msgType, uint32_t &serviceId, uint32_t &methodId,
+                                     uint32_t &sequence);
         
         static void workerStub(void *arg);
         void start(void);

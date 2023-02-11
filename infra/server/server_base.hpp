@@ -73,16 +73,16 @@ public:
     /*!
 * @brief This function will create host on server side, or connect client to the server.
 *
-* @retval #rpc_status_success When creating host was successful or client connected successfully.
+* @retval #Success When creating host was successful or client connected successfully.
 * @retval #kErpcStatus_UnknownName Host name resolution failed.
 * @retval #kErpcStatus_ConnectionFailure Connecting to the specified host failed.
 */
-    virtual rpc_status_t open(void) = 0;
+    virtual rpc_status open(void) = 0;
     
     /*!
      * @brief This function runs the server.
      */
-    virtual rpc_status_t run(void) = 0;
+    virtual rpc_status run(void) = 0;
 
     /*!
      * @brief This function stop the server.
@@ -101,9 +101,9 @@ protected:
     //  * @param[in] methodId To identify function in interface.
     //  * @param[in] sequence To connect correct answer with correct request.
     //  *
-    //  * @returns #rpc_status_success or based on codec startReadMessage.
+    //  * @returns #Success or based on codec startReadMessage.
     //  */
-    // virtual rpc_status_t processMessage(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId,
+    // virtual rpc_status processMessage(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId,
     //                                      uint32_t sequence);
 
     // /*!
@@ -115,9 +115,9 @@ protected:
     //  * @param[out] methodId To identify function in interface.
     //  * @param[out] sequence To connect correct answer with correct request.
     //  *
-    //  * @returns #rpc_status_success or based on service handleInvocation.
+    //  * @returns #Success or based on service handleInvocation.
     //  */
-    // virtual rpc_status_t readHeadOfMessage(Codec *codec, message_type_t &msgType, uint32_t &serviceId,
+    // virtual rpc_status readHeadOfMessage(Codec *codec, message_type_t &msgType, uint32_t &serviceId,
     //                                         uint32_t &methodId, uint32_t &sequence);
 
     // /*!

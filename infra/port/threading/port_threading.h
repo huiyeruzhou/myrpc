@@ -97,6 +97,7 @@ public:
      * @param[in] name Optional name for the thread.
      * @param[in] stackPtr Mandatory task stack pointer for static api usage.
      */
+    //TODO
     Thread(thread_entry_t entry, uint32_t priority = 0, uint32_t stackSize = 2048, const char *name = "");
 
     /*!
@@ -174,15 +175,6 @@ public:
         return reinterpret_cast<thread_id_t>(xTaskGetCurrentTaskHandle());
 #endif
     }
-
-#if ERPC_THREADS_IS(ZEPHYR)
-    /*!
-     * @brief This function sets stack pointer for Zephyr task.
-     *
-     * @param[in] stack Stack pointer.
-     */
-    void setStackPointer(k_thread_stack_t *stack) { m_stack = stack; }
-#endif
 
 
     /*!

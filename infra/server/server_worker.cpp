@@ -28,7 +28,7 @@ void ServerWorker::disposeBufferAndCodec(Codec *codec)
     }
 }
 
-rpc_status_t ServerWorker::runInternal(void)
+rpc_status ServerWorker::runInternal(void)
 {
     MessageBuffer buff;
     Codec *codec = NULL;
@@ -39,8 +39,8 @@ rpc_status_t ServerWorker::runInternal(void)
     uint32_t methodId;
     uint32_t sequence;
 
-    rpc_status_t err = runInternalBegin(&codec, buff, msgType, serviceId, methodId, sequence);
-    if (err == rpc_status_success)
+    rpc_status err = runInternalBegin(&codec, buff, msgType, serviceId, methodId, sequence);
+    if (err == Success)
     {
         err = runInternalEnd(codec, msgType, serviceId, methodId, sequence);
     }
@@ -48,10 +48,10 @@ rpc_status_t ServerWorker::runInternal(void)
     return err;
 }
 
-rpc_status_t ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff, message_type_t &msgType,
-                                            uint32_t &serviceId, uint32_t &methodId, uint32_t &sequence)
+rpc_status ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff, message_type_t &msgType,
+    uint32_t &serviceId, uint32_t &methodId, uint32_t &sequence)
 {
-    rpc_status_t err = rpc_status_success;
+    rpc_status err = Success;
 
     //创建接收缓冲区
     if (m_messageFactory->createServerBuffer() == true)
@@ -59,28 +59,28 @@ rpc_status_t ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff, 
         buff = m_messageFactory->create();
         if (NULL == buff.get())
         {
-            err = kErpcStatus_MemoryError;
+            err = MemoryError;
         }
     }
 
     // Receive the next invocation request.
-    if (err == rpc_status_success)
+    if (err == Success)
     {
         err = m_worker->receive(&buff);
     }
 
     //创建codec
-    if (err == rpc_status_success)
+    if (err == Success)
     {
         *codec = m_codecFactory->create();
         if (*codec == NULL)
         {
-            err = kErpcStatus_MemoryError;
+            err = MemoryError;
         }
     }
 
     //
-    if (err != rpc_status_success)
+    if (err != Success)
     {
         // Dispose of buffers.
         if (buff.get() != NULL)
@@ -89,39 +89,39 @@ rpc_status_t ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff, 
         }
     }
 
-    if (err == rpc_status_success)
+    if (err == Success)
     {
         (*codec)->setBuffer(buff);
 
         err = readHeadOfMessage(*codec, msgType, serviceId, methodId, sequence);
-        
+
         LOGI(this->TAG, "read head of message\n                "
-            "msgType: %" "d" 
+            "msgType: %" "d"
             ", serviceId: %" PRIu32
             ",  methodId: %" PRIu32
             ", sequence: %" PRIu32 "\n",
             msgType, serviceId, methodId, sequence);
-        if (err != rpc_status_success)
+        if (err != Success)
         {
             // Dispose of buffers and codecs.
             disposeBufferAndCodec(*codec);
         }
     }
-    if (err != rpc_status_success)
+    if (err != Success)
     {
-        
-        LOGI(this->TAG,"runInternalBegin err: %d\n",   err);
+
+        LOGI(this->TAG, "runInternalBegin err: %d\n", err);
     }
 
     return err;
 }
 
-rpc_status_t ServerWorker::runInternalEnd(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId,
-                                          uint32_t sequence)
+rpc_status ServerWorker::runInternalEnd(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId,
+    uint32_t sequence)
 {
-    rpc_status_t err = processMessage(codec, msgType, serviceId, methodId, sequence);
+    rpc_status err = processMessage(codec, msgType, serviceId, methodId, sequence);
 
-    if (err == rpc_status_success)
+    if (err == Success)
     {
         if (msgType != kOnewayMessage)
         {
@@ -131,50 +131,50 @@ rpc_status_t ServerWorker::runInternalEnd(Codec *codec, message_type_t msgType, 
     }
     // Dispose of buffers and codecs.
     disposeBufferAndCodec(codec);
-    if (err != rpc_status_success)
+    if (err != Success)
     {
-        LOGI(this->TAG,"runInternalEnd err: %d\n",   err);
+        LOGI(this->TAG, "runInternalEnd err: %d\n", err);
     }
 
     return err;
 }
 
-rpc_status_t ServerWorker::readHeadOfMessage(Codec *codec, message_type_t &msgType, uint32_t &serviceId, uint32_t &methodId,
-                                             uint32_t &sequence)
+rpc_status ServerWorker::readHeadOfMessage(Codec *codec, message_type_t &msgType, uint32_t &serviceId, uint32_t &methodId,
+    uint32_t &sequence)
 {
     codec->startReadMessage(&msgType, &serviceId, &methodId, &sequence);
     return codec->getStatus();
 }
 
-rpc_status_t ServerWorker::processMessage(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId,
-                                          uint32_t sequence)
+rpc_status ServerWorker::processMessage(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId,
+    uint32_t sequence)
 {
-    rpc_status_t err = rpc_status_success;
+    rpc_status err = Success;
     Service *service;
 
     if ((msgType != kInvocationMessage) && (msgType != kOnewayMessage))
     {
-        err = rpc_status_invalid_argument;
+        err = InvalidArgument;
     }
 
-    if (err == rpc_status_success)
+    if (err == Success)
     {
         service = findServiceWithId(serviceId);
         if (service == NULL)
         {
-            err = rpc_status_invalid_argument;
+            err = InvalidArgument;
         }
     }
 
-    if (err == rpc_status_success)
+    if (err == Success)
     {
         err = service->handleInvocation(methodId, sequence, codec, m_messageFactory);
-        LOGI(this->TAG,"service `%s` invoked\n",   service->m_name);
+        LOGI(this->TAG, "service `%s` invoked\n", service->m_name);
     }
 
-    if (err != rpc_status_success)
+    if (err != Success)
     {
-        LOGI(this->TAG,"processMessage err: %d\n",   err);
+        LOGI(this->TAG, "processMessage err: %d\n", err);
     }
 
     return err;
@@ -192,24 +192,21 @@ Service *ServerWorker::findServiceWithId(uint32_t serviceId)
 
         service = service->getNext();
     }
-    LOGI(this->TAG,"service No.%" PRIu32 " `%s` found\n",   serviceId, service->m_name);
+    LOGI(this->TAG, "service No.%" PRIu32 " `%s` found\n", serviceId, service->m_name);
     return service;
 }
 
 void ServerWorker::workerStub(void *arg)
 {
-    int err = rpc_status_fail;
+    rpc_status err = rpc_status::Success;
     ServerWorker *This = reinterpret_cast<ServerWorker *>(arg);
     LOGI(This->TAG, "in stub");
     if (This != NULL)
     {
-        int i = 1;
-        while (err != rpc_status_success && i <= 5)
+        while (err == rpc_status::Success)
         {
             err = This->runInternal();
-            i++;
         }
-        close(This->m_worker->m_socket);
     }
     LOGI(This->TAG, "work done\n");
     return;

@@ -25,15 +25,15 @@ void MessageBuffer::setUsed(uint16_t used)
     m_used = used;
 }
 
-rpc_status_t MessageBuffer::read(uint16_t offset, void *data, uint32_t length)
+rpc_status MessageBuffer::read(uint16_t offset, void *data, uint32_t length)
 {
-    rpc_status_t err = rpc_status_success;
+    rpc_status err = Success;
 
     if (length > 0U)
     {
         if (data == NULL)
         {
-            err = kErpcStatus_MemoryError;
+            err = MemoryError;
         }
         else if ((offset + length) > m_len || (offset + length) < offset)
         {
@@ -48,15 +48,15 @@ rpc_status_t MessageBuffer::read(uint16_t offset, void *data, uint32_t length)
     return err;
 }
 
-rpc_status_t MessageBuffer::write(uint16_t offset, const void *data, uint32_t length)
+rpc_status MessageBuffer::write(uint16_t offset, const void *data, uint32_t length)
 {
-    rpc_status_t err = rpc_status_success;
+    rpc_status err = Success;
 
     if (length > 0U)
     {
         if (data == NULL)
         {
-            err = kErpcStatus_MemoryError;
+            err = MemoryError;
         }
         else if ((offset + length) > m_len || (offset + length) < offset)
         {
@@ -71,9 +71,9 @@ rpc_status_t MessageBuffer::write(uint16_t offset, const void *data, uint32_t le
     return err;
 }
 
-rpc_status_t MessageBuffer::copy(const MessageBuffer *other)
+rpc_status MessageBuffer::copy(const MessageBuffer *other)
 {
-    rpc_status_t err;
+    rpc_status err;
 
     erpc_assert(other != NULL);
     erpc_assert(m_len >= other->m_len);
@@ -159,21 +159,21 @@ MessageBuffer::Cursor &MessageBuffer::Cursor::operator--(void)
     return *this;
 }
 
-rpc_status_t MessageBuffer::Cursor::read(void *data, uint32_t length)
+rpc_status MessageBuffer::Cursor::read(void *data, uint32_t length)
 {
     erpc_assert((m_pos != NULL) && ("Data buffer wasn't set to MessageBuffer." != NULL));
 
-    rpc_status_t err = rpc_status_success;
+    rpc_status err = Success;
 
     if (length > 0U)
     {
         if (data == NULL)
         {
-            err = kErpcStatus_MemoryError;
+            err = MemoryError;
         }
         else if (length > getRemainingUsed())
         {
-            err = rpc_status_fail;
+            err = Fail;
         }
         else if (length > getRemaining())
         {
@@ -189,18 +189,18 @@ rpc_status_t MessageBuffer::Cursor::read(void *data, uint32_t length)
     return err;
 }
 
-rpc_status_t MessageBuffer::Cursor::write(const void *data, uint32_t length)
+rpc_status MessageBuffer::Cursor::write(const void *data, uint32_t length)
 {
     erpc_assert((m_pos != NULL) && ("Data buffer wasn't set to MessageBuffer." != NULL));
     erpc_assert(m_pos == (m_buffer->get() + m_buffer->getUsed()));
 
-    rpc_status_t err = rpc_status_success;
+    rpc_status err = Success;
 
     if (length > 0U)
     {
         if (data == NULL)
         {
-            err = kErpcStatus_MemoryError;
+            err = MemoryError;
         }
         else if (length > getRemaining())
         {
@@ -217,10 +217,10 @@ rpc_status_t MessageBuffer::Cursor::write(const void *data, uint32_t length)
     return err;
 }
 
-rpc_status_t MessageBufferFactory::prepareServerBufferForSend(MessageBuffer *message)
+rpc_status MessageBufferFactory::prepareServerBufferForSend(MessageBuffer *message)
 {
     message->setUsed(0);
-    return rpc_status_success;
+    return Success;
 }
 MessageBuffer MessageBufferFactory::create(void)
 {

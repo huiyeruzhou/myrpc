@@ -52,10 +52,10 @@ SimpleServer::~SimpleServer()
     delete m_codecFactory;
 }
 
-rpc_status_t SimpleServer::run(void)
+rpc_status SimpleServer::run(void)
 {
-    rpc_status_t err = rpc_status_success;
-    while ((err == rpc_status_success) && m_isServerOn)
+    rpc_status err = Success;
+    while ((err == Success) && m_isServerOn)
     {
         // Sleep 10 ms.
          Thread::sleep(10000);
@@ -63,28 +63,6 @@ rpc_status_t SimpleServer::run(void)
     return err;
 }
 
-// rpc_status_t SimpleServer::poll(void)
-// {
-//     rpc_status_t err;
-
-//     if (m_isServerOn)
-//     {
-//         if (m_transport->hasMessage() == true)
-//         {
-//             err = runInternal();
-//         }
-//         else
-//         {
-//             err = rpc_status_success;
-//         }
-//     }
-//     else
-//     {
-//         err = kErpcStatus_ServerIsDown;
-//     }
-
-//     return err;
-// }
 
 void SimpleServer::stop(void)
 {
@@ -97,7 +75,7 @@ void SimpleServer::onNewSocket(int sockfd, int port) {
     worker->start();
 }
 
-rpc_status_t SimpleServer::close(bool stopServer)
+rpc_status SimpleServer::close(bool stopServer)
 {
     if (stopServer)
     {
@@ -110,7 +88,7 @@ rpc_status_t SimpleServer::close(bool stopServer)
         m_sockfd = -1;
     }
 
-    return rpc_status_success;
+    return Success;
 }
 
 
@@ -133,7 +111,7 @@ void SimpleServer::networkpollerThread(void)
     m_sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (m_sockfd < 0)
     {
-        LOGE(TAG, "failed to create server socket");
+        LOGE(TAG, "failed to create server socket, error: %s", strerror(errno));
         status = true;
     }
     if (!status)
@@ -148,7 +126,7 @@ void SimpleServer::networkpollerThread(void)
         result = setsockopt(m_sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
         if (result < 0)
         {
-            LOGE(TAG, "setsockopt failed");
+            LOGE(TAG, "setsockopt failed, error: %s", strerror(errno));
             status = true;
         }
     }
@@ -160,7 +138,7 @@ void SimpleServer::networkpollerThread(void)
         //on Failed
         if (result < 0)
         {
-            LOGE(TAG, "bind failed");
+            LOGE(TAG, "bind failed, error: %s", strerror(errno));
             status = true;
         }
         //on Success
@@ -177,25 +155,11 @@ void SimpleServer::networkpollerThread(void)
         //on Failed
         if (result < 0)
         {
-            LOGE(TAG, "listen failed");
+            LOGE(TAG, "listen failed, error: %s", strerror(errno));
             status = true;
         }
         //on Success
         LOGI(TAG, "%s", "Listening for connections\n");
-    }
-    if (!status)
-    {
-        // //在内核中创建事件表
-        // epfd = epoll_create(EPOLL_SIZE);
-        // if (epfd < 0)
-        // {
-        //     LOGE(TAG, "epfd error");
-        //     status = true;
-        // }
-        // LOGI(TAG, "epoll created, epollfd = %d\n", epfd);
-        // //往内核事件表里添加事件
-        // addfd(epfd, m_sockfd, true);
-
     }
     if (!status)
     {
@@ -220,47 +184,8 @@ void SimpleServer::networkpollerThread(void)
             }
             else
             {
-                LOGE(TAG, "accept failed");
+                LOGE(TAG, "accept failed, error: %s", strerror(errno));
             }
-            // int epoll_events_count = epoll_wait(epfd, events, EPOLL_SIZE, -1);
-            // if (epoll_events_count < 0)
-            // {
-            //     perror("epoll failure");
-            //     break;
-            // }
-            // //处理所有已经就绪的事件
-            // for (int i = 0; i < epoll_events_count; ++i)
-            // {
-            //     int sockfd = events[i].data.fd;
-            //     //新用户连接
-            //     if (sockfd == m_sockfd)
-            //     {
-            //         incomingAddressLength = sizeof(struct sockaddr);
-            //         // we should use select() otherwise we can't end the server properly
-            //         incomingSocket = accept(m_sockfd, &incomingAddress, &incomingAddressLength);
-
-            //         if (incomingSocket > 0)
-            //         {
-            //             // Successfully accepted a connection.
-            //             LOGI(TAG, "accepted connection from ");
-            //             sprint_net_info(&incomingAddress, incomingAddressLength);
-
-            //             // should be inherited from accept() socket but it's not always ...
-            //             yes = 1;
-            //             setsockopt(m_sockfd, IPPROTO_TCP, TCP_NODELAY, (void *) &yes, sizeof(yes));
-            //             addfd(epfd, incomingSocket, true);
-            //             onNewSocket(incomingSocket, getPortFormAddr(&incomingAddress, incomingAddressLength));
-            //         }
-            //         else
-            //         {
-            //             LOGE("accept failed");
-            //         }
-            //     }
-            //     //TODO:处理客户端的进一步输入
-            //     else
-            //     {
-            //     }
-            // }
         }
     }
     close(m_sockfd);
@@ -278,13 +203,13 @@ void SimpleServer::networkpollerStub(void *arg)
     }
 }
 
-rpc_status_t SimpleServer::open(void)
+rpc_status SimpleServer::open(void)
 {
-    rpc_status_t status;
+    rpc_status status;
     m_serverThread.setName("Network Poller");
     m_runServer = true;
     m_serverThread.start(this);
     LOGI(TAG, "start running networkpollerThread");
-    status = rpc_status_success;
+    status = Success;
     return status;
 }

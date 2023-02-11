@@ -31,9 +31,9 @@ client: ${ERPC_CLIENT}  client.cpp ${ERPC_LIB}
 	@${CXX} ${CXXFLAGS} $^ -o client
 	@$(call printmessage,build,Building, client)
 
-# ${ERPC_SERVER} ${ERPC_CLIENT} ${ERPC_HEADER}:
-# 	erpcgen ${ERPC} -g c
+${ERPC_SERVER} ${ERPC_CLIENT} ${ERPC_HEADER}:
+	erpcgen ${ERPC} -g c
 
 .PHONY:clean
 clean:
-	rm client server ${ERPC_CLIENT} ${ERPC_SERVER}
+	rm client server ${ERPC_CLIENT} ${ERPC_SERVER} ${ERPC_HEADER}

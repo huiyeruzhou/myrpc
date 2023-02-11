@@ -35,6 +35,7 @@ Thread::Thread(const char *name)
     strncpy(m_name, name, configMAX_TASK_NAME_LEN);
 }
 
+//默认传入后三个参数
 Thread::Thread(thread_entry_t entry, uint32_t priority, uint32_t stackSize, const char *name)
     : m_entry(entry)
     , m_arg(0)

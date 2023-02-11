@@ -21,22 +21,22 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 /*! @brief eRPC status return codes. */
-enum rpc_status_t
+enum rpc_status
 {
     //! No error occurred.
-    rpc_status_success = 0,
+    Success= 0,
 
     //! Generic failure.
-    rpc_status_fail = 1,
+    Fail = 1,
 
     //! Argument is an invalid value.
-    rpc_status_invalid_argument = 4,
+    InvalidArgument = 4,
 
     //! Operated timed out.
     rpc_status_timeout = 5,
 
     //! Message header contains an unknown version.
-    kErpcStatus_InvalidMessageVersion = 6,
+    InvalidMessageVersion = 6,
 
     //! Expected a reply message but got another message type.
     kErpcStatus_ExpectedReply,
@@ -54,7 +54,7 @@ enum rpc_status_t
     kErpcStatus_ConnectionClosed,
 
     //! Memory allocation error.
-    kErpcStatus_MemoryError,
+    MemoryError,
 
     //! Server is stopped.
     kErpcStatus_ServerIsDown,
@@ -77,9 +77,6 @@ enum rpc_status_t
     //! When sending address from bigger architecture to smaller.
     kErpcStatus_BadAddressScale
 };
-
-/*! @brief Type used for all status and error return values. */
-typedef enum rpc_status_t rpc_status_t;
 
 /*! @} */
 

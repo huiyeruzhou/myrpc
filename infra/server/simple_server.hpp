@@ -14,7 +14,7 @@
 #include "port.h"
 #include "server_base.hpp"
 #include "basic_codec.hpp"
-#include "tcp_worker.hpp"
+#include "tcp_transport.hpp"
 #include "server_worker.hpp"
 #include <fcntl.h>
 
@@ -50,38 +50,39 @@ public:
      *
      * Will never jump out from this function.
      */
-    virtual rpc_status_t run(void) override;
+    virtual rpc_status run(void) override;
 
-    // /*!
-    //  * @brief Run server implementation only if exist message to process.
-    //  *
-    //  * If is message to process, server process it and jumps out from this function,
-    //  * useful for bare-metal because doesn't block main loop, when are not messages
-    //  * to process.
-    //  *
-    //  * @return Return true when server is ON, else false.
-    //  */
-    // virtual rpc_status_t poll(void);
+
 
     /*!
      * @brief This function sets server from ON to OFF
      */
     virtual void stop(void) override;
 
-
-    virtual rpc_status_t open(void) override;
+    /*!
+     * @brief Open the server 
+     *
+     * Awake the network poller thread and begin to listen 
+     */
+    virtual rpc_status open(void) override;
     
     /*!
      * @brief This function disconnects client or stop server host.
      *
      * @param[in] stopServer Specify is server shall be closed as well (stop listen())
-     * @retval #rpc_status_success Always return this.
+     * @retval #Success Always return this.
      */
-    virtual rpc_status_t close(bool stopServer = true);
+    virtual rpc_status close(bool stopServer = true);
     
 
 
-    
+    /*!
+     * @brief callback called when new socket accepted
+     *
+     * Create and start a server_worker to handle this connection
+     * @param[in] sockfd return value of accept()
+     * @param[in] port port numeber of the tcp connection
+     */
     void onNewSocket(int socketfd, int port);
 
 //     /*!
@@ -98,18 +99,19 @@ public:
 
 protected:
     /*!
- * @brief Server thread function.
- */
+    * @brief Server thread function.
+    * Listen on the given port, after socket accpeted it will call the `onNewSocket` function
+    */
     void networkpollerThread(void);
     /*!
- * @brief Thread entry point.
- *
- * Control is passed to the networkpollerThread() method of the TCPTransport instance pointed to
- * by the @c arg parameter.
- *
- * @param arg Thread argument. The pointer to the TCPTransport instance is passed through
- *  this argument.
- */
+    * @brief Thread entry point.
+    *
+    * Control is passed to the networkpollerThread() method of the SimpleServer instance pointed to
+    * by the @c arg parameter.
+    *
+    * @param arg Thread argument. The pointer to the SimpleServer instance is passed through
+    *  this argument.
+    */
     static void networkpollerStub(void *arg);
 };
 

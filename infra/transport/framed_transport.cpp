@@ -33,10 +33,10 @@ FramedTransport::FramedTransport(void)
 FramedTransport::~FramedTransport(void) {}
 
 
-rpc_status_t FramedTransport::receive(MessageBuffer *message)
+rpc_status FramedTransport::receive(MessageBuffer *message)
 {
     Header h;
-    rpc_status_t retVal;
+    rpc_status retVal;
 
     {
 #if !ERPC_THREADS_IS(NONE)
@@ -46,7 +46,7 @@ rpc_status_t FramedTransport::receive(MessageBuffer *message)
         // Receive header first.
         retVal = underlyingReceive((uint8_t *)&h, sizeof(h));
 
-        if (retVal == rpc_status_success)
+        if (retVal == Success)
         {
 
             // received size can't be zero.
@@ -57,7 +57,7 @@ rpc_status_t FramedTransport::receive(MessageBuffer *message)
             }
         }
 
-        if (retVal == rpc_status_success)
+        if (retVal == Success)
         {
             // received size can't be larger then buffer length.
             if (h.m_messageSize > message->getLength())
@@ -67,23 +67,23 @@ rpc_status_t FramedTransport::receive(MessageBuffer *message)
             }
         }
 
-        if (retVal == rpc_status_success)
+        if (retVal == Success)
         {
             // Receive rest of the message now we know its size.
             retVal = underlyingReceive(message->get(), h.m_messageSize);
         }
     }
 
-    if (retVal == rpc_status_success) {
+    if (retVal == Success) {
         // Receive rest of the message now we know its size.
         message->setUsed(h.m_messageSize);
     }
     return retVal;
 }
 
-rpc_status_t FramedTransport::send(MessageBuffer *message)
+rpc_status FramedTransport::send(MessageBuffer *message)
 {
-    rpc_status_t ret;
+    rpc_status ret;
     uint16_t messageLength;
     Header h;
 
@@ -97,7 +97,7 @@ rpc_status_t FramedTransport::send(MessageBuffer *message)
     h.m_messageSize = messageLength;
 
     ret = underlyingSend((uint8_t *)&h, sizeof(h));
-    if (ret == rpc_status_success)
+    if (ret == Success)
     {
         ret = underlyingSend(message->get(), messageLength);
     }

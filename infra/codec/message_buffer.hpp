@@ -132,7 +132,7 @@ public:
      *
      * @return Status from reading data.
      */
-    rpc_status_t read(uint16_t offset, void *data, uint32_t length);
+    rpc_status read(uint16_t offset, void *data, uint32_t length);
 
     /*!
      * @brief This function write data to local buffer.
@@ -143,7 +143,7 @@ public:
      *
      * @return Status from reading data.
      */
-    rpc_status_t write(uint16_t offset, const void *data, uint32_t length);
+    rpc_status write(uint16_t offset, const void *data, uint32_t length);
 
     /*!
      * @brief This function copy given message buffer to local instance.
@@ -152,7 +152,7 @@ public:
      *
      * @return Status from reading data.
      */
-    rpc_status_t copy(const MessageBuffer *other);
+    rpc_status copy(const MessageBuffer *other);
 
     /*!
      * @brief This function swap message buffer attributes between given instance and local instance.
@@ -260,10 +260,10 @@ public:
          * @param[out] data Pointer to value, where copy read data.
          * @param[in] length How much bytes need be read.
          *
-         * @retval rpc_status_success
+         * @retval Success
          * @retval kErpcStatus_BufferOverrun
          */
-        rpc_status_t read(void *data, uint32_t length);
+        rpc_status read(void *data, uint32_t length);
 
         /*!
          * @brief Read data from current buffer.
@@ -271,10 +271,10 @@ public:
          * @param[out] data Pointer to value to be sent.
          * @param[in] length How much bytes need be wrote.
          *
-         * @retval rpc_status_success
+         * @retval Success
          * @retval kErpcStatus_BufferOverrun
          */
-        rpc_status_t write(const void *data, uint32_t length);
+        rpc_status write(const void *data, uint32_t length);
 
         /*!
          * @brief Casting operator return local buffer.
@@ -385,7 +385,7 @@ public:
      *
      * @param[in] message MessageBuffer which can be reused.
      */
-    virtual rpc_status_t prepareServerBufferForSend(MessageBuffer *message);
+    virtual rpc_status prepareServerBufferForSend(MessageBuffer *message);
 
     /*!
      * @brief This function disposes message buffer.

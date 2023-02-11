@@ -9,7 +9,7 @@
  */
 
 #include "rpc_client.h"
-#include "tcp_worker.hpp"
+#include "tcp_transport.hpp"
 #include <string>
 
 
@@ -76,7 +76,7 @@ void Client::performRequest(RequestContext &request)
 
 void Client::performClientRequest(RequestContext &request)
 {
-    rpc_status_t err;
+    rpc_status err;
 
     // Send invocation request to server.
     if (request.getCodec()->isStatusOk() == true)
@@ -160,7 +160,7 @@ void Client::releaseRequest(RequestContext &request)
     }
 }
 
-void Client::callErrorHandler(rpc_status_t err, uint32_t functionID)
+void Client::callErrorHandler(rpc_status err, uint32_t functionID)
 {
     if (m_errorHandler != NULL)
     {
@@ -168,9 +168,9 @@ void Client::callErrorHandler(rpc_status_t err, uint32_t functionID)
     }
 }
 
-rpc_status_t Client::open(void)
+rpc_status Client::open(void)
 {
-    rpc_status_t status = rpc_status_success;
+    rpc_status status = Success;
     struct addrinfo hints = {};
     char portString[8];
     struct addrinfo *res0;
@@ -180,7 +180,7 @@ rpc_status_t Client::open(void)
 
     if (m_sockfd != -1)
     {
-        LOGI("%s", "socket already connected\n");
+        LOGE("%s", "socket already connected, error: %s", strerror(errno));
     }
     else
     {
@@ -193,23 +193,23 @@ rpc_status_t Client::open(void)
         result = snprintf(portString, sizeof(portString), "%d", m_port);
         if (result < 0)
         {
-            LOGE(TAG, "snprintf failed");
-            status = rpc_status_fail;
+            LOGE(TAG, "snprintf failed, error: %s", strerror(errno));
+            status = Fail;
         }
 
-        if (status == rpc_status_success)
+        if (status == Success)
         {
             // Perform the name lookup.
             result = getaddrinfo(m_host, portString, &hints, &res0);
             if (result != 0)
             {
                 // TODO check EAI_NONAME
-                LOGE(TAG, "gettaddrinfo failed");
+                LOGE(TAG, "gettaddrinfo failed, error: %s", strerror(errno));
                 status = kErpcStatus_UnknownName;
             }
         }
 
-        if (status == rpc_status_success)
+        if (status == Success)
         {
             // Iterate over result addresses and try to connect. Exit the loop on the first successful
             // connection.
@@ -219,9 +219,13 @@ rpc_status_t Client::open(void)
                 sock = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
                 if (sock < 0)
                 {
+                    LOGW(TAG, "try create a socket, but failed");
                     continue;
                 }
                 // Attempt to connect.
+                char netinfo[24];
+                sprint_net_info(netinfo, sizeof(netinfo), res->ai_addr, res->ai_addrlen);
+                LOGI(TAG, "try to connect to %s", netinfo);
                 if (connect(sock, res->ai_addr, res->ai_addrlen) < 0)
                 {
                     LOGW(TAG, "try to connect for one of socket, but failed");
@@ -246,36 +250,36 @@ rpc_status_t Client::open(void)
             if (sock < 0)
             {
                 // TODO check EADDRNOTAVAIL:
-                LOGE(TAG, "connecting failed");
+                LOGE(TAG, "connecting failed, error: %s", strerror(errno));
                 status = kErpcStatus_ConnectionFailure;
             }
         }
 
-        if (status == rpc_status_success)
+        if (status == Success)
         {
             set = 1;
             if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (void *) &set, sizeof(int)) < 0)
             {
                 ::close(sock);
-                LOGE(TAG, "setsockopt failed");
-                status = rpc_status_fail;
+                LOGE(TAG, "setsockopt failed, error: %s", strerror(errno));
+                status = Fail;
             }
         }
 
-        if (status == rpc_status_success)
+        if (status == Success)
         {
             // globally disable the SIGPIPE signal
             signal(SIGPIPE, SIG_IGN);
             m_sockfd = sock;
         }
     }
-    if (rpc_status_success == status)
+    if (Success == status)
     {
         m_transport = new TCPWorker(m_sockfd, m_port);
     }
     else
     {
-        LOGE(TAG, "connecting failed");
+        LOGE(TAG, "connecting failed, error: %s", strerror(errno));
     }
     return status;
 }

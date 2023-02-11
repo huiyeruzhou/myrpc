@@ -61,7 +61,7 @@ public:
     Codec(void)
     : m_buffer()
     , m_cursor()
-    , m_status(rpc_status_success)
+    , m_status(Success)
     {
     }
 
@@ -86,14 +86,14 @@ public:
     {
         m_buffer = buf;
         m_cursor.set(&m_buffer);
-        m_status = rpc_status_success;
+        m_status = Success;
     }
 
     /*! @brief Reset the codec to initial state. */
     virtual void reset(void)
     {
         m_cursor.set(&m_buffer);
-        m_status = rpc_status_success;
+        m_status = Success;
     }
 
     /*!
@@ -101,22 +101,22 @@ public:
      *
      * @return Current status of eRPC message processing.
      */
-    rpc_status_t getStatus(void) { return m_status; }
+    rpc_status getStatus(void) { return m_status; }
 
     /*!
      * @brief Return bool value representing current status.
      *
-     * @retval True Current status value is rpc_status_success.
-     * @retval False Current status is other than rpc_status_success.
+     * @retval True Current status value is Success.
+     * @retval False Current status is other than Success.
      */
-    bool isStatusOk(void) { return (m_status == rpc_status_success); }
+    bool isStatusOk(void) { return (m_status == Success); }
 
     /*!
      * @brief Set current status of eRPC message processing to given value.
      *
      * @param[in] status New current value.
      */
-    void updateStatus(rpc_status_t status)
+    void updateStatus(rpc_status status)
     {
         if (isStatusOk())
         {
@@ -430,7 +430,7 @@ public:
 protected:
     MessageBuffer m_buffer;         /*!< Message buffer object */
     MessageBuffer::Cursor m_cursor; /*!< Copy data to message buffers. */
-    rpc_status_t m_status;         /*!< Status of serialized data. */
+    rpc_status m_status;         /*!< Status of serialized data. */
 };
 
 /*!
