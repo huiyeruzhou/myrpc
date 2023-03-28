@@ -197,7 +197,7 @@ Service *ServerWorker::findServiceWithId(uint32_t serviceId)
 
         service = service->getNext();
     }
-    LOGI(this->TAG, "service No.%" PRIu32 " `%s` found", serviceId, service->m_name);
+    LOGI(this->TAG, "service No.%" PRIu32 " found:  `%s`", serviceId, service->m_name);
     return service;
 }
 
