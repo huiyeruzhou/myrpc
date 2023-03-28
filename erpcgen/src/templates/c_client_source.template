@@ -142,7 +142,7 @@ using namespace std;
 {% if generateErrorChecks && fn.returnValue.type.isNotVoid %}
 {%  if empty(fn.returnValue.errorReturnValue) == false && fn.returnValue.isNullReturnType == false %}
 
-    if (err != kErpcStatus_Success)
+    if (err != rpc_status::Success)
     {
         result = {$fn.returnValue.errorReturnValue};
     }

@@ -44,6 +44,8 @@ extern bool nestingDetection;
 {$> symbolFreeSpaceHeader(group.symbolsMap.symbolsServerFree, "noSharedMem")}
 {$> symbolFreeSpaceSource(group.symbolsMap.symbolsServerFree, "noSharedMem")}
 {% def serverShimCode(fn, serverIDName, functionIDName) ------------------------- serverShimCode(fn, serverIDName, functionIDName) %}
+#pragma GCC diagnostic push  
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 {% set serverIndent = "" >%}
 {% if (fn.isReturnValue || fn.isSendValue) && generateErrorChecks %}
     rpc_status err = rpc_status::Success;
@@ -176,7 +178,9 @@ extern bool nestingDetection;
 {% else %}
     return codec->getStatus();
 {% endif %}
+#pragma GCC diagnostic pop 
 {% enddef --------------------------------------------------------------------------------- serverShimCode(fn, serverIDName, functionIDName) %}
+
 {% for callbackType in group.callbacks %}
 
 // Common function for serializing and deserializing callback functions of same type.

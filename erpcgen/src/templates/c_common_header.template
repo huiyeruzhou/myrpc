@@ -120,7 +120,7 @@ enum _{$iface.name}_ids
 {% for iface in group.interfaces %}
 
 /*!
- * @brief Service subclass for {$iface.name}.
+ * @brief Client subclass for {$iface.name}.
  */
 class {$iface.name}Client : public erpc::Client
 {
