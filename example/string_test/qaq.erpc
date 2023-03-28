@@ -1,0 +1,12 @@
+/*!
+ * You can write copyrights rules here. These rules will be copied into the outputs.
+ */
+@outputDir("erpc_outputs") // output directory
+program qaq; // specify name of output files
+
+
+
+interface aaa // cover functions for same topic
+{
+    erpctest(in string str) -> void
+}
