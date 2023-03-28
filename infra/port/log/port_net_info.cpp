@@ -1,5 +1,5 @@
 #include "port_net_info.hpp"
-
+#include "port_log.h"
 #if CONFIG_HAS_FREERTOS
 //only declared but not implemented by esp-idf framework, therefore we should implement one
 //by ourselves, remember to make sure that it is thread-safe
@@ -15,7 +15,14 @@ int getnameinfo(const struct sockaddr *addr, socklen_t addrlen,
 void sprint_net_info(char *netinfo, int netinfo_len, const sockaddr *__sockaddr, int __len) {
     char host[16];
     char service[6];
-    getnameinfo(__sockaddr, __len, host, 32, service, 32, 0);
+    int ret = 0;
+    if ((ret = getnameinfo(__sockaddr, __len, host, 16, service, 6, 0)))
+    {
+#if CONFIG_HAS_POSIX
+        LOGW("net info log", "%s", gai_strerror(ret));
+#endif
+        LOGW("net info log", "SA_FAMILY: %d", __sockaddr->sa_family);
+    }
     snprintf(netinfo, netinfo_len, "%s:%s", host, service);
 }
 

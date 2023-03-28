@@ -8,7 +8,7 @@ codec->readString(&{$info.stringLocalName}_len, &{$info.stringLocalName}_local);
 {%   if generateAllocErrorChecks == true %}
 if (({$info.name} == NULL) || ({$info.stringLocalName}_local == NULL))
 {
-    codec->updateStatus(rpc_status::MemoryError)
+    codec->updateStatus(rpc_status::MemoryError);
 }
 else
 {
@@ -49,7 +49,7 @@ if (({$info.sizeTemp} <= {$info.maxSize}) && ({$info.dataTemp} != NULL))
 {%  if generateAllocErrorChecks == true %}
 {$indent}if (({$info.name} == NULL) && ({$info.sizeTemp} > 0))
 {$indent}{
-{$indent}    codec->updateStatus(rpc_status::MemoryError)
+{$indent}    codec->updateStatus(rpc_status::MemoryError);
 {$indent}}
 {$indent}else
 {$indent}{
@@ -65,7 +65,7 @@ if (({$info.sizeTemp} <= {$info.maxSize}) && ({$info.dataTemp} != NULL))
 }
 else
 {
-    codec->updateStatus(rpc_status::Fail)
+    codec->updateStatus(rpc_status::Fail);
 }
 {% endif %}
 {% enddef ------------------------------- BinaryType %}
@@ -102,7 +102,7 @@ if ({$info.sizeTemp} <= {$info.maxSize})
 {%   if generateAllocErrorChecks == true %}
 {$indent}if (({$info.name} == NULL) && ({$info.sizeTemp} > 0))
 {$indent}{
-{$indent}    codec->updateStatus(rpc_status::MemoryError)
+{$indent}    codec->updateStatus(rpc_status::MemoryError);
 {$indent}}
 {%   endif -- generateAllocErrorChecks == true %}
 {$      addIndent(indent, decodeArrayType(info))}
@@ -113,7 +113,7 @@ if ({$info.sizeTemp} <= {$info.maxSize})
 }
 else
 {
-    codec->updateStatus(rpc_status::Fail)
+    codec->updateStatus(rpc_status::Fail);
 }
 {%  endif %}
 {% endif >%}
@@ -321,7 +321,7 @@ if (({$info.name} >= ERPC_SHARED_MEMORY_BEGIN) && ({$info.name} <= ERPC_SHARED_M
 }
 else
 {
-    codec->updateStatus(rpc_status::MemoryError)
+    codec->updateStatus(rpc_status::MemoryError);
 }
 {% else %}
 codec->writePtr(reinterpret_cast<uintptr_t>({%if source == "client" && info.InoutOutDirection %}*{% endif %}{$info.name}));

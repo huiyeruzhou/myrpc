@@ -92,14 +92,15 @@ rpc_status ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff, me
     if (err == Success)
     {
         (*codec)->setBuffer(buff);
+        LOGI(TAG, "%s", "new RPC call");
 
         err = readHeadOfMessage(*codec, msgType, serviceId, methodId, sequence);
 
-        LOGI(this->TAG, "read head of message\n                "
+        LOGI(this->TAG, "read head of message:    "
             "msgType: %" "d"
             ", serviceId: %" PRIu32
             ",  methodId: %" PRIu32
-            ", sequence: %" PRIu32 "\n",
+            ", sequence: %" PRIu32 "",
             msgType, serviceId, methodId, sequence);
         if (err != Success)
         {
@@ -110,7 +111,7 @@ rpc_status ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff, me
     if (err != Success)
     {
 
-        LOGI(this->TAG, "runInternalBegin err: %d\n", err);
+        LOGW(this->TAG, "runInternalBegin err: %d\n", err);
     }
 
     return err;
@@ -133,7 +134,11 @@ rpc_status ServerWorker::runInternalEnd(Codec *codec, message_type_t msgType, ui
     disposeBufferAndCodec(codec);
     if (err != Success)
     {
-        LOGI(this->TAG, "runInternalEnd err: %d\n", err);
+        LOGW(this->TAG, "runInternalEnd err: %d\n", err);
+    }
+    else
+    {
+        LOGI(TAG, "%s", "RPC call finished\n");
     }
 
     return err;
@@ -169,7 +174,7 @@ rpc_status ServerWorker::processMessage(Codec *codec, message_type_t msgType, ui
     if (err == Success)
     {
         err = service->handleInvocation(methodId, sequence, codec, m_messageFactory);
-        LOGI(this->TAG, "service `%s` invoked\n", service->m_name);
+        LOGI(this->TAG, "service `%s` invoked", service->m_name);
     }
 
     if (err != Success)
@@ -192,7 +197,7 @@ Service *ServerWorker::findServiceWithId(uint32_t serviceId)
 
         service = service->getNext();
     }
-    LOGI(this->TAG, "service No.%" PRIu32 " `%s` found\n", serviceId, service->m_name);
+    LOGI(this->TAG, "service No.%" PRIu32 " `%s` found", serviceId, service->m_name);
     return service;
 }
 
@@ -200,7 +205,7 @@ void ServerWorker::workerStub(void *arg)
 {
     rpc_status err = rpc_status::Success;
     ServerWorker *This = reinterpret_cast<ServerWorker *>(arg);
-    LOGI(This->TAG, "in stub");
+
     if (This != NULL)
     {
         while (err == rpc_status::Success)

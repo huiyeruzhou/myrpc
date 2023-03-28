@@ -141,11 +141,14 @@ void SimpleServer::networkpollerThread(void)
             LOGE(TAG, "bind failed, error: %s", strerror(errno));
             status = true;
         }
-        //on Success
-        char netinfo[24];
-        sprint_net_info(netinfo, sizeof(netinfo), (struct sockaddr *) &serverAddress, sizeof(serverAddress));
-        LOGI(TAG, "bind to %s", netinfo);
-        
+        else
+        {
+            //on Success
+            char netinfo[24];
+            sprint_net_info(netinfo, sizeof(netinfo), (struct sockaddr *) &serverAddress, sizeof(serverAddress));
+            LOGI(TAG, "bind to %s", netinfo);
+        }
+
     }
 
     if (!status)
@@ -168,7 +171,7 @@ void SimpleServer::networkpollerThread(void)
         {
             incomingSocket = accept(m_sockfd, &incomingAddress, &incomingAddressLength);
 
-            if (incomingSocket > 0)
+            if (incomingSocket >= 0)
             {
                 // Successfully accepted a connection.
                 char netinfo[24];
@@ -188,6 +191,7 @@ void SimpleServer::networkpollerThread(void)
             }
         }
     }
+    m_isServerOn = false;
     close(m_sockfd);
 }
 
@@ -195,8 +199,6 @@ void SimpleServer::networkpollerThread(void)
 void SimpleServer::networkpollerStub(void *arg)
 {
     SimpleServer *This = reinterpret_cast<SimpleServer *>(arg);
-
-    LOGI(TAG, "in networkpollerStub (arg=%p)", arg);
     if (This != NULL)
     {
         This->networkpollerThread();

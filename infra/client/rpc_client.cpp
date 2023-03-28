@@ -186,7 +186,7 @@ rpc_status Client::open(void)
     {
         // Fill in hints structure for getaddrinfo.
         hints.ai_flags = AI_NUMERICSERV;
-        hints.ai_family = PF_UNSPEC;
+        hints.ai_family = AF_INET;
         hints.ai_socktype = SOCK_STREAM;
 
         // Convert port number to a string.
