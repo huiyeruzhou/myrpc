@@ -58,7 +58,8 @@ INCLUDES += $(ERPC_C_ROOT)/infra \
 
 SOURCES += 	$(foreach dir,$(subst ' ', ,$(INCLUDES)),$(wildcard $(dir)/*.cpp))
 SOURCES +=  $(foreach dir,$(subst ' ', ,$(INCLUDES)),$(wildcard $(dir)/*.c))
-
+CXXFLAGS += -g
+CFLAGS += -g
 
 MAKE_TARGET = $(TARGET_LIB)($(OBJECTS_ALL))
 

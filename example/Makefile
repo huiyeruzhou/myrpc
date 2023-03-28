@@ -1,7 +1,6 @@
 include ../mk/common.mk
 ERPC_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))../)
 ERPC_C_ROOT = $(ERPC_ROOT)
-ERPC_LIB=$(ERPC_ROOT)/Debug/Linux/erpc/lib/liberpc.a
 INCLUDES += $(ERPC_C_ROOT)/infra \
 			$(ERPC_C_ROOT)/infra/codec \
 			$(ERPC_C_ROOT)/infra/client \
@@ -15,12 +14,14 @@ INCLUDE := $(foreach includes, $(INCLUDES), -I $(includes))
 
 CXX=g++
 CXXFLAGS += -g $(INCLUDE) -lpthread
-
+PROGRAM=erpc_matrix_multiply
 ERPC=idl.erpc
-ERPC_SERVER=erpc_matrix_multiply_server.cpp 
-ERPC_CLIENT=erpc_matrix_multiply_client.cpp
-ERPC_HEADER=erpc_matrix_multiply_server.hpp \
-			erpc_matrix_multiply.h
+ERPC_LIB=$(ERPC_ROOT)/Debug/Linux/erpc/lib/liberpc.a
+ERPCGEN=$(ERPC_ROOT)/Debug/Linux/erpcgen/erpcgen
+ERPC_SERVER=${PROGRAM}_server.cpp 
+ERPC_CLIENT=${PROGRAM}_client.cpp
+ERPC_HEADER=${PROGRAM}_server.hpp \
+			${PROGRAM}.h
 			
 .PHONY:all
 all: client server
@@ -34,7 +35,7 @@ client: ${ERPC_CLIENT}  client.cpp ${ERPC_LIB}
 	@$(call printmessage,build,Building, client)
 
 ${ERPC_SERVER} ${ERPC_CLIENT} ${ERPC_HEADER}:
-	erpcgen ${ERPC} -g c
+	${ERPCGEN} ${ERPC} -g c
 
 .PHONY:clean
 clean:
