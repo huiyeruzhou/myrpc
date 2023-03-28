@@ -11,9 +11,9 @@
 #define TRANSPORT_BASE_H
 
 #include "rpc_status.h"
-#include "port.h"
-#include "message_buffer.hpp"
-#include "port_threading.h"
+#include "port/port.h"
+#include "codec/message_buffer.hpp"
+#include "port/threading/port_threading.h"
 
 
 /*!

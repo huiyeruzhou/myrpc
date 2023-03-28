@@ -1,8 +1,8 @@
 #ifndef _SERVICE_H_
 #define _SERVICE_H_
 
-#include "codec_base.hpp"
-#include "port.h"
+#include "codec/codec_base.hpp"
+#include "port/port.h"
 namespace erpc
 {
     class Service

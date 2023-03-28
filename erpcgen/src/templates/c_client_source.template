@@ -4,8 +4,8 @@
 {% endif %}
 {$commonHeader()}
 
-#include "rpc_client.h"
-#include "port.h"
+#include "client/rpc_client.h"
+#include "port/port.h"
 #include <err.h>
 #include "{$codecHeader}"
 extern "C"

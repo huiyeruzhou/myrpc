@@ -12,7 +12,7 @@
 #define PORT_THREADING_H
 #include <cstdint>
 #include <cstring>
-#include "port.h"
+#include "port/port.h"
 // Threading model
 #define ERPC_THREADS_NONE (0U)     //!< No threads.
 #define ERPC_THREADS_PTHREADS (1U) //!< POSIX pthreads.

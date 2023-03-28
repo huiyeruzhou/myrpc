@@ -12,8 +12,8 @@
 #define MESSAGE_CODEC_BASE_H
 
 #include "rpc_status.h"
-#include "port.h"
-#include "message_buffer.hpp"
+#include "port/port.h"
+#include "codec/message_buffer.hpp"
 
 #include <cstring>
 #include <cstdint>

@@ -8,8 +8,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "rpc_client.h"
-#include "tcp_transport.hpp"
+#include "client/rpc_client.h"
+#include "transport/tcp_transport.hpp"
 #include <string>
 
 

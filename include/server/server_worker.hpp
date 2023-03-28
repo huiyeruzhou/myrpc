@@ -1,9 +1,9 @@
 #ifndef SERVER_WORKER_H
 #define SERVER_WORKER_H
-#include "port.h"
-#include "codec_base.hpp"
-#include "service.hpp"
-#include "tcp_transport.hpp"
+#include "port/port.h"
+#include "codec/codec_base.hpp"
+#include "server/service.hpp"
+#include "transport/tcp_transport.hpp"
 #include <cstdio>
 extern "C" {
 #include <unistd.h>

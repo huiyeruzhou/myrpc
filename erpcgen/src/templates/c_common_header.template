@@ -21,7 +21,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "erpc_version.h"
-#include "rpc_client.h"
+#include "client/rpc_client.h"
 {% if empty(crc16) == false %}
 #include "{$crcHeaderName}"
 {% endif  -- empty(crc16) == false %}

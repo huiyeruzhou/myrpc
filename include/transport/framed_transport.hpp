@@ -11,9 +11,9 @@
 #ifndef FRAMED_TRANSPORT_H
 #define FRAMED_TRANSPORT_H
 
-#include "port.h"
-#include "message_buffer.hpp"
-#include "transport_base.hpp"
+#include "port/port.h"
+#include "codec/message_buffer.hpp"
+#include "transport/transport_base.hpp"
 
 /*!
  * @addtogroup infra_transport

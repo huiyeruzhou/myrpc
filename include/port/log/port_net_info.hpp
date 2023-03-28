@@ -4,8 +4,8 @@
 
 #ifndef RPC_PORT_NET_INFO_H
 #define RPC_PORT_NET_INFO_H
-#include "config.h"
-#include "port_prt_scn.h"
+#include "port/config.h"
+#include "port/log/port_prt_scn.h"
 
 #if CONFIG_HAS_FREERTOS
 #include <cstdio>

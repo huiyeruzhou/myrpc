@@ -12,8 +12,8 @@
 #define _EMBEDDED_RPC__SERVER_H_
 
 #include "rpc_base.hpp"
-#include "port.h"
-#include "service.hpp"
+#include "port/port.h"
+#include "server/service.hpp"
 
 
 /*!

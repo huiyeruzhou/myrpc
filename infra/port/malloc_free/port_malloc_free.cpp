@@ -8,8 +8,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "port_malloc_free.h"
-#include "../config.h"
+#include "port/malloc_free/port_malloc_free.h"
+#include "port/config.h"
 
 #if CONFIG_HAS_POSIX
 #include <cstdlib>

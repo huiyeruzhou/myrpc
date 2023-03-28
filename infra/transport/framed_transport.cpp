@@ -8,10 +8,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "framed_transport.hpp"
+#include "transport/framed_transport.hpp"
 
-#include "port.h"
-#include "message_buffer.hpp"
+#include "port/port.h"
+#include "codec/message_buffer.hpp"
 
 #include <cstdio>
 

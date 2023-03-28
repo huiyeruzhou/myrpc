@@ -1,5 +1,5 @@
-#include "port_net_info.hpp"
-#include "port_log.h"
+#include "port/log/port_net_info.hpp"
+#include "port/log/port_log.h"
 #if CONFIG_HAS_FREERTOS
 //only declared but not implemented by esp-idf framework, therefore we should implement one
 //by ourselves, remember to make sure that it is thread-safe

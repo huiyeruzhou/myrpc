@@ -10,9 +10,9 @@
 #ifndef RPC_BASE_H
 #define RPC_BASE_H
 
-#include "port.h"
-#include "codec_base.hpp"
-#include "transport_base.hpp"
+#include "port/port.h"
+#include "codec/codec_base.hpp"
+#include "transport/transport_base.hpp"
 #if CONFIG_HAS_FREERTOS
 #include <cstdio>
 #ifdef __cplusplus

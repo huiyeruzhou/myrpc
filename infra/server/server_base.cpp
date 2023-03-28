@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "server_base.hpp"
+#include "server/server_base.hpp"
 
 using namespace erpc;
 

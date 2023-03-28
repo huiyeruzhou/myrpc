@@ -133,12 +133,12 @@ Generator::Generator(InterfaceDefinition *def, generator_type_t generatorType)
     {
         case InterfaceDefinition::kBasicCodec: {
             m_templateData["codecClass"] = "BasicCodec";
-            m_templateData["codecHeader"] = "basic_codec.hpp";
+            m_templateData["codecHeader"] = "codec/basic_codec.hpp";
             break;
         }
         default: {
             m_templateData["codecClass"] = "Codec";
-            m_templateData["codecHeader"] = "codec_base.hpp";
+            m_templateData["codecHeader"] = "codec/codec_base.hpp";
             break;
         }
     }

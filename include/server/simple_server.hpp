@@ -11,11 +11,11 @@
 #ifndef SIMPLE_SERVER_H
 #define SIMPLE_SERVER_H
 
-#include "port.h"
-#include "server_base.hpp"
-#include "basic_codec.hpp"
-#include "tcp_transport.hpp"
-#include "server_worker.hpp"
+#include "port/port.h"
+#include "server/server_base.hpp"
+#include "codec/basic_codec.hpp"
+#include "transport/tcp_transport.hpp"
+#include "server/server_worker.hpp"
 #include <fcntl.h>
 
  /*!

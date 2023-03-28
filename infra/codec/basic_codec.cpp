@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "basic_codec.hpp"
+#include "codec/basic_codec.hpp"
 
 
 using namespace erpc;

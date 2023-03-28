@@ -12,10 +12,10 @@
 #define RPC_CLIENT_H
 
 #include "rpc_status.h"
-#include "port.h"
+#include "port/port.h"
 #include "rpc_base.hpp"
-#include "basic_codec.hpp"
-#include "message_buffer.hpp"
+#include "codec/basic_codec.hpp"
+#include "codec/message_buffer.hpp"
 
 #include <netdb.h>
 

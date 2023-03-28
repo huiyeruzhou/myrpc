@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "simple_server.hpp"
+#include "server/simple_server.hpp"
 using namespace erpc;
 __attribute__((unused)) static const char *TAG = "server";
 // #define EPOLL_SIZE 1024

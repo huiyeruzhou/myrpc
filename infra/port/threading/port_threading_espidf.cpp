@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "port_threading.h"
+#include "port/threading/port_threading.h"
 
 #if ERPC_THREADS_IS(FREERTOS)
 __attribute__((unused)) static const char *TAG = "Thread";
