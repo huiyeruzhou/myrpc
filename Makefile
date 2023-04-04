@@ -53,13 +53,12 @@ INCLUDES += $(ERPC_C_ROOT)/infra \
 			$(ERPC_C_ROOT)/infra/port/threading\
 			$(ERPC_C_ROOT)/infra/port/malloc_free\
 			$(ERPC_C_ROOT)/infra/port/log 
-
-			
+INCLUDES += $(ERPC_C_ROOT)/include			
 
 SOURCES += 	$(foreach dir,$(subst ' ', ,$(INCLUDES)),$(wildcard $(dir)/*.cpp))
 SOURCES +=  $(foreach dir,$(subst ' ', ,$(INCLUDES)),$(wildcard $(dir)/*.c))
-CXXFLAGS += -g
-CFLAGS += -g
+CXXFLAGS += -g -O2
+CFLAGS += -g -O2
 
 MAKE_TARGET = $(TARGET_LIB)($(OBJECTS_ALL))
 

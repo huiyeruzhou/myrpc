@@ -1,4 +1,3 @@
-#include "rpc_client.h"
 #include "erpc_matrix_multiply.h"
 
 #include <stdio.h>

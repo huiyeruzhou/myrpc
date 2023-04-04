@@ -1,15 +1,7 @@
 include ../mk/common.mk
 ERPC_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))../)
 ERPC_C_ROOT = $(ERPC_ROOT)
-INCLUDES += $(ERPC_C_ROOT)/infra \
-			$(ERPC_C_ROOT)/infra/codec \
-			$(ERPC_C_ROOT)/infra/client \
-			$(ERPC_C_ROOT)/infra/server \
-			$(ERPC_C_ROOT)/infra/transport \
-			$(ERPC_C_ROOT)/infra/port \
-			$(ERPC_C_ROOT)/infra/port/threading\
-			$(ERPC_C_ROOT)/infra/port/malloc_free\
-			$(ERPC_C_ROOT)/infra/port/log 
+INCLUDES += $(ERPC_C_ROOT)/include
 INCLUDE := $(foreach includes, $(INCLUDES), -I $(includes))
 
 CXX=g++

@@ -1,5 +1,4 @@
 #include "erpc_matrix_multiply_server.h"
-#include "simple_server.hpp"
 #include <unistd.h>
 #include <stdio.h>
 /* implementation of function call */

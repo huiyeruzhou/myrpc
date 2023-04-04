@@ -17,6 +17,8 @@ namespace erpc {
         virtual ~TCPWorker(void);
         rpc_status underlyingReceive(uint8_t *data, uint32_t size);
         rpc_status underlyingSend(const uint8_t *data, uint32_t size);
+    private:
+        friend class ServerWorker;
         int m_socket;
         uint16_t m_port;
     };

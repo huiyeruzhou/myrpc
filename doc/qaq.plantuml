@@ -1,33 +1,25 @@
-@startuml qaq
-!include theme.plantuml
-title RPC框架顺序图
+@startuml 1
+skinparam dpi 800
+title RPC顺序图-建立连接
 
 actor Client as C
-box "客户端" 
-participant ClientStub as CS
-participant ClientCodec as CCod
 participant ClientCore as CC
 participant ClientTransport as CT
 participant ServerTransport as ST
-end box
 
-box "服务端" 
 participant ServerWorker as SW
 participant ServerCore as SS
-participant ServerCodec as SCod
 participant ServiceStub as SStub
-end box
+
 actor Server as S
 
 
-== 建立连接 ==
-autonumber
 S -> SStub : 创建服务
 SStub --> S : 返回服务实例
 
 S -> SS : 注册服务
 S -> SS : 启动服务器
-SS -> ST : 轮询监听端口
+SS -> ST : 服务线程accept()监听端口
 
 C -> CC : 启动客户端
 CC -> CT : 连接服务器
@@ -36,10 +28,29 @@ ST --> CT : 建立连接
 ST --> SS : accept()返回fd
 CT --> CC : 连接完成
 CC --> C : 启动完成
+@enduml 1
+@startuml 2
+skinparam dpi 800
+title RPC顺序图-建立连接
+
+actor Client as C
+participant ClientStub as CS
+participant ClientCodec as CCod
+participant ClientCore as CC
+participant ClientTransport as CT
+participant ServerTransport as ST
+
+participant ServerWorker as SW
+participant ServerCore as SS
+participant ServerCodec as SCod
+participant ServiceStub as SStub
+
+actor Server as S
+S-> SS : 启动服务
+SS-> ST : accept()监听端口
+ST-> SS : accept()返回
 SS -> SW : 创建worker
 SW -> ST : Worker阻塞等待请求
-== 客户端发起调用 ==
-autonumber
 C -> CS : 调用rpc方法
 CS -> CCod : 序列化Meta
 CS -> CCod : 序列化入参
@@ -50,10 +61,31 @@ CC -> CT : 发送数据
 CT -> ST : write()
 ST --> CT : 发送完成
 CT --> CC : 发送完成
-CC -> CT : Client阻塞等待读取返回信息
-== 服务端响应调用 ==
-autonumber
 ST --> SW : 请求到达,Worker不再阻塞
+CC -> CT : Client阻塞等待读取返回信息
+
+@enduml 2
+@startuml 3
+skinparam dpi 800
+title RPC顺序图-建立连接
+
+actor Client as C
+participant ClientStub as CS
+participant ClientCodec as CCod
+participant ClientCore as CC
+participant ClientTransport as CT
+participant ServerTransport as ST
+
+participant ServerWorker as SW
+participant ServerCore as SS
+participant ServerCodec as SCod
+participant ServiceStub as SStub
+
+actor Server as S
+C -> CC : 进行RPC请求
+CC -> CT : 发送数据
+CT --> CC : 发送完成
+CC -> CT : Client阻塞等待读取返回信息
 SW -> SCod : 反序列化Meta
 SW -> SStub : 根据Meta查找服务
 SStub -> SStub : 服务代理handleInvocation()
@@ -69,12 +101,9 @@ SW -> SCod : 获取发送缓冲区
 SCod --> SW : 返回发送缓冲区
 SW -> ST : 发送数据
 ST -> CT : write()
-== 客户端接收结果 ==
-autonumber
 CT --> CC : 返回到达,Client不再阻塞
 CC --> CS : RPC请求完成
 CS -> CCod : 获取返回值
 CCod --> CS : 返回返回值
 CS --> C : 返回调用结果
-
-@enduml
+@enduml 3
