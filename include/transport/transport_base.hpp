@@ -10,7 +10,7 @@
 #ifndef TRANSPORT_BASE_H
 #define TRANSPORT_BASE_H
 
-#include "rpc_status.h"
+#include "rpc_status.hpp"
 #include "port/port.h"
 #include "codec/message_buffer.hpp"
 #include "port/threading/port_threading.h"
@@ -55,7 +55,7 @@ public:
      *
      * @return based on receive implementation.
      */
-    virtual rpc_status receive(MessageBuffer *message) = 0;
+    virtual rpc_status receive(uint8_t *data, uint32_t size) = 0;
 
     /*!
      * @brief Prototype for send message.
@@ -66,18 +66,7 @@ public:
      *
      * @return based on send implementation.
      */
-    virtual rpc_status send(MessageBuffer *message) = 0;
-
-    /*!
-     * @brief Poll for an incoming message.
-     *
-     * This function should return true if are some messages to process by server,
-     * the return value should be tested before calling receive function to avoid
-     * waiting for a new message (receive can be implemented as blocking function).
-     *
-     * @retval True when a message is available to process, else false.
-     */
-    virtual bool hasMessage(void) { return true; }
+    virtual rpc_status send(const uint8_t *data, uint32_t size) = 0;
 };
 
 /*!

@@ -30,19 +30,24 @@ enum rpc_status
     Fail = 1,
 
     //! Argument is an invalid value.
-    InvalidArgument = 4,
+    InvalidArgument,
 
     //! Operated timed out.
-    rpc_status_timeout = 5,
+    rpc_status_timeout,
 
     //! Message header contains an unknown version.
-    InvalidMessageVersion = 6,
+    InvalidMessageVersion,
+
+    //! Failed to encode or decode a message.
+    NanopbCodecError,
 
     //! Expected a reply message but got another message type.
-    kErpcStatus_ExpectedReply,
+    UnExpectedMsgType,
+
+    UnknownService,
 
     //! Attempt to read or write past the end of a buffer.
-    kErpcStatus_BufferOverrun,
+    BufferOverrun,
 
     //! Could not find host with given name.
     kErpcStatus_UnknownName,

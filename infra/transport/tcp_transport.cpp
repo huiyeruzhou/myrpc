@@ -8,7 +8,7 @@ using namespace erpc;
 
 TCPWorker::~TCPWorker(void) {}
 
-rpc_status TCPWorker::underlyingReceive(uint8_t *data, uint32_t size)
+rpc_status TCPWorker::receive(uint8_t *data, uint32_t size)
 {
     ssize_t length;
     rpc_status status = Success;
@@ -50,7 +50,7 @@ rpc_status TCPWorker::underlyingReceive(uint8_t *data, uint32_t size)
     return status;
 }
 
-rpc_status TCPWorker::underlyingSend(const uint8_t *data, uint32_t size)
+rpc_status TCPWorker::send(const uint8_t *data, uint32_t size)
 {
     rpc_status status = Success;
     ssize_t result;

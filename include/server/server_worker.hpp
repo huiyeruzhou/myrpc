@@ -1,11 +1,12 @@
 #ifndef SERVER_WORKER_H
 #define SERVER_WORKER_H
+
 #include "port/port.h"
-#include "codec/codec_base.hpp"
 #include "server/service.hpp"
 #include "transport/tcp_transport.hpp"
 #include <cstdio>
 extern "C" {
+#include "codec/meta.pb.h"
 #include <unistd.h>
 }
 namespace erpc
@@ -13,19 +14,15 @@ namespace erpc
     class ServerWorker {
     public:
         ServerWorker(Service *services, MessageBufferFactory *messageFactory,
-            CodecFactory *codecFactory,
             TCPWorker *worker);
         ~ServerWorker(){}
-        void disposeBufferAndCodec(Codec *codec);
+        void disposeBufferAndCodec();
         rpc_status runInternal(void);
-        rpc_status runInternalBegin(Codec **codec, MessageBuffer &buff, message_type_t &msgType,
-                                    uint32_t &serviceId, uint32_t &methodId, uint32_t &sequence);
-        rpc_status runInternalEnd(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId,
-                                  uint32_t sequence);
+        rpc_status runInternalBegin(myrpc_Meta *meta);
+        rpc_status runInternalEnd(myrpc_Meta *meta);
         Service *findServiceWithId(uint32_t serviceId);
-        rpc_status processMessage(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId, uint32_t sequence);
-        rpc_status readHeadOfMessage(Codec *codec, message_type_t &msgType, uint32_t &serviceId, uint32_t &methodId,
-                                     uint32_t &sequence);
+        rpc_status processMessage(myrpc_Meta *meta);
+        rpc_status readHeadOfMessage(myrpc_Meta *meta);
         
         static void workerStub(void *arg);
         void start(void);
@@ -39,8 +36,7 @@ namespace erpc
         
         Service *m_firstService;
         MessageBufferFactory *m_messageFactory; //!< Message buffer factory to use.
-        CodecFactory *m_codecFactory;           //!< Codec to use.
-        TCPWorker *m_worker;                 //!< Worker to do transport
+        NanopbTransport *m_worker;                 //!< Worker to do transport
         
     };
 

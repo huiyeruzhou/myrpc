@@ -1,0 +1,26 @@
+syntax="proto2";
+
+package myrpc; 
+
+message proto{
+    message Nested{
+        required int32 num1 = 1;
+        required int32 num2 = 2;
+    }
+}
+
+message InputTest{
+    required int32 num1 = 1;
+    required int32 num2 = 2;
+}
+
+message OutputTest{
+    required int32 ret = 1;
+}
+
+service MatrixMultiplyService 
+{
+    rpc myrpctest(InputTest) returns (OutputTest) {}
+}
+
+

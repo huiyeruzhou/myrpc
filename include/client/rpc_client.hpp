@@ -11,10 +11,9 @@
 #ifndef RPC_CLIENT_H
 #define RPC_CLIENT_H
 
-#include "rpc_status.h"
+#include "rpc_status.hpp"
 #include "port/port.h"
 #include "rpc_base.hpp"
-#include "codec/basic_codec.hpp"
 #include "codec/message_buffer.hpp"
 
 #include <netdb.h>
@@ -42,7 +41,7 @@ extern "C" {
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace erpc {
-class RequestContext;
+    class RequestContext;
 #if ERPC_NESTED_CALLS
 class Server;
 #endif
@@ -81,12 +80,6 @@ public:
      */
     virtual void performRequest(RequestContext &request);
 
-    /*!
-     * @brief This function releases request context.
-     *
-     * @param[in] request Request context to release.
-     */
-    virtual void releaseRequest(RequestContext &request);
 
     /*!
      * @brief This function sets error handler function for infrastructure errors.
@@ -130,15 +123,6 @@ protected:
     //! @brief Validate that an incoming message is a reply.
     virtual void verifyReply(RequestContext &request);
 
-    /*!
-     * @brief Create message buffer and codec.
-     *
-     * The new codec is set to use the new message buffer. Both codec and buffer are allocated
-     * with the relevant factories.
-     *
-     * @return Pointer to created codec with message buffer.
-     */
-    Codec *createBufferAndCodec(void);
 
 
 private:
@@ -163,19 +147,18 @@ public:
      * @param[in] codec Set in inout codec.
      * @param[in] isOneway Set information if codec is only oneway or bidirectional.
      */
-    RequestContext(uint32_t sequence, Codec *codec, bool argIsOneway)
+    RequestContext(uint32_t sequence,  bool argIsOneway, MessageBufferFactory *bufferfactory)
     : m_sequence(sequence)
-    , m_codec(codec)
-    , m_oneway(argIsOneway)
+        , m_oneway(argIsOneway)
+        , status(Success)
     {
     }
 
-    /*!
-     * @brief Get inout codec (for writing).
-     *
-     * @return Inout codec.
-     */
-    Codec *getCodec(void) { return m_codec; }
+    bool isStatusOk(void) const { return status == Success; }
+
+    rpc_status getStatus(void) const { return status; }
+
+    void updateStatus(rpc_status newStatus) { status = newStatus; }
 
     /*!
      * @brief Get sequence number (be sure that reply belong to current request).
@@ -200,8 +183,8 @@ public:
 
 protected:
     uint32_t m_sequence; //!< Sequence number. To be sure that reply belong to current request.
-    Codec *m_codec;      //!< Inout codec. Codec for receiving and sending data.
     bool m_oneway;       //!< When true, request context will be oneway type (only send data).
+    rpc_status status;   //!< Status of request context.
 };
 
 } // namespace erpc

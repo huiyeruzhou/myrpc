@@ -12,11 +12,14 @@
 #define SIMPLE_SERVER_H
 
 #include "port/port.h"
+#ifdef __cplusplus 
+extern "C" {
+#endif 
 #include "server/server_base.hpp"
-#include "codec/basic_codec.hpp"
 #include "transport/tcp_transport.hpp"
 #include "server/server_worker.hpp"
 #include <fcntl.h>
+
 
  /*!
  * @addtogroup infra_server
@@ -120,3 +123,6 @@ protected:
 /*! @} */
 
 #endif // SIMPLE_SERVER_H
+#ifdef __cplusplus 
+}
+#endif 

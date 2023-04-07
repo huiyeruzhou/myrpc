@@ -1,7 +1,10 @@
 #ifndef _SERVICE_H_
 #define _SERVICE_H_
 
-#include "codec/codec_base.hpp"
+#include "transport/nanopb_transport.hpp"
+#include "rpc_status.hpp"
+#include "codec/meta.pb.h"
+#include "codec/message_buffer.hpp"
 #include "port/port.h"
 namespace erpc
 {
@@ -57,8 +60,7 @@ namespace erpc
          *
          * @return Based on handleInvocation implementation.
          */
-        virtual rpc_status handleInvocation(uint32_t methodId, uint32_t sequence, Codec *codec,
-                                            MessageBufferFactory *messageFactory) = 0;
+        virtual rpc_status handleInvocation(NanopbTransport *transport, myrpc_Meta *meta) = 0;
 
         const char *m_name;
 

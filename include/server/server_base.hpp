@@ -91,44 +91,6 @@ public:
 
 protected:
     Service *m_firstService; /*!< Contains pointer to first service. */
-    
-    /*!
-    //  * @brief Process message.
-    //  *
-    //  * @param[in] codec Inout codec to use.
-    //  * @param[in] msgType Type of received message. Based on message type will be (will be not) sent respond.
-    //  * @param[in] serviceId To identify interface.
-    //  * @param[in] methodId To identify function in interface.
-    //  * @param[in] sequence To connect correct answer with correct request.
-    //  *
-    //  * @returns #Success or based on codec startReadMessage.
-    //  */
-    // virtual rpc_status processMessage(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId,
-    //                                      uint32_t sequence);
-
-    // /*!
-    //  * @brief Read head of message to identify type of message.
-    //  *
-    //  * @param[in] codec Inout codec to use.
-    //  * @param[out] msgType Type of received message. Based on message type will be (will be not) sent respond.
-    //  * @param[out] serviceId To identify interface.
-    //  * @param[out] methodId To identify function in interface.
-    //  * @param[out] sequence To connect correct answer with correct request.
-    //  *
-    //  * @returns #Success or based on service handleInvocation.
-    //  */
-    // virtual rpc_status readHeadOfMessage(Codec *codec, message_type_t &msgType, uint32_t &serviceId,
-    //                                         uint32_t &methodId, uint32_t &sequence);
-
-    // /*!
-    //  * @brief This function finds service base on service ID.
-    //  *
-    //  * @param[in] serviceId Service id number.
-    //  *
-    //  * @return Pointer to service or NULL.
-    //  */
-    // virtual Service *findServiceWithId(uint32_t serviceId);
-
 
 private:
     // Disable copy ctor.

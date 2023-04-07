@@ -3,109 +3,64 @@
 
 using namespace erpc;
 
+
 ServerWorker::ServerWorker(Service *services, MessageBufferFactory *messageFactory,
-    CodecFactory *codecFactory,
     TCPWorker *worker)
-    : m_workerThread(workerStub)
+    :m_workerThread(workerStub)
     , m_firstService(services)
-    , m_messageFactory(messageFactory)
-    , m_codecFactory(codecFactory)
-    , m_worker(worker)
 {
-    snprintf(TAG, sizeof(TAG) - 1, "worker %" PRId16, m_worker->m_port);
+    m_worker = new NanopbTransport(worker, messageFactory);
+    snprintf(TAG, sizeof(TAG) - 1, "worker %" PRId16, static_cast<TCPWorker *>(m_worker->worker)->m_port);
     m_workerThread.setName(TAG);
 }
 
-void ServerWorker::disposeBufferAndCodec(Codec *codec)
+void ServerWorker::disposeBufferAndCodec()
 {
-    if (codec != NULL)
-    {
-        if (codec->getBuffer() != NULL)
-        {
-            m_messageFactory->dispose(codec->getBuffer());
-        }
-        m_codecFactory->dispose(codec);
-    }
 }
 
 rpc_status ServerWorker::runInternal(void)
 {
-    MessageBuffer buff;
-    Codec *codec = NULL;
-
     // Handle the request.
-    message_type_t msgType;
-    uint32_t serviceId;
-    uint32_t methodId;
-    uint32_t sequence;
-
-    rpc_status err = runInternalBegin(&codec, buff, msgType, serviceId, methodId, sequence);
+    myrpc_Meta meta = myrpc_Meta_init_zero;
+    rpc_status err = runInternalBegin(&meta);
     if (err == Success)
     {
-        err = runInternalEnd(codec, msgType, serviceId, methodId, sequence);
+        err = runInternalEnd(&meta);
     }
-
     return err;
 }
 
-rpc_status ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff, message_type_t &msgType,
-    uint32_t &serviceId, uint32_t &methodId, uint32_t &sequence)
+rpc_status ServerWorker::runInternalBegin(myrpc_Meta *meta)
 {
     rpc_status err = Success;
-
-    //创建接收缓冲区
-    if (m_messageFactory->createServerBuffer() == true)
-    {
-        buff = m_messageFactory->create();
-        if (NULL == buff.get())
-        {
-            err = MemoryError;
-        }
-    }
 
     // Receive the next invocation request.
     if (err == Success)
     {
-        err = m_worker->receive(&buff);
+        err = m_worker->receive();
     }
 
-    //创建codec
-    if (err == Success)
-    {
-        *codec = m_codecFactory->create();
-        if (*codec == NULL)
-        {
-            err = MemoryError;
-        }
-    }
 
-    //
     if (err != Success)
     {
         // Dispose of buffers.
-        if (buff.get() != NULL)
-        {
-            m_messageFactory->dispose(&buff);
-        }
     }
-
-    if (err == Success)
+    else
     {
-        (*codec)->setBuffer(buff);
+        myrpc_Meta meta = myrpc_Meta_init_zero;
+        m_worker->read(myrpc_Meta_fields, &meta);
         LOGI(TAG, "%s", "new RPC call");
-
-        err = readHeadOfMessage(*codec, msgType, serviceId, methodId, sequence);
-
+        
         LOGI(this->TAG, "read head of message:    "
             "msgType: %" "d"
             ", serviceId: %" PRIu32
             ",  methodId: %" PRIu32
             ", sequence: %" PRIu32 "",
-            msgType, serviceId, methodId, sequence);
+            meta.type, meta.serviceId, meta.methodId, meta.seq);
         if (err != Success)
         {
             // Dispose of buffers and codecs.
-            disposeBufferAndCodec(*codec);
+            disposeBufferAndCodec();
         }
     }
     if (err != Success)
@@ -117,21 +72,16 @@ rpc_status ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff, me
     return err;
 }
 
-rpc_status ServerWorker::runInternalEnd(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId,
-    uint32_t sequence)
+rpc_status ServerWorker::runInternalEnd(myrpc_Meta *meta)
 {
-    rpc_status err = processMessage(codec, msgType, serviceId, methodId, sequence);
+    rpc_status err = processMessage(meta);
 
     if (err == Success)
     {
-        if (msgType != kOnewayMessage)
-        {
-
-            err = m_worker->send(codec->getBuffer());
-        }
+        err = m_worker->send();
     }
     // Dispose of buffers and codecs.
-    disposeBufferAndCodec(codec);
+    disposeBufferAndCodec();
     if (err != Success)
     {
         LOGW(this->TAG, "runInternalEnd err: %d\n", err);
@@ -144,45 +94,27 @@ rpc_status ServerWorker::runInternalEnd(Codec *codec, message_type_t msgType, ui
     return err;
 }
 
-rpc_status ServerWorker::readHeadOfMessage(Codec *codec, message_type_t &msgType, uint32_t &serviceId, uint32_t &methodId,
-    uint32_t &sequence)
-{
-    codec->startReadMessage(&msgType, &serviceId, &methodId, &sequence);
-    return codec->getStatus();
-}
 
-rpc_status ServerWorker::processMessage(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId,
-    uint32_t sequence)
+rpc_status ServerWorker::processMessage(myrpc_Meta *meta)
 {
-    rpc_status err = Success;
     Service *service;
 
-    if ((msgType != kInvocationMessage) && (msgType != kOnewayMessage))
-    {
-        err = InvalidArgument;
-    }
+    if ((meta->type != myrpc_Meta_msgType_REQUEST) && (meta->type != myrpc_Meta_msgType_ONEWAY))
+        return UnExpectedMsgType;
+    
 
-    if (err == Success)
-    {
-        service = findServiceWithId(serviceId);
-        if (service == NULL)
-        {
-            err = InvalidArgument;
-        }
-    }
+    if (NULL == findServiceWithId(meta->serviceId))
+        return UnknownService;
 
-    if (err == Success)
-    {
-        err = service->handleInvocation(methodId, sequence, codec, m_messageFactory);
-        LOGI(this->TAG, "service `%s` invoked", service->m_name);
-    }
-
-    if (err != Success)
-    {
+    rpc_status err;
+    err = service->handleInvocation(m_worker, meta);
+    if (err != Success) {
         LOGI(this->TAG, "processMessage err: %d\n", err);
+        return err;
     }
 
-    return err;
+    LOGI(this->TAG, "service `%s` invoked", service->m_name);
+    return Success;
 }
 
 Service *ServerWorker::findServiceWithId(uint32_t serviceId)

@@ -54,7 +54,7 @@ INCLUDES += $(ERPC_C_ROOT)/infra \
 			$(ERPC_C_ROOT)/infra/port/malloc_free\
 			$(ERPC_C_ROOT)/infra/port/log 
 INCLUDES += $(ERPC_C_ROOT)/include			
-
+INCLUDES += $(ERPC_C_ROOT)/nanopb
 SOURCES += 	$(foreach dir,$(subst ' ', ,$(INCLUDES)),$(wildcard $(dir)/*.cpp))
 SOURCES +=  $(foreach dir,$(subst ' ', ,$(INCLUDES)),$(wildcard $(dir)/*.c))
 CXXFLAGS += -g -O2

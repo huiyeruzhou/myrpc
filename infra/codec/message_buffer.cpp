@@ -17,215 +17,64 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////////////////
 // Code
 ////////////////////////////////////////////////////////////////////////////////
-
-void MessageBuffer::setUsed(uint16_t used)
-{
-    erpc_assert(used <= m_len);
-
-    m_used = used;
-}
-
-rpc_status MessageBuffer::read(uint16_t offset, void *data, uint32_t length)
+rpc_status MessageBuffer::read(void *data, uint32_t length, uint16_t offset)
 {
     rpc_status err = Success;
-
+    uint16_t dest_pos = offset + length;
+    
     if (length > 0U)
     {
         if (data == NULL)
         {
             err = MemoryError;
         }
-        else if ((offset + length) > m_len || (offset + length) < offset)
+        else if ((dest_pos) > m_len || (dest_pos) < offset)
         {
-            err = kErpcStatus_BufferOverrun;
+            err = BufferOverrun;
         }
         else
         {
-            (void)memcpy(data, &m_buf[offset], length);
+            (void) memcpy(data, &m_buf[offset], length);
+            m_read_pos = dest_pos > m_read_pos ? dest_pos : m_read_pos;
         }
     }
-
     return err;
 }
 
-rpc_status MessageBuffer::write(uint16_t offset, const void *data, uint32_t length)
+rpc_status MessageBuffer::write(const void *data, uint32_t length, uint16_t offset)
 {
     rpc_status err = Success;
-
+    uint16_t dest_pos = offset + length;
+    
     if (length > 0U)
     {
         if (data == NULL)
         {
             err = MemoryError;
         }
-        else if ((offset + length) > m_len || (offset + length) < offset)
+        else if ((dest_pos) > m_len || (dest_pos) < offset)
         {
-            err = kErpcStatus_BufferOverrun;
+            err = BufferOverrun;
         }
         else
         {
-            (void)memcpy(&m_buf[offset], data, length);
+            (void) memcpy(&m_buf[offset], data, length);
+            m_write_pos = dest_pos > m_write_pos ? dest_pos : m_write_pos;
         }
     }
-
-    return err;
-}
-
-rpc_status MessageBuffer::copy(const MessageBuffer *other)
-{
-    rpc_status err;
-
-    erpc_assert(other != NULL);
-    erpc_assert(m_len >= other->m_len);
-
-    m_used = other->m_used;
-    err = this->write(0, other->m_buf, m_used);
-
-    return err;
-}
-
-void MessageBuffer::swap(MessageBuffer *other)
-{
-    erpc_assert(other != NULL);
-
-    MessageBuffer temp(*other);
-
-    other->m_len = m_len;
-    other->m_used = m_used;
-    other->m_buf = m_buf;
-    m_len = temp.m_len;
-    m_used = temp.m_used;
-    m_buf = temp.m_buf;
-}
-
-void MessageBuffer::Cursor::set(MessageBuffer *buffer)
-{
-    erpc_assert(buffer != NULL);
-
-    m_buffer = buffer;
-    // RPMSG when nested calls are enabled can set NULL buffer.
-    // erpc_assert(buffer->get() && "Data buffer wasn't set to MessageBuffer.");
-    // receive function should return err if it couldn't set data buffer.
-    m_pos = buffer->get();
-}
-
-uint8_t &MessageBuffer::Cursor::operator[](int index)
-{
-    erpc_assert(((m_pos + index) >= m_buffer->get()) && ((uint16_t)(m_pos - m_buffer->get()) + index <= m_buffer->getLength()));
-
-    return m_pos[index];
-}
-
-const uint8_t &MessageBuffer::Cursor::operator[](int index) const
-{
-    erpc_assert(((m_pos + index) >= m_buffer->get()) && ((uint16_t)(m_pos - m_buffer->get()) + index <= m_buffer->getLength()));
-
-    return m_pos[index];
-}
-
-MessageBuffer::Cursor &MessageBuffer::Cursor::operator+=(uint16_t n)
-{
-    erpc_assert((uint32_t)(m_pos - m_buffer->get()) + n <= m_buffer->getLength());
-
-    m_pos += n;
-
-    return *this;
-}
-
-MessageBuffer::Cursor &MessageBuffer::Cursor::operator-=(uint16_t n)
-{
-    erpc_assert(((uintptr_t)m_pos >= n) && (m_pos - n) >= m_buffer->get());
-
-    m_pos -= n;
-
-    return *this;
-}
-
-MessageBuffer::Cursor &MessageBuffer::Cursor::operator++(void)
-{
-    erpc_assert((uint16_t)(m_pos - m_buffer->get()) < m_buffer->getLength());
-
-    ++m_pos;
-
-    return *this;
-}
-
-MessageBuffer::Cursor &MessageBuffer::Cursor::operator--(void)
-{
-    erpc_assert(m_pos > m_buffer->get());
-
-    --m_pos;
-
-    return *this;
-}
-
-rpc_status MessageBuffer::Cursor::read(void *data, uint32_t length)
-{
-    erpc_assert((m_pos != NULL) && ("Data buffer wasn't set to MessageBuffer." != NULL));
-
-    rpc_status err = Success;
-
-    if (length > 0U)
-    {
-        if (data == NULL)
-        {
-            err = MemoryError;
-        }
-        else if (length > getRemainingUsed())
-        {
-            err = Fail;
-        }
-        else if (length > getRemaining())
-        {
-            err = kErpcStatus_BufferOverrun;
-        }
-        else
-        {
-            (void)memcpy(data, m_pos, length);
-            m_pos += length;
-        }
-    }
-
-    return err;
-}
-
-rpc_status MessageBuffer::Cursor::write(const void *data, uint32_t length)
-{
-    erpc_assert((m_pos != NULL) && ("Data buffer wasn't set to MessageBuffer." != NULL));
-    erpc_assert(m_pos == (m_buffer->get() + m_buffer->getUsed()));
-
-    rpc_status err = Success;
-
-    if (length > 0U)
-    {
-        if (data == NULL)
-        {
-            err = MemoryError;
-        }
-        else if (length > getRemaining())
-        {
-            err = kErpcStatus_BufferOverrun;
-        }
-        else
-        {
-            (void)memcpy(m_pos, data, length);
-            m_pos += length;
-            m_buffer->setUsed(m_buffer->getUsed() + length);
-        }
-    }
-
     return err;
 }
 
 rpc_status MessageBufferFactory::prepareServerBufferForSend(MessageBuffer *message)
 {
-    message->setUsed(0);
+    message->m_read_pos = 0;
+    message->m_write_pos = 4;
     return Success;
 }
-MessageBuffer MessageBufferFactory::create(void)
+MessageBuffer *MessageBufferFactory::create(void)
 {
     uint8_t *buf = new (nothrow) uint8_t[ERPC_DEFAULT_BUFFER_SIZE];
-    return MessageBuffer(buf, ERPC_DEFAULT_BUFFER_SIZE);
+    return new MessageBuffer(buf, ERPC_DEFAULT_BUFFER_SIZE);
 }
 void MessageBufferFactory::dispose(MessageBuffer *buf)
     {

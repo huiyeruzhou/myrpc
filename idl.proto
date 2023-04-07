@@ -1,0 +1,33 @@
+syntax="proto2";
+
+package myrpc_matrix_multiply; 
+enum e{
+    e1 = 1;
+    e2 = 2;
+}
+message proto{
+    required int32 num1 = 1;
+    required string qaq = 3;
+    repeated int32 waw = 4;
+    message Nested{
+        required int32 num1 = 1;
+        required int32 num2 = 2;
+    }
+    required Nested nested = 2;
+}
+
+message InputTest{
+    required int32 num1 = 1;
+    required int32 num2 = 2;
+}
+
+message OutputTest{
+    required int32 ret = 1;
+}
+
+service MatrixMultiplyService 
+{
+    rpc myrpctest(InputTest) returns (OutputTest) {}
+}
+
+
