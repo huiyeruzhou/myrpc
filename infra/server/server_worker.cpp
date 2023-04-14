@@ -4,133 +4,115 @@
 using namespace erpc;
 
 
-ServerWorker::ServerWorker(Service *services, MessageBufferFactory *messageFactory,
-    TCPWorker *worker)
+ServerWorker::ServerWorker(Service *services, TCPWorker *worker)
     :m_workerThread(workerStub)
     , m_firstService(services)
+    , m_worker(worker)
 {
-    m_worker = new NanopbTransport(worker, messageFactory);
-    snprintf(TAG, sizeof(TAG) - 1, "worker %" PRId16, static_cast<TCPWorker *>(m_worker->worker)->m_port);
+    snprintf(TAG, sizeof(TAG) - 1, "worker %" PRIin_port_t, m_worker->m_port);
     m_workerThread.setName(TAG);
 }
-
-void ServerWorker::disposeBufferAndCodec()
-{
-}
-
+ServerWorker::~ServerWorker() {
+    m_service->destroyMsg(m_worker->to_recv_msg, m_worker->to_send_msg);
+    delete m_worker;
+};
 rpc_status ServerWorker::runInternal(void)
 {
-    // Handle the request.
-    myrpc_Meta meta = myrpc_Meta_init_zero;
-    rpc_status err = runInternalBegin(&meta);
-    if (err == Success)
-    {
-        err = runInternalEnd(&meta);
-    }
-    return err;
-}
-
-rpc_status ServerWorker::runInternalBegin(myrpc_Meta *meta)
-{
-    rpc_status err = Success;
-
-    // Receive the next invocation request.
-    if (err == Success)
-    {
-        err = m_worker->receive();
-    }
-
-
-    if (err != Success)
-    {
-        // Dispose of buffers.
-    }
-    else
-    {
-        myrpc_Meta meta = myrpc_Meta_init_zero;
-        m_worker->read(myrpc_Meta_fields, &meta);
-        LOGI(TAG, "%s", "new RPC call");
-        
-        LOGI(this->TAG, "read head of message:    "
-            "msgType: %" "d"
-            ", serviceId: %" PRIu32
-            ",  methodId: %" PRIu32
-            ", sequence: %" PRIu32 "",
-            meta.type, meta.serviceId, meta.methodId, meta.seq);
-        if (err != Success)
-        {
-            // Dispose of buffers and codecs.
-            disposeBufferAndCodec();
-        }
-    }
-    if (err != Success)
-    {
-
-        LOGW(this->TAG, "runInternalBegin err: %d\n", err);
-    }
-
-    return err;
-}
-
-rpc_status ServerWorker::runInternalEnd(myrpc_Meta *meta)
-{
-    rpc_status err = processMessage(meta);
-
-    if (err == Success)
-    {
-        err = m_worker->send();
-    }
-    // Dispose of buffers and codecs.
-    disposeBufferAndCodec();
-    if (err != Success)
-    {
-        LOGW(this->TAG, "runInternalEnd err: %d\n", err);
-    }
-    else
-    {
-        LOGI(TAG, "%s", "RPC call finished\n");
-    }
-
-    return err;
-}
-
-
-rpc_status ServerWorker::processMessage(myrpc_Meta *meta)
-{
-    Service *service;
-
-    if ((meta->type != myrpc_Meta_msgType_REQUEST) && (meta->type != myrpc_Meta_msgType_ONEWAY))
-        return UnExpectedMsgType;
-    
-
-    if (NULL == findServiceWithId(meta->serviceId))
-        return UnknownService;
-
     rpc_status err;
-    err = service->handleInvocation(m_worker, meta);
-    if (err != Success) {
-        LOGI(this->TAG, "processMessage err: %d\n", err);
-        return err;
+    myrpc_Meta *req_md = m_worker->to_recv_md;
+    myrpc_Meta *rsp_md = m_worker->to_send_md;
+    const pb_msgdesc_t **input_desc = &m_worker->recv_desc;
+    const pb_msgdesc_t **output_desc = &m_worker->send_desc;
+    void **input_msg = &m_worker->to_recv_msg;
+    void **output_msg = &m_worker->to_send_msg;
+    // get data frame
+    CHECK_STATUS(m_worker->receiveFrame(), err);
+    LOGI(TAG, "receiveFrame()");
+    //recv inital metadata
+    CHECK_STATUS(m_worker->recv_inital_md(), err);
+    LOGI(TAG, "recv_inital_md()");
+
+    //find the method
+    CHECK_STATUS(findServiceByMetadata(req_md),err);
+    //filled message desc, so that we can receive message
+    m_service->filledMsgDesc(input_desc, input_msg, output_desc, output_msg);
+    
+    //recv messgae
+    CHECK_STATUS(m_worker->recv_msg(), err);
+    LOGI(TAG, "recv_msg()");
+    //recv trailing metadata
+    CHECK_STATUS(m_worker->recv_trailing_md(), err);
+    LOGI(TAG, "recv_trailing_md()");
+    
+    CHECK_STATUS(callMethodByMetadata(req_md, rsp_md, m_worker->to_recv_msg, m_worker->to_send_msg), err);
+
+    //send initial metadata
+    CHECK_STATUS(m_worker->send_inital_md(), err);
+    LOGI(TAG, "send_inital_md()");
+    //send msg
+    CHECK_STATUS(m_worker->send_msg(), err);
+    LOGI(TAG, "send_msg()");
+    //sned trailing metadata
+done:
+    rpc_status has_error = err;
+    if (err != rpc_status::Success && ((rsp_md->has_status && rsp_md->status == rpc_status::Success) || !rsp_md->has_status)) {
+        rsp_md->has_status = true;
+        rsp_md->status = err;
     }
-
-    LOGI(this->TAG, "service `%s` invoked", service->m_name);
-    return Success;
+    if (err == rpc_status::kErpcStatus_ConnectionClosed) {
+        m_worker->close();
+        return kErpcStatus_ConnectionClosed;
+    }
+    err = m_worker->send_trailing_md();
+    if (rpc_status::Success != err) {
+        LOGE(TAG, "Failed to send trailing md");
+    }
+    LOGI(TAG, "send_trailing_md()");
+    if (has_error != rpc_status::Success) {
+        LOGW(TAG, "Error occurred: %s", StatusToString(has_error));
+    }
+    else {
+        LOGI(TAG, "RPC Call Success\n");
+    }
+    resetBuffers();
+    return err;
 }
-
-Service *ServerWorker::findServiceWithId(uint32_t serviceId)
+rpc_status ServerWorker::resetBuffers(void)
 {
+    m_service->destroyMsg(m_worker->to_recv_msg, m_worker->to_send_msg);
+    m_service = NULL;
+    return m_worker->resetBuffers();
+}
+rpc_status ServerWorker::findServiceByMetadata(myrpc_Meta *req) {
     Service *service = m_firstService;
-    while (service != NULL)
-    {
-        if (service->getServiceId() == serviceId)
-        {
+    while (service != NULL) {
+        // find the last '/' in path
+        if (strcmp(service->getServiceId(), req->path) == 0) {
             break;
         }
-
         service = service->getNext();
     }
-    LOGI(this->TAG, "service No.%" PRIu32 " found:  `%s`", serviceId, service->m_name);
-    return service;
+    if (!service) {
+        return UnknownService;
+    }
+    m_service = service;
+    LOGI(this->TAG, "service `%s`", service->getServiceId());
+    return rpc_status::Success;
+}
+rpc_status ServerWorker::callMethodByMetadata(myrpc_Meta *req, myrpc_Meta *rsp, void *input, void *output)
+{
+    if (!m_service) {
+        LOGE(TAG, "Unknown service but called");
+        return rpc_status::UnknownService;
+    }
+    rpc_status err = m_service->handleInvocation(input, output);
+    rsp->seq = req->seq;
+    rsp->version = req->version;
+    rsp->path = req->path;
+    rsp->has_status = true;
+    rsp->status = err;
+    rsp->has_send_end = false;
+    return err;
 }
 
 void ServerWorker::workerStub(void *arg)

@@ -17,7 +17,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////////////////
 // Code
 ////////////////////////////////////////////////////////////////////////////////
-#define GRPC_SLICE_INLINE_EXTRA_SIZE sizeof(rpc_status*)
+#define GRPC_SLICE_INLINE_EXTRA_SIZE sizeof(void*)
 
 #define GRPC_SLICE_INLINED_SIZE \
   (sizeof(size_t) + sizeof(uint8_t*) - 1 + GRPC_SLICE_INLINE_EXTRA_SIZE)
@@ -58,11 +58,11 @@ typedef struct grpc_slice_buffer {
     size_t capacity;
     /** the combined length of all slices in the array */
     size_t length;
-    /** inlined elements to arpc_status allocations */
+    /** inlined elements to avoid allocations */
     grpc_slice inlined[GRPC_SLICE_BUFFER_INLINE_ELEMENTS];
 } grpc_slice_buffer;
 
-rpc_status MessageBuffer::read(rpc_status *data, uint32_t length, uint16_t offset)
+rpc_status MessageBuffer::read(void *data, uint32_t length, uint16_t offset)
 {
     rpc_status err = Success;
     uint16_t dest_pos = offset + length;
@@ -79,14 +79,14 @@ rpc_status MessageBuffer::read(rpc_status *data, uint32_t length, uint16_t offse
         }
         else
         {
-            (rpc_status) memcpy(data, &m_buf[offset], length);
+            (void) memcpy(data, &m_buf[offset], length);
             m_read_pos = dest_pos > m_read_pos ? dest_pos : m_read_pos;
         }
     }
     return err;
 }
 
-rpc_status MessageBuffer::write(const rpc_status *data, uint32_t length, uint16_t offset)
+rpc_status MessageBuffer::write(const void *data, uint32_t length, uint16_t offset)
 {
     rpc_status err = Success;
     uint16_t dest_pos = offset + length;
@@ -103,7 +103,7 @@ rpc_status MessageBuffer::write(const rpc_status *data, uint32_t length, uint16_
         }
         else
         {
-            (rpc_status) memcpy(&m_buf[offset], data, length);
+            (void) memcpy(&m_buf[offset], data, length);
             m_write_pos = dest_pos > m_write_pos ? dest_pos : m_write_pos;
         }
     }
@@ -115,11 +115,13 @@ rpc_status MessageBufferList::add(MessageBuffer *buf)
 {
     erpc_assert(m_count < MAX_BUFFER_COUNT);
     m_buffers[m_count++] = buf;
+    return Success;
 }
 rpc_status MessageBufferList::append(MessageBuffer *buf)
 {
     erpc_assert(m_count < MAX_BUFFER_COUNT);
     m_buffers[m_count++] = buf;
+    return Success;
 }
 rpc_status MessageBufferList::insert(MessageBuffer *buf, uint32_t index)
 {
@@ -129,6 +131,7 @@ rpc_status MessageBufferList::insert(MessageBuffer *buf, uint32_t index)
         m_buffers[i + 1] = m_buffers[i];
     }
     m_buffers[index] = buf;
+    return Success;
 }
 MessageBuffer *MessageBufferList::get(uint32_t index)
 {
@@ -144,8 +147,14 @@ std::string MessageBufferList::JoinIntoString() const {
     std::string result;
     // result.reserve(slice_buffer_.length);
     for (size_t i = 0; i < this->m_count; i++) {
-        result.append(reinterpret_cast<const char *>(m_buffers[i]->m_buf), m_buffers[i]->m_len);
+        result.append(reinterpret_cast<const char *>(m_buffers[i]->m_buf), m_buffers[i]->m_write_pos);
     }
     return result;
 }
-
+rpc_status MessageBufferList::reset() {
+    for (size_t i = 0; i < m_count; i++) {
+        delete m_buffers[i];
+    }
+    m_count = 0;
+    return Success;
+}

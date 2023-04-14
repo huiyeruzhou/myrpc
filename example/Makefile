@@ -47,8 +47,8 @@ CXXFLAGS += "-I$(NANOPB_DIR)" -I../include
 # C source code files that are required
 SRC  = server.cpp                   # The main program
 CRC  = client.cpp                   # The main program
-SRC  += idl.pb.c                  # The main program
-CRC += idl.pb.c                # The compiled protocol definition
+SRC  += idl.pb.cpp                  # The main program
+CRC += idl.pb.cpp                # The compiled protocol definition
 SRC += $(NANOPB_DIR)/pb_encode.c  # The nanopb encoder
 SRC += $(NANOPB_DIR)/pb_decode.c  # The nanopb decoder
 SRC += $(NANOPB_DIR)/pb_common.c  # The nanopb common parts
@@ -65,5 +65,5 @@ client: $(CRC) $(ERPC_LIB)
 	$(CXX) $(CXXFLAGS) -osimpleclient $^
 
 # Build rule for the protocol
-idl.pb.c: idl.proto
+idl.pb.cpp: idl.proto
 	$(PROTOC) $(PROTOC_OPTS) --nanopb_out=. $<

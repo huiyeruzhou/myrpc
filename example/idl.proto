@@ -2,26 +2,19 @@ syntax="proto2";
 
 package myrpc; 
 
-message proto{
-    message Nested{
-        required int32 num1 = 1;
-        required int32 num2 = 2;
-    }
+message Input{
+    required int32 r = 1;
+    required int32 g = 2;
+    required int32 b = 3;
 }
 
-message InputTest{
-    required string path = 3;
-    required int32 num1 = 1;
-    required int32 num2 = 2;
+message Output{
+    required bool success = 1;
 }
 
-message OutputTest{
-    required int32 ret = 1;
-}
-
-service MatrixMultiplyService 
+service LEDControl
 {
-    rpc myrpctest(InputTest) returns (OutputTest) {}
+    rpc setColor(Input) returns (Output) {}
 }
 
 

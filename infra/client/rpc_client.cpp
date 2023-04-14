@@ -11,15 +11,14 @@
 #include "codec/meta.pb.h"
 #include "client/rpc_client.hpp"
 #include "transport/tcp_transport.hpp"
-#include "transport/nanopb_transport.hpp"
 #include <string>
 
 
 extern "C" {
 #include <signal.h>
-// #include <sys/socket.h>
-// #include <sys/types.h>
-// #include <unistd.h>
+    // #include <sys/socket.h>
+    // #include <sys/types.h>
+    // #include <unistd.h>
 }
 using namespace erpc;
 
@@ -33,81 +32,69 @@ __attribute__((unused)) const static char *TAG = "client";
      *
      * This function initializes object attributes.
      */
-Client::Client(const char *host, uint16_t port, MessageBufferFactory *messageFactory)
+Client::Client(const char *host, uint16_t port)
     : CSBase(host, port)
-    , m_sequence(0)
-    , m_errorHandler(NULL)
-{
-    setMessageBufferFactory(messageFactory);
+    , m_sequence(0) {
 }
 
 /*!
  * @brief Client destructor
  */
-Client::~Client(void)
-{
-    delete this->m_messageFactory;
+Client::~Client(void) {
     delete this->m_transport;
 }
-RequestContext Client::createRequest(bool isOneway)
-{
-    return RequestContext(++m_sequence, isOneway, m_messageFactory);
+RequestContext Client::createRequest(bool isOneway) {
+    return RequestContext(++m_sequence, isOneway);
 }
 
-void Client::performRequest(RequestContext &request)
-{
+rpc_status Client::performRequest(char *path, const pb_msgdesc_t *req_desc, void *req, const pb_msgdesc_t *rsp_desc, void *rsp) {
+
+    m_transport->to_send_msg = req;
+    m_transport->to_recv_msg = rsp;
+    m_transport->send_desc = req_desc;
+    m_transport->recv_desc = rsp_desc;
+    myrpc_Meta *req_md = m_transport->to_send_md;
+    req_md->seq = ++m_sequence;
+    req_md->has_send_end = true;
+    req_md->send_end = true;
+    req_md->path = path;
+    req_md->version = 0;
+    req_md->has_status = false;
+
     rpc_status err;
 
-    // Send invocation request to server.
-    if (request.isStatusOk() == true) {
-        err = m_transport->send();
-        request.updateStatus(err);
-    }
+    //send initial metadata
+    CHECK_STATUS(m_transport->send_inital_md(), err);
+    LOGI(TAG, "send_inital_md()");
+    //send msg
+    CHECK_STATUS(m_transport->send_msg(), err);
+    LOGI(TAG, "send_msg()");
+    //sned trailing metadata
+    CHECK_STATUS(m_transport->send_trailing_md(), err);
+    LOGI(TAG, "send_trailing_md()");
 
-    // If the request is oneway, then there is nothing more to do.
-    if (!request.isOneway()) {
-        if (request.isStatusOk() == true) {
-            // Receive reply.
-            err = m_transport->receive();
-            request.updateStatus(err);
-        }
+    // get data frame
+    CHECK_STATUS(m_transport->receiveFrame(), err);
+    LOGI(TAG, "receiveFrame()");
+    //recv inital metadata
+    CHECK_STATUS(m_transport->recv_inital_md(), err);
+    LOGI(TAG, "recv_inital_md()");
+    //recv messgae
+    CHECK_STATUS(m_transport->recv_msg(), err);
+    LOGI(TAG, "recv_msg()");
+    //recv trailing metadata
+    CHECK_STATUS(m_transport->recv_trailing_md(), err);
+    LOGI(TAG, "recv_trailing_md()");
 
-        // Check the reply.
-        if (request.isStatusOk() == true) {
-            verifyReply(request);
-        }
-    }
+    err = m_transport->to_recv_md->has_status ? static_cast<rpc_status>(m_transport->to_recv_md->status)
+        : UnExpectedMsgType;
+
+    m_transport->resetBuffers();
+    return err;
 }
 
-void Client::verifyReply(RequestContext &request)
-{
-    rpc_status err;
-    myrpc_Meta meta = myrpc_Meta_init_zero;
-    err = m_transport->read(&myrpc_Meta_msg, &meta);
-    
-    request.updateStatus(err);
-    if (err != Success)
-    {
-        return;
-    }
 
-    // Verify that this is a reply to the request we just sent.
-    if ((meta.type != myrpc_Meta_msgType_RESPONSE) || (meta.seq != request.getSequence()))
-    {
-        request.updateStatus(UnExpectedMsgType);
-    }
-}
-
-void Client::callErrorHandler(rpc_status err, uint32_t functionID)
-{
-    if (m_errorHandler != NULL)
-    {
-        m_errorHandler(err, functionID);
-    }
-}
-
-rpc_status Client::open(void)
-{
+rpc_status Client::open(void) {
     rpc_status status = Success;
     struct addrinfo hints = {};
     char portString[8];
@@ -116,12 +103,10 @@ rpc_status Client::open(void)
     int sock = -1;
     struct addrinfo *res;
 
-    if (m_sockfd != -1)
-    {
+    if (m_sockfd != -1) {
         LOGE("%s", "socket already connected, error: %s", strerror(errno));
     }
-    else
-    {
+    else {
         // Fill in hints structure for getaddrinfo.
         hints.ai_flags = AI_NUMERICSERV;
         hints.ai_family = AF_INET;
@@ -129,34 +114,28 @@ rpc_status Client::open(void)
 
         // Convert port number to a string.
         result = snprintf(portString, sizeof(portString), "%d", m_port);
-        if (result < 0)
-        {
+        if (result < 0) {
             LOGE(TAG, "snprintf failed, error: %s", strerror(errno));
             status = Fail;
         }
 
-        if (status == Success)
-        {
+        if (status == Success) {
             // Perform the name lookup.
             result = getaddrinfo(m_host, portString, &hints, &res0);
-            if (result != 0)
-            {
+            if (result != 0) {
                 // TODO check EAI_NONAME
                 LOGE(TAG, "gettaddrinfo failed, error: %s", strerror(errno));
                 status = kErpcStatus_UnknownName;
             }
         }
 
-        if (status == Success)
-        {
+        if (status == Success) {
             // Iterate over result addresses and try to connect. Exit the loop on the first successful
             // connection.
-            for (res = res0; res; res = res->ai_next)
-            {
+            for (res = res0; res; res = res->ai_next) {
                 // Create the socket.
                 sock = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-                if (sock < 0)
-                {
+                if (sock < 0) {
                     LOGW(TAG, "try create a socket, but failed");
                     continue;
                 }
@@ -164,15 +143,13 @@ rpc_status Client::open(void)
                 char netinfo[24];
                 sprint_net_info(netinfo, sizeof(netinfo), res->ai_addr, res->ai_addrlen);
                 LOGI(TAG, "try to connect to %s", netinfo);
-                if (connect(sock, res->ai_addr, res->ai_addrlen) < 0)
-                {
+                if (connect(sock, res->ai_addr, res->ai_addrlen) < 0) {
                     LOGW(TAG, "try to connect for one of socket, but failed");
                     ::close(sock);
                     sock = -1;
                     continue;
                 }
-                else
-                {
+                else {
                     // Exit the loop for the first successful connection.
                     char netinfo[24];
                     sprint_net_info(netinfo, sizeof(netinfo), res->ai_addr, res->ai_addrlen);
@@ -185,39 +162,32 @@ rpc_status Client::open(void)
             freeaddrinfo(res0);
 
             // Check if we were able to open a connection.
-            if (sock < 0)
-            {
+            if (sock < 0) {
                 // TODO check EADDRNOTAVAIL:
                 LOGE(TAG, "connecting failed, error: %s", strerror(errno));
                 status = kErpcStatus_ConnectionFailure;
             }
         }
 
-        if (status == Success)
-        {
+        if (status == Success) {
             set = 1;
-            if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (void *) &set, sizeof(int)) < 0)
-            {
+            if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (void *) &set, sizeof(int)) < 0) {
                 ::close(sock);
                 LOGE(TAG, "setsockopt failed, error: %s", strerror(errno));
                 status = Fail;
             }
         }
 
-        if (status == Success)
-        {
+        if (status == Success) {
             // globally disable the SIGPIPE signal
             signal(SIGPIPE, SIG_IGN);
             m_sockfd = sock;
         }
     }
-    if (Success == status)
-    {
-        m_transport_worker = new TCPWorker(m_sockfd, m_port);
-        m_transport = new NanopbTransport(m_transport_worker, m_messageFactory);
+    if (Success == status) {
+        m_transport = new TCPWorker(m_sockfd, m_port);
     }
-    else
-    {
+    else {
         LOGE(TAG, "connecting failed, error: %s", strerror(errno));
     }
     return status;

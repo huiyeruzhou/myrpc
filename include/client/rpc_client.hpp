@@ -25,17 +25,6 @@
  * @file
  */
 
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    typedef void (*client_error_handler_t)(rpc_status err,
-                                           uint32_t functionID); /*!< eRPC error handler function type. */
-#ifdef __cplusplus
-}
-#endif
-
-
 ////////////////////////////////////////////////////////////////////////////////
 // Classes
 ////////////////////////////////////////////////////////////////////////////////
@@ -59,7 +48,7 @@ public:
      *
      * This function initializes object attributes.
      */
-    Client(const char *host, uint16_t port, MessageBufferFactory *messageFactory);
+    Client(const char *host, uint16_t port);
 
     /*!
      * @brief Client destructor
@@ -78,25 +67,7 @@ public:
      *
      * @param[in] request Request context to perform.
      */
-    virtual void performRequest(RequestContext &request);
-
-
-    /*!
-     * @brief This function sets error handler function for infrastructure errors.
-     *
-     * @param[in] error_handler Pointer to error handler function.
-     */
-    void setErrorHandler(client_error_handler_t error_handler) { m_errorHandler = error_handler; }
-
-    /*!
-     * @brief This function calls error handler callback function with given status.
-     *
-     * Function is called in client shim code at the end of function when error occurred.
-     *
-     * @param[in] err Specify function status at the end of eRPC call.
-     * @param[in] functionID Specify eRPC function call.
-     */
-    void callErrorHandler(rpc_status err, uint32_t functionID);
+    virtual rpc_status performRequest(char *path, const pb_msgdesc_t *req_desc, void *req, const pb_msgdesc_t *rsp_desc, void *rsp);
 
     /*!
     * @brief This function connect client to the server.
@@ -108,20 +79,6 @@ public:
 
 protected:
     uint32_t m_sequence;                    //!< Sequence number.
-    client_error_handler_t m_errorHandler;  //!< Pointer to function error handler.
-
-    /*!
-     * @brief This function performs request.
-     *
-     * Should be called in non server context (do not call another eRPC function in server
-     * remote call implementation).
-     *
-     * @param[in] request Request context to perform.
-     */
-    virtual void performClientRequest(RequestContext &request);
-
-    //! @brief Validate that an incoming message is a reply.
-    virtual void verifyReply(RequestContext &request);
 
 
 
@@ -147,7 +104,7 @@ public:
      * @param[in] codec Set in inout codec.
      * @param[in] isOneway Set information if codec is only oneway or bidirectional.
      */
-    RequestContext(uint32_t sequence,  bool argIsOneway, MessageBufferFactory *bufferfactory)
+    RequestContext(uint32_t sequence,  bool argIsOneway)
     : m_sequence(sequence)
         , m_oneway(argIsOneway)
         , status(Success)

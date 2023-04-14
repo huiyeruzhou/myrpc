@@ -1,7 +1,6 @@
 #ifndef _SERVICE_H_
 #define _SERVICE_H_
 
-#include "transport/nanopb_transport.hpp"
 #include "rpc_status.hpp"
 #include "codec/meta.pb.h"
 #include "codec/message_buffer.hpp"
@@ -16,7 +15,7 @@ namespace erpc
          *
          * This function initializes object attributes.
          */
-        Service(uint32_t serviceId)
+        Service(const char * serviceId)
             : m_serviceId(serviceId)
             , m_next(NULL)
         {
@@ -32,7 +31,7 @@ namespace erpc
          *
          * @return Service id number.
          */
-        uint32_t getServiceId(void) const { return m_serviceId; }
+        const char *getServiceId(void) const { return m_serviceId; }
 
         /*!
          * @brief Return next service.
@@ -48,24 +47,13 @@ namespace erpc
          */
         void setNext(Service *next) { m_next = next; }
 
-        void setName(const char *name) { m_name = name; }
+        virtual rpc_status handleInvocation(void *input, void *output) = 0;
+        virtual void filledMsgDesc(const pb_msgdesc_t **input_desc, void **input_msg, const pb_msgdesc_t **output_desc,void **output) = 0;
+        virtual void destroyMsg(void *input, void *output) = 0;
 
-        /*!
-         * @brief This function call function implementation of current service.
-         *
-         * @param[in] methodId Id number of function, which is requested.
-         * @param[in] sequence Sequence number. To be sure that reply from server belongs to client request.
-         * @param[in] codec For reading and writing data.
-         * @param[in] messageFactory Used for setting output buffer.
-         *
-         * @return Based on handleInvocation implementation.
-         */
-        virtual rpc_status handleInvocation(NanopbTransport *transport, myrpc_Meta *meta) = 0;
-
-        const char *m_name;
 
     protected:
-        uint32_t m_serviceId; /*!< Service unique id. */
+        const char* m_serviceId; /*!< Service unique id. */
         Service *m_next;      /*!< Pointer to next service. */
         
     };

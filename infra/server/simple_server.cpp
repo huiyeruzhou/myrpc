@@ -33,15 +33,12 @@ __attribute__((unused)) static const char *TAG = "server";
 // Code
 ////////////////////////////////////////////////////////////////////////////////
 
-SimpleServer::SimpleServer(const char *host, uint16_t port, MessageBufferFactory *message_buffer_factory)
+SimpleServer::SimpleServer(const char *host, uint16_t port)
     : Server(host, port)
     , m_isServerOn(true)
     , m_serverThread(SimpleServer::networkpollerStub)
     , m_runServer(false)
 {
-
-    // Init server with the provided transport.
-    this->setMessageBufferFactory(message_buffer_factory);
 
 }
 
@@ -70,7 +67,7 @@ void SimpleServer::stop(void)
 
 void SimpleServer::onNewSocket(int sockfd, int port) {
     TCPWorker *transport_worker = new TCPWorker(sockfd, port);
-    ServerWorker *worker = new ServerWorker(m_firstService, m_messageFactory,  transport_worker);
+    ServerWorker *worker = new ServerWorker(m_firstService,  transport_worker);
     worker->start();
 }
 

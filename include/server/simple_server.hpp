@@ -12,9 +12,6 @@
 #define SIMPLE_SERVER_H
 
 #include "port/port.h"
-#ifdef __cplusplus 
-extern "C" {
-#endif 
 #include "server/server_base.hpp"
 #include "transport/tcp_transport.hpp"
 #include "server/server_worker.hpp"
@@ -45,7 +42,7 @@ public:
      *
      * This function initializes object attributes.
      */
-    SimpleServer(const char *host, uint16_t port, MessageBufferFactory *message_buffer_factory);
+    SimpleServer(const char *host, uint16_t port);
 
     ~SimpleServer();
     /*!
@@ -123,6 +120,3 @@ protected:
 /*! @} */
 
 #endif // SIMPLE_SERVER_H
-#ifdef __cplusplus 
-}
-#endif 
