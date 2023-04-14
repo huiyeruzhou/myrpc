@@ -15,6 +15,7 @@ extern "C" {
 #endif  
 #include "rpc_status.hpp"
 #include <cstddef>
+#include <string>
 #include <new>
 #include <cstring>
 #include <cstdint>
@@ -131,64 +132,39 @@ extern "C" {
             rpc_status write(const void *data, uint32_t length, uint16_t offset);
             rpc_status write(const void *data, uint32_t length) { write(data, length, m_write_pos); }
 
+
             uint8_t *m_buf;  /*!< Buffer used to read write data. */
             uint16_t m_len;  /*!< Length of buffer. */
             uint16_t m_read_pos; /*!< Used buffer bytes. */
             uint16_t m_write_pos; /*!< Left buffer bytes. */
         };
-
-        /*!
-         *  @brief Abstract interface for message buffer factory.
-         *
-         * @ingroup infra_codec
-         */
-        class MessageBufferFactory
-        {
+        #define MAX_BUFFER_COUNT 10
+        class MessageBufferList {
         public:
-            /*!
-             * @brief Constructor.
-             *
-             * This function initializes object attributes.
-             */
-            MessageBufferFactory(void) {}
-
-            /*!
-             * @brief MessageBufferFactory destructor
-             */
-            virtual ~MessageBufferFactory(void) {}
-
-            /*!
-             * @brief This function creates new message buffer.
-             *
-             * @return New created MessageBuffer.
-             */
-            virtual MessageBuffer *create(void);
-
-            /*!
-             * @brief This function informs server if it has to create buffer for received message.
-             *
-             * @return Has to return TRUE when server need create buffer for receiving message.
-             */
-            virtual bool createServerBuffer(void) { return true; }
-
-            /*!
-             * @brief This function is preparing output buffer on server side.
-             *
-             * This function do decision if this function want reuse buffer, or use new buffer.
-             * In case of using new buffer function has to free given buffer.
-             *
-             * @param[in] message MessageBuffer which can be reused.
-             */
-            virtual rpc_status prepareServerBufferForSend(MessageBuffer *message);
-
-            /*!
-             * @brief This function disposes message buffer.
-             *
-             * @param[in] buf MessageBuffer to dispose.
-             */
-            virtual void dispose(MessageBuffer *buf);
+            MessageBufferList(void)
+                : m_count(0)
+                , m_buffers(new MessageBuffer *[MAX_BUFFER_COUNT])
+            {
+            }
+            ~MessageBufferList(void) {
+                for (size_t i = 0; i < m_count; i++) {
+                    m_buffers[i]->~MessageBuffer();
+                }
+                delete[] m_buffers;
+            }
+            //assert
+            rpc_status add(MessageBuffer *buf);
+            rpc_status append(MessageBuffer *buf);
+            rpc_status insert(MessageBuffer *buf, uint32_t index);
+            MessageBuffer *get(uint32_t index);
+            rpc_status destroy(void);
+            void Clear();
+            std::string JoinIntoString() const;
+            uint32_t count(void) { return m_count; }
+        private:
+            MessageBuffer **m_buffers;
+            size_t m_count;
         };
-
     } // namespace erpc
 
     /*! @} */

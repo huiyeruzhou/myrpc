@@ -4,31 +4,22 @@
 #ifndef PB_MYRPC_META_PB_H_INCLUDED
 #define PB_MYRPC_META_PB_H_INCLUDED
 #include <pb.h>
-#include <client/rpc_client.hpp>
-#include <rpc_status.hpp>
-#include <pb_encode.h>
-#include <pb_decode.h>
-using namespace erpc;
 
 #if PB_PROTO_HEADER_VERSION != 40
 #error Regenerate this file with the current version of nanopb generator.
 #endif
 
-/* Enum definitions */
-typedef enum _myrpc_Meta_msgType {
-    myrpc_Meta_msgType_REQUEST = 0,
-    myrpc_Meta_msgType_RESPONSE = 1,
-    myrpc_Meta_msgType_ONEWAY = 2,
-    myrpc_Meta_msgType_REPLY = 3
-} myrpc_Meta_msgType;
-
 /* Struct definitions */
 typedef struct _myrpc_Meta {
+    /* enum msgType{
+     REQUEST = 0;
+     RESPONSE = 1;
+     ONEWAY = 2;
+ } */
     uint32_t version;
-    myrpc_Meta_msgType type;
-    uint32_t serviceId;
-    uint32_t methodId;
+    char *;
     uint32_t seq;
+    uint64_t timeout;
 } myrpc_Meta;
 
 
@@ -36,32 +27,22 @@ typedef struct _myrpc_Meta {
 extern "C" {
 #endif
 
-/* Helper constants for enums */
-#define _myrpc_Meta_msgType_MIN myrpc_Meta_msgType_REQUEST
-#define _myrpc_Meta_msgType_MAX myrpc_Meta_msgType_REPLY
-#define _myrpc_Meta_msgType_ARRAYSIZE ((myrpc_Meta_msgType)(myrpc_Meta_msgType_REPLY+1))
-
-#define myrpc_Meta_type_ENUMTYPE myrpc_Meta_msgType
-
-
 /* Initializer values for message structs */
-#define myrpc_Meta_init_default                  {0, _myrpc_Meta_msgType_MIN, 0, 0, 0}
-#define myrpc_Meta_init_zero                     {0, _myrpc_Meta_msgType_MIN, 0, 0, 0}
+#define myrpc_Meta_init_default                  {0, NULL, 0, 0}
+#define myrpc_Meta_init_zero                     {0, NULL, 0, 0}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define myrpc_Meta_version_tag                   1
-#define myrpc_Meta_type_tag                      2
-#define myrpc_Meta_serviceId_tag                 3
-#define myrpc_Meta_methodId_tag                  4
-#define myrpc_Meta_seq_tag                       5
+#define myrpc_Meta_path_tag                      2
+#define myrpc_Meta_seq_tag                       3
+#define myrpc_Meta_timeout_tag                   4
 
 /* Struct field encoding specification for nanopb */
 #define myrpc_Meta_FIELDLIST(X, a) \
 X(a, STATIC,   REQUIRED, UINT32,   version,           1) \
-X(a, STATIC,   REQUIRED, UENUM,    type,              2) \
-X(a, STATIC,   REQUIRED, UINT32,   serviceId,         3) \
-X(a, STATIC,   REQUIRED, UINT32,   methodId,          4) \
-X(a, STATIC,   REQUIRED, UINT32,   seq,               5)
+X(a, POINTER,  REQUIRED, STRING,   path,              2) \
+X(a, STATIC,   REQUIRED, UINT32,   seq,               3) \
+X(a, STATIC,   REQUIRED, UINT64,   timeout,           4)
 #define myrpc_Meta_CALLBACK NULL
 #define myrpc_Meta_DEFAULT NULL
 
@@ -71,9 +52,8 @@ extern const pb_msgdesc_t myrpc_Meta_msg;
 #define myrpc_Meta_fields &myrpc_Meta_msg
 
 /* Maximum encoded size of messages (where known) */
-#define myrpc_Meta_size                          26
+/* myrpc_Meta_size depends on runtime parameters */
 
-/* Client Defination */
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

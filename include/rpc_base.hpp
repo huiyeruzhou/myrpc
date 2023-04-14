@@ -12,7 +12,7 @@
 
 #include "port/port.h"
 #include "transport/transport_base.hpp"
-#include "transport/nanopb_transport.hpp"
+// #include "transport/nanopb_transport.hpp"
 #if CONFIG_HAS_FREERTOS
 #include <cstdio>
 #ifdef __cplusplus

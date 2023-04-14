@@ -10,6 +10,7 @@ message proto{
 }
 
 message InputTest{
+    required string path = 3;
     required int32 num1 = 1;
     required int32 num2 = 2;
 }

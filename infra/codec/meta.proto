@@ -1,15 +1,14 @@
 syntax="proto2";
 package myrpc;
 message Meta{
-    enum msgType{
-        REQUEST = 0;
-        RESPONSE = 1;
-        ONEWAY = 2;
-    }
+    // enum msgType{
+    //     REQUEST = 0;
+    //     RESPONSE = 1;
+    //     ONEWAY = 2;
+    // }
     required uint32 version = 1;
-    required msgType type = 2;
-    required uint32 serviceId = 3;
-    required uint32 methodId = 4;
-    required uint32 seq = 5;
+    required string path = 2;
+    required uint32 seq = 3;
+    required uint64 timeout = 4;
 
 }
