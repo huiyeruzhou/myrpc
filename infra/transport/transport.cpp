@@ -62,7 +62,7 @@
 //                         if (result != 0) {
 //                             // TODO check EAI_NONAME
 //                             LOGE(TAG, "gettaddrinfo failed, error: %s", strerror(errno));
-//                             status = kErpcStatus_UnknownName;
+//                             status = UnknownAddress;
 //                         }
 //                     }
 
@@ -102,7 +102,7 @@
 //                         if (sock < 0) {
 //                             // TODO check EADDRNOTAVAIL:
 //                             LOGE(TAG, "connecting failed, error: %s", strerror(errno));
-//                             status = kErpcStatus_ConnectionFailure;
+//                             status = ConnectionFailure;
 //                         }
 //                     }
 
@@ -123,7 +123,7 @@
 //                 }
 //                 if (Success == status) {
 //                     /* TODO,准备Worker和Codec */
-//                     // m_transport_worker = new TCPWorker(m_sockfd, m_port);
+//                     // m_transport_worker = new TCPTransport(m_sockfd, m_port);
 //                     // m_transport = new NanopbTransport(m_transport_worker, m_messageFactory);
 //                 }
 //                 else {
@@ -1036,7 +1036,7 @@
 //                 // cancel_stream_locked also adjusts stream list
 //                 cancel_stream_locked(
 //                     t->stream_list,
-//                     rpc_status::kErpcStatus_ConnectionClosed);
+//                     rpc_status::ConnectionClosed);
 //             }
 //         }
 //     }

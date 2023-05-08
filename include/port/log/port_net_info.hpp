@@ -17,6 +17,9 @@ extern "C" {
 #include <cstdio>
 extern "C" {
 #include <netdb.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
 }
 #endif
 #include <cstring>

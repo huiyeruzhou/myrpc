@@ -7,6 +7,9 @@
 #include "../config.h"
 #include "port_prt_scn.h"
 #include "port_net_info.hpp"
+#if CONFIG_HAS_ANDROID
+#include <android/log.h>
+#endif
 
 #define color_default     "\033[00m"
 #define color_bold     "\033[01m"
@@ -36,6 +39,11 @@
 #define LOGD( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_DEBUG,   tag, format, ##__VA_ARGS__)
 #define LOGV( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_VERBOSE, tag, format, ##__VA_ARGS__)
 #endif // !(defined(__cplusplus) && (__cplusplus >  201703L))
+#elif CONFIG_HAS_ANDROID
+#include <android/log.h>
+#define LOGI(TAG,...) __android_log_print(ANDROID_LOG_INFO,TAG,__VA_ARGS__)
+#define LOGW(TAG,...) __android_log_print(ANDROID_LOG_WARN,TAG,__VA_ARGS__)
+#define LOGE(TAG,...) __android_log_print(ANDROID_LOG_ERROR,TAG,__VA_ARGS__)
 #elif CONFIG_HAS_POSIX
 //线程安全性还有待检查, 但已经避免了对任何全局变量进行操作(begin是全局常量), 不过
 //如果一个线程运行途中发生了上下文切换, 日志打印可能会出现交错

@@ -10,10 +10,10 @@
 // Classes
 ////////////////////////////////////////////////////////////////////////////////
 namespace erpc {
-    class TCPWorker : public Transport {
+    class TCPTransport : public Transport {
     public:
-        TCPWorker(int sockfd, int port);
-        virtual ~TCPWorker(void);
+        TCPTransport(int sockfd, int port);
+        virtual ~TCPTransport(void);
         rpc_status close();
         virtual rpc_status receive(uint8_t *data, uint32_t size);
         virtual rpc_status send(const uint8_t *data, uint32_t size);

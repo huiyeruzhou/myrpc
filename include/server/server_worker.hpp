@@ -21,7 +21,7 @@ namespace erpc
 {
     class ServerWorker {
     public:
-        ServerWorker(Service *services, TCPWorker *worker);
+        ServerWorker(std::vector<erpc::MethodBase*> methods, TCPTransport *worker);
         ~ServerWorker();    
         rpc_status runInternal(void);
         rpc_status resetBuffers(void);
@@ -36,9 +36,9 @@ namespace erpc
 #elif ERPC_THREADS_IS(FREERTOS)
         char TAG[configMAX_TASK_NAME_LEN];
 #endif
-        Service *m_service = NULL;
-        Service *m_firstService;
-        TCPWorker *m_worker;                 //!< Worker to do transport
+        MethodBase *m_method = NULL;
+        std::vector<erpc::MethodBase*> methods;
+        TCPTransport *m_worker;                 //!< Worker to do transport
         
     };
 

@@ -45,7 +45,7 @@ SimpleServer::SimpleServer(const char *host, uint16_t port)
 SimpleServer::~SimpleServer()
 {
     // Close server.
-    close(true);
+    close();
 }
 
 rpc_status SimpleServer::run(void)
@@ -66,17 +66,14 @@ void SimpleServer::stop(void)
 }
 
 void SimpleServer::onNewSocket(int sockfd, int port) {
-    TCPWorker *transport_worker = new TCPWorker(sockfd, port);
-    ServerWorker *worker = new ServerWorker(m_firstService,  transport_worker);
+    TCPTransport *transport_worker = new TCPTransport(sockfd, port);
+    ServerWorker *worker = new ServerWorker(methods,  transport_worker);
     worker->start();
 }
 
-rpc_status SimpleServer::close(bool stopServer)
+rpc_status SimpleServer::close()
 {
-    if (stopServer)
-    {
-        m_runServer = false;
-    }
+    m_runServer = false;
 
     if (m_sockfd != -1)
     {
@@ -188,7 +185,7 @@ void SimpleServer::networkpollerThread(void)
         }
     }
     m_isServerOn = false;
-    close(m_sockfd);
+    ::close(m_sockfd);
 }
 
 

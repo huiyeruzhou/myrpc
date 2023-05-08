@@ -16,6 +16,11 @@
 #include "transport/tcp_transport.hpp"
 #include "server/server_worker.hpp"
 #include <fcntl.h>
+#ifdef CONFIG_HAS_ANDROID
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
+#endif
 
 
  /*!
@@ -72,10 +77,10 @@ public:
      * @param[in] stopServer Specify is server shall be closed as well (stop listen())
      * @retval #Success Always return this.
      */
-    virtual rpc_status close(bool stopServer = true);
+    virtual rpc_status close(void);
     
 
-
+private:
     /*!
      * @brief callback called when new socket accepted
      *

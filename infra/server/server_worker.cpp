@@ -4,16 +4,16 @@
 using namespace erpc;
 
 
-ServerWorker::ServerWorker(Service *services, TCPWorker *worker)
+ServerWorker::ServerWorker(std::vector<erpc::MethodBase*> methods, TCPTransport *worker)
     :m_workerThread(workerStub)
-    , m_firstService(services)
+    , methods(methods)
     , m_worker(worker)
 {
     snprintf(TAG, sizeof(TAG) - 1, "worker %" PRIin_port_t, m_worker->m_port);
     m_workerThread.setName(TAG);
 }
 ServerWorker::~ServerWorker() {
-    m_service->destroyMsg(m_worker->to_recv_msg, m_worker->to_send_msg);
+    m_method->destroyMsg(m_worker->to_recv_msg, m_worker->to_send_msg);
     delete m_worker;
 };
 rpc_status ServerWorker::runInternal(void)
@@ -35,7 +35,7 @@ rpc_status ServerWorker::runInternal(void)
     //find the method
     CHECK_STATUS(findServiceByMetadata(req_md),err);
     //filled message desc, so that we can receive message
-    m_service->filledMsgDesc(input_desc, input_msg, output_desc, output_msg);
+    m_method->filledMsgDesc(input_desc, input_msg, output_desc, output_msg);
     
     //recv messgae
     CHECK_STATUS(m_worker->recv_msg(), err);
@@ -55,21 +55,30 @@ rpc_status ServerWorker::runInternal(void)
     //sned trailing metadata
 done:
     rpc_status has_error = err;
+    // If the user didn't set a status, set it to the error code.Otherwise just keep it.
     if (err != rpc_status::Success && ((rsp_md->has_status && rsp_md->status == rpc_status::Success) || !rsp_md->has_status)) {
         rsp_md->has_status = true;
         rsp_md->status = err;
     }
-    if (err == rpc_status::kErpcStatus_ConnectionClosed) {
+    //If connection has been closed, we don't need to send trailing metadata and should close the worker
+    if (err == rpc_status::ConnectionClosed) {
         m_worker->close();
-        return kErpcStatus_ConnectionClosed;
+        return ConnectionClosed;
     }
+    //send trailing metadata
     err = m_worker->send_trailing_md();
     if (rpc_status::Success != err) {
         LOGE(TAG, "Failed to send trailing md");
     }
     LOGI(TAG, "send_trailing_md()");
     if (has_error != rpc_status::Success) {
-        LOGW(TAG, "Error occurred: %s", StatusToString(has_error));
+        LOGW(TAG, "RPC Call Failed Because: %s", StatusToString(has_error));
+        if (has_error == rpc_status::UnknownService) {
+            LOGW(TAG, "Request Service: %s", req_md->path);
+            for_each(methods.begin(), methods.end(),[this](MethodBase *method) {
+                LOGW(TAG, "Service: %s", method->getPath());
+            });
+        }
     }
     else {
         LOGI(TAG, "RPC Call Success\n");
@@ -79,33 +88,31 @@ done:
 }
 rpc_status ServerWorker::resetBuffers(void)
 {
-    m_service->destroyMsg(m_worker->to_recv_msg, m_worker->to_send_msg);
-    m_service = NULL;
+    if(m_method)m_method->destroyMsg(m_worker->to_recv_msg, m_worker->to_send_msg);
+    m_method = NULL;
     return m_worker->resetBuffers();
 }
 rpc_status ServerWorker::findServiceByMetadata(myrpc_Meta *req) {
-    Service *service = m_firstService;
-    while (service != NULL) {
-        // find the last '/' in path
-        if (strcmp(service->getServiceId(), req->path) == 0) {
-            break;
-        }
-        service = service->getNext();
+
+    auto iter_method = std::find_if(methods.begin(), methods.end(),[&](MethodBase *method)->bool {
+        return !strcmp(method->getPath(),req->path);
+    });
+    if(iter_method==methods.end()){
+        m_method = NULL;
+        return rpc_status::UnknownService;
+    }else{
+        m_method = *iter_method;
     }
-    if (!service) {
-        return UnknownService;
-    }
-    m_service = service;
-    LOGI(this->TAG, "service `%s`", service->getServiceId());
+    LOGI(this->TAG, "service `%s`", m_method->getPath());
     return rpc_status::Success;
 }
 rpc_status ServerWorker::callMethodByMetadata(myrpc_Meta *req, myrpc_Meta *rsp, void *input, void *output)
 {
-    if (!m_service) {
+    if (!m_method) {
         LOGE(TAG, "Unknown service but called");
         return rpc_status::UnknownService;
     }
-    rpc_status err = m_service->handleInvocation(input, output);
+    rpc_status err = m_method->handleInvocation(input, output);
     rsp->seq = req->seq;
     rsp->version = req->version;
     rsp->path = req->path;

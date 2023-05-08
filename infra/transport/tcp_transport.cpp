@@ -6,7 +6,7 @@
 #include <stdio.h>
 using namespace erpc;
 __attribute__((unused)) const static char *TAG = "tcp";
-TCPWorker::TCPWorker(int sockfd, int port):
+TCPTransport::TCPTransport(int sockfd, int port):
     m_socket(sockfd),
     m_port(port),
     to_recv_md(new myrpc_Meta()),
@@ -15,27 +15,27 @@ TCPWorker::TCPWorker(int sockfd, int port):
     m_send_buffer_list(new MessageBufferList())
 {
 }
-TCPWorker::~TCPWorker(void) {
+TCPTransport::~TCPTransport(void) {
     ::close(m_socket);
     delete m_read_buffer;
     m_send_buffer_list->~MessageBufferList();
     delete to_recv_md;
     delete to_send_md;
 }
-rpc_status TCPWorker::close() {
+rpc_status TCPTransport::close() {
     if (0 != ::close(m_socket)) {
         return rpc_status::IOError;
     }
     return rpc_status::Success;
 }
-rpc_status TCPWorker::receive(uint8_t *data, uint32_t size)
+rpc_status TCPTransport::receive(uint8_t *data, uint32_t size)
 {
     ssize_t length;
     rpc_status status = Success;
 
     if(m_socket <= 0)
     {
-        status = kErpcStatus_ConnectionFailure;
+        status = ConnectionFailure;
         return status;
     }
 
@@ -56,11 +56,11 @@ rpc_status TCPWorker::receive(uint8_t *data, uint32_t size)
             {
                 // close socket, not server
                 close();
-                status = kErpcStatus_ConnectionClosed;
+                status = ConnectionClosed;
             }
             else
             {
-                status = kErpcStatus_ReceiveFailed;
+                status = ReceiveFailed;
                 printf("transport:   unknown error from tcp, return value of read is %zu\n", length);
             }
             break;
@@ -70,7 +70,7 @@ rpc_status TCPWorker::receive(uint8_t *data, uint32_t size)
     return status;
 }
 
-rpc_status TCPWorker::send(const uint8_t *data, uint32_t size)
+rpc_status TCPTransport::send(const uint8_t *data, uint32_t size)
 {
     rpc_status status = Success;
     ssize_t result;
@@ -78,7 +78,7 @@ rpc_status TCPWorker::send(const uint8_t *data, uint32_t size)
     if (m_socket <= 0)
     {
         // we should not pretend to have a succesful Send or we create a deadlock
-        status = kErpcStatus_ConnectionFailure;
+        status = ConnectionFailure;
     }
     else
     {
@@ -97,11 +97,11 @@ rpc_status TCPWorker::send(const uint8_t *data, uint32_t size)
                 {
                     // close socket, not server
                     close();
-                    status = kErpcStatus_ConnectionClosed;
+                    status = ConnectionClosed;
                 }
                 else
                 {
-                    status = kErpcStatus_SendFailed;
+                    status = SendFailed;
                 }
                 break;
             }
@@ -111,7 +111,7 @@ rpc_status TCPWorker::send(const uint8_t *data, uint32_t size)
     return status;
 }
 
-rpc_status TCPWorker::recv_inital_md() {
+rpc_status TCPTransport::recv_inital_md() {
     rpc_status err = rpc_status::NanopbCodecError;
     if (!md_recvd) {
         CHECK_STATUS(m_codec.get(m_read_buffer, myrpc_Meta_fields, to_recv_md), err);
@@ -119,7 +119,7 @@ rpc_status TCPWorker::recv_inital_md() {
     return err;
 }
 
-rpc_status TCPWorker::recv_msg() {
+rpc_status TCPTransport::recv_msg() {
     rpc_status err = rpc_status::NanopbCodecError;
     if (recv_desc && to_recv_msg) {
         CHECK_STATUS(m_codec.get(m_read_buffer, recv_desc, to_recv_msg), err);
@@ -129,17 +129,17 @@ rpc_status TCPWorker::recv_msg() {
     }
     return err;
 }
-rpc_status TCPWorker::recv_trailing_md() {
+rpc_status TCPTransport::recv_trailing_md() {
     return rpc_status::Success;
 }
-rpc_status TCPWorker::send_inital_md() {
+rpc_status TCPTransport::send_inital_md() {
     MessageBuffer *initial_md_buffer = new MessageBuffer();
     rpc_status err = rpc_status::NanopbCodecError;
     CHECK_STATUS(m_codec.write(initial_md_buffer, myrpc_Meta_fields, to_send_md), err);
     CHECK_STATUS(m_send_buffer_list->add(initial_md_buffer), err);
     return err;
 }
-rpc_status TCPWorker::send_msg() {
+rpc_status TCPTransport::send_msg() {
     MessageBuffer *msg_buffer = new MessageBuffer();
     rpc_status err = rpc_status::NanopbCodecError;
     if (send_desc && to_send_msg) {
@@ -151,13 +151,13 @@ rpc_status TCPWorker::send_msg() {
     m_send_buffer_list->add(msg_buffer);
     return err;
 }
-rpc_status TCPWorker::send_trailing_md() {
+rpc_status TCPTransport::send_trailing_md() {
     rpc_status err = rpc_status::Success;
     CHECK_STATUS(sendFrame(), err);
     return err;
 }
 
-rpc_status TCPWorker::receiveFrame() {
+rpc_status TCPTransport::receiveFrame() {
     uint32_t h;
     rpc_status retVal;
     MessageBuffer *message = m_read_buffer;
@@ -169,7 +169,7 @@ rpc_status TCPWorker::receiveFrame() {
         if (retVal == Success) {
             // received size can't be zero.
             if (h == 0U) {
-                retVal = kErpcStatus_ReceiveFailed;
+                retVal = ReceiveFailed;
                 printf("transport:    received size can't be zero.\n");
             }
         }
@@ -177,7 +177,7 @@ rpc_status TCPWorker::receiveFrame() {
         if (retVal == Success) {
             // received size can't be larger then buffer length.
             if (h > message->getWriteSize()) {
-                retVal = kErpcStatus_ReceiveFailed;
+                retVal = ReceiveFailed;
                 printf("transport:    received size can't be larger then buffer length.\n");
             }
         }
@@ -190,7 +190,7 @@ rpc_status TCPWorker::receiveFrame() {
     return retVal;
 }
 
-rpc_status TCPWorker::sendFrame() {
+rpc_status TCPTransport::sendFrame() {
     rpc_status ret;
     MessageBufferList *message_list = m_send_buffer_list;
     //walk through message_list
@@ -203,7 +203,7 @@ rpc_status TCPWorker::sendFrame() {
 
     return ret;
 }
-rpc_status TCPWorker::resetBuffers() {
+rpc_status TCPTransport::resetBuffers() {
     m_read_buffer->reset();
     m_send_buffer_list->reset();
     recv_desc = NULL;

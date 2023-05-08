@@ -47,7 +47,6 @@ public:
      */
     Server(const char *host, uint16_t port)
     : CSBase(host, port)
-    , m_firstService(NULL)
     {
     }
 
@@ -74,8 +73,8 @@ public:
 * @brief This function will create host on server side, or connect client to the server.
 *
 * @retval #Success When creating host was successful or client connected successfully.
-* @retval #kErpcStatus_UnknownName Host name resolution failed.
-* @retval #kErpcStatus_ConnectionFailure Connecting to the specified host failed.
+* @retval #UnknownAddress Host name resolution failed.
+* @retval #ConnectionFailure Connecting to the specified host failed.
 */
     virtual rpc_status open(void) = 0;
     
@@ -90,7 +89,7 @@ public:
     virtual void stop(void) = 0;
 
 protected:
-    Service *m_firstService; /*!< Contains pointer to first service. */
+    std::vector<MethodBase*> methods; /*!< Contains pointer to first service. */
 
 private:
     // Disable copy ctor.

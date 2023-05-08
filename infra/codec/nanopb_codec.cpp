@@ -1,9 +1,6 @@
 #include <codec/nanopb_codec.hpp>
 __attribute__((unused)) static const char *TAG = "nanopb";
 namespace erpc {
-    rpc_status NanopbCodec::read(MessageBuffer *ibuf, const pb_msgdesc_t *fields, void *dst_struct) {
-        return Fail;
-    }
     rpc_status NanopbCodec::write(MessageBuffer *obuf, const pb_msgdesc_t *fields, const void *src_struct) {
         //encode the size
         size_t size;
@@ -25,7 +22,7 @@ namespace erpc {
         //encode the message
         pb_ostream_t ostream = pb_ostream_from_buffer(obuf->getWrite(), obuf->getWriteSize());
         if (!pb_encode(&ostream, fields, src_struct)) {
-            LOGE(TAG, "pb_encode_delimited() failed: %s", PB_GET_ERROR(&ostream));
+            LOGE(TAG, "pb_encode() failed: %s", PB_GET_ERROR(&ostream));
             return NanopbCodecError;
         }
         // set write_pos
@@ -49,7 +46,7 @@ namespace erpc {
         }
         pb_istream_t istream = pb_istream_from_buffer(ibuf->getRead(), (size_t) size);
         if (!pb_decode(&istream, fields, dst_struct)) {
-            LOGE(TAG, "pb_decode_delimited() failed: %s", PB_GET_ERROR(&istream));
+            LOGE(TAG, "pb_decode() failed: %s", PB_GET_ERROR(&istream));
             return NanopbCodecError;
         }
         else {

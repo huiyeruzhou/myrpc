@@ -42,8 +42,8 @@ enum rpc_status
     //! Argument is an invalid value.
     InvalidArgument,
 
-    //! Operated timed out.
-    rpc_status_timeout,
+    //! Time out.
+    Timeout,
 
     //! Message header contains an unknown version.
     InvalidMessageVersion,
@@ -54,45 +54,38 @@ enum rpc_status
     //! Expected a reply message but got another message type.
     UnExpectedMsgType,
 
+    //! Failed to find the service by given path in the register vector.
     UnknownService,
 
     //! Attempt to read or write past the end of a buffer.
     BufferOverrun,
 
-    //! Could not find host with given name.
-    kErpcStatus_UnknownName,
+    //! Could not find server with given host:port.
+    UnknownAddress,
 
     //! Failed to connect to host.
-    kErpcStatus_ConnectionFailure,
+    ConnectionFailure,
 
     //! Connected closed by peer.
-    kErpcStatus_ConnectionClosed,
+    ConnectionClosed,
 
     //! Memory allocation error.
     MemoryError,
 
-    //! Server is stopped.
-    kErpcStatus_ServerIsDown,
-
-    //! Transport layer initialization failed.
-    kErpcStatus_InitFailed,
-
     //! Failed to receive data.
-    kErpcStatus_ReceiveFailed,
+    ReceiveFailed,
 
     //! Failed to send data.
-    kErpcStatus_SendFailed,
+    SendFailed,
 
-    //! Sending/Receiving callback function which is not defined in IDL.
-    kErpcStatus_UnknownCallback,
-
-    //! Calling eRPC function from another eRPC function. For more information see erpc_status.h.
+    //! received init/trailing/msg but unexpected.
     UnexpectedTransportOperation,
 
-    //! When sending address from bigger architecture to smaller.
-    kErpcStatus_BadAddressScale,
+    //! close(fd) return negative number.
+    IOError,
 
-    IOError
+    //! Unimplement stub function.
+    UnimplmentedService,
 };
 
 /*! @} */

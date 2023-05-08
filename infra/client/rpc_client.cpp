@@ -13,9 +13,8 @@
 #include "transport/tcp_transport.hpp"
 #include <string>
 
-
 extern "C" {
-#include <signal.h>
+    #include <signal.h>
     // #include <sys/socket.h>
     // #include <sys/types.h>
     // #include <unistd.h>
@@ -43,9 +42,7 @@ Client::Client(const char *host, uint16_t port)
 Client::~Client(void) {
     delete this->m_transport;
 }
-RequestContext Client::createRequest(bool isOneway) {
-    return RequestContext(++m_sequence, isOneway);
-}
+
 
 rpc_status Client::performRequest(char *path, const pb_msgdesc_t *req_desc, void *req, const pb_msgdesc_t *rsp_desc, void *rsp) {
 
@@ -125,7 +122,7 @@ rpc_status Client::open(void) {
             if (result != 0) {
                 // TODO check EAI_NONAME
                 LOGE(TAG, "gettaddrinfo failed, error: %s", strerror(errno));
-                status = kErpcStatus_UnknownName;
+                status = UnknownAddress;
             }
         }
 
@@ -165,7 +162,7 @@ rpc_status Client::open(void) {
             if (sock < 0) {
                 // TODO check EADDRNOTAVAIL:
                 LOGE(TAG, "connecting failed, error: %s", strerror(errno));
-                status = kErpcStatus_ConnectionFailure;
+                status = ConnectionFailure;
             }
         }
 
@@ -180,12 +177,12 @@ rpc_status Client::open(void) {
 
         if (status == Success) {
             // globally disable the SIGPIPE signal
-            signal(SIGPIPE, SIG_IGN);
+            //signal(SIGPIPE, SIG_IGN);
             m_sockfd = sock;
         }
     }
     if (Success == status) {
-        m_transport = new TCPWorker(m_sockfd, m_port);
+        m_transport = new TCPTransport(m_sockfd, m_port);
     }
     else {
         LOGE(TAG, "connecting failed, error: %s", strerror(errno));

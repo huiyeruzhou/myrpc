@@ -1,9 +1,11 @@
 #include "rpc_status.hpp"
 const char *status_string[] = {
+    //! Success
    "Success",
+   //! Success
    "Fail",
    "InvalidArgument",
-   "rpc_status_timeout",
+   "Timeout",
 
    //! Message header contains an unknown version.
    "InvalidMessageVersion",
@@ -20,38 +22,27 @@ const char *status_string[] = {
    "BufferOverrun",
 
    //! Could not find host with given name.
-   "kErpcStatus_UnknownName",
+   "UnknownAddress",
 
    //! Failed to connect to host.
-   "kErpcStatus_ConnectionFailure",
+   "ConnectionFailure",
 
    //! Connected closed by peer.
-   "kErpcStatus_ConnectionClosed",
+   "ConnectionClosed",
 
    //! Memory allocation error.
    "MemoryError",
 
-   //! Server is stopped.
-   "kErpcStatus_ServerIsDown",
-
-   //! Transport layer initialization failed.
-   "kErpcStatus_InitFailed",
-
    //! Failed to receive data.
-   "kErpcStatus_ReceiveFailed",
+   "ReceiveFailed",
 
    //! Failed to send data.
-   "kErpcStatus_SendFailed",
+   "SendFailed",
 
-   //! Sending/Receiving callback function which is not defined in IDL.
-   "kErpcStatus_UnknownCallback",
-
-   //! Calling eRPC function from another eRPC function. For more information see erpc_status.h.
-   "kErpcStatus_NestedCallFailure",
-
-   //! When sending address from bigger architecture to smaller.
-   "kErpcStatus_BadAddressScale",
+   "UnexpectedTransportOperation",
    "IOError",
+
+   "UnimplmentedService",
 };
 extern const char *StatusToString(int stat) {
     return status_string[stat];

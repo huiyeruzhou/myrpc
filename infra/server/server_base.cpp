@@ -23,43 +23,14 @@ bool nestingDetection = false;
 
 void Server::addService(Service *service)
 {
-    if (m_firstService == NULL)
-    {
-        m_firstService = service;
-    }
-    else
-    {
-
-        Service *link = m_firstService;
-        while (link->getNext() != NULL)
-        {
-            link = link->getNext();
-        }
-
-        link->setNext(service);
-    }
+    this->methods.insert(this->methods.end(), service->methods.begin(), service->methods.end());
 }
 
 void Server::removeService(Service *service)
 {
-    Service *link = m_firstService;
-
-    if (link == service)
-    {
-        m_firstService = link->getNext();
-    }
-    else
-    {
-        while (link != NULL)
-        {
-            if (link->getNext() == service)
-            {
-                link->setNext(link->getNext()->getNext());
-                break;
-            }
-            link = link->getNext();
-        }
-    }
+    this->methods.erase(std::remove_if(this->methods.begin(), this->methods.end(), [&](MethodBase *method) {
+        return std::find(service->methods.begin(), service->methods.end(), method) != service->methods.end();
+    }), this->methods.end());
 }
 
 

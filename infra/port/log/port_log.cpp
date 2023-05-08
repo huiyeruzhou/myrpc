@@ -4,7 +4,7 @@
 
 #include "port/log/port_log.h"
 
-#if CONFIG_HAS_POSIX
+#if CONFIG_HAS_POSIX && !CONFIG_HAS_ANDROID
 extern const std::time_t begin = _getTimeStamp();
 
 std::time_t _getTimeStamp()

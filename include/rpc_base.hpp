@@ -80,7 +80,7 @@ public:
      * @param[in] transport Transport layer to use.
      *
      */
-    void setTransport(Transport *transport) { m_transport = reinterpret_cast<TCPWorker *>(transport); }
+    void setTransport(Transport *transport) { m_transport = reinterpret_cast<TCPTransport *>(transport); }
 
     /*!
      * @brief This function gets transport instance.
@@ -88,12 +88,13 @@ public:
      * @return Transport * Pointer to transport instance.
      */
     Transport *getTransport(void) { return m_transport; }
+
+
+protected:
     const char *m_host;    /*!< Specify the host name or IP address of the computer. */
     uint16_t m_port;       /*!< Specify the listening port number. */
     int m_sockfd;
-
-protected:
-    TCPWorker *m_transport;
+    TCPTransport *m_transport;
 };
 
 } // namespace erpc
