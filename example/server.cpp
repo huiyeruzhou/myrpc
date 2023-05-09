@@ -12,7 +12,9 @@ int main()
     auto server = new erpc::SimpleServer("localhost", 12345);
     /* add generated service into server, look into erpc_matrix_multiply_server.h */
     class myService:public myrpc_LEDControl_Service {
-        void setColor(myrpc_Input *req, myrpc_Output *rsp) {
+        rpc_status setColor(myrpc_Input *req, myrpc_Output *rsp) override {
+            rsp->success = true;
+            return rpc_status::Success;
         }
     };
     auto service = new myService();

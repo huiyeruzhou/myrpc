@@ -56,6 +56,10 @@ CRC += $(NANOPB_DIR)/pb_encode.c  # The nanopb encoder
 CRC += $(NANOPB_DIR)/pb_decode.c  # The nanopb decoder
 CRC += $(NANOPB_DIR)/pb_common.c  # The nanopb common parts
 
+.PHONY: all clean
+all: server client
+clean:
+	rm -f server client idl.pb.c idl.pb.h
 # Build rule for the main program
 server: $(SRC) $(ERPC_LIB)
 	$(CXX) $(CXXFLAGS) -osimple $^

@@ -13,7 +13,7 @@
 ```
 ## 编译（linux）
 
-### 编译代码生成工具
+### 准备代码声生成工具
 在erpcgen目录下运行:
 ```bash
 # cd myrpc/erpcgen

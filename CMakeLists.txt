@@ -1,6 +1,6 @@
 file(GLOB_RECURSE RPC_SRC
         infra/*.cpp
-        infra/*.c
+        nanopb/*.c
         )
 set(RPC_INCLUDE include/ include/nanopb)
 
