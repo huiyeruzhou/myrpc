@@ -1,0 +1,9 @@
+syntax="proto2";
+package myrpc;
+message Meta{
+    required uint32 version = 1;
+    required uint32 seq = 2;
+    optional string path = 2;
+    optional bool send_end = 4;
+    optional uint32 status = 5;
+}

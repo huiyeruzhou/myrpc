@@ -1,215 +1,138 @@
-#include "server_worker.hpp"
+#include "server/server_worker.hpp"
 
 
 using namespace erpc;
 
-ServerWorker::ServerWorker(Service *services, MessageBufferFactory *messageFactory,
-    CodecFactory *codecFactory,
-    TCPWorker *worker)
-    : m_workerThread(workerStub)
-    , m_firstService(services)
-    , m_messageFactory(messageFactory)
-    , m_codecFactory(codecFactory)
+
+ServerWorker::ServerWorker(std::vector<erpc::MethodBase*> methods, TCPTransport *worker)
+    :m_workerThread(workerStub)
+    , methods(methods)
     , m_worker(worker)
 {
-    snprintf(TAG, sizeof(TAG) - 1, "worker %d", m_worker->getport());
+    snprintf(TAG, sizeof(TAG) - 1, "worker %" PRIin_port_t, m_worker->m_port);
     m_workerThread.setName(TAG);
 }
-
-void ServerWorker::disposeBufferAndCodec(Codec *codec)
+ServerWorker::~ServerWorker() {
+    m_method->destroyMsg(m_worker->to_recv_msg, m_worker->to_send_msg);
+    delete m_worker;
+};
+rpc_status ServerWorker::runInternal(void)
 {
-    if (codec != nullptr)
-    {
-        if (codec->getBuffer() != nullptr)
-        {
-            m_messageFactory->dispose(codec->getBuffer());
+    rpc_status err;
+    myrpc_Meta *req_md = m_worker->to_recv_md;
+    myrpc_Meta *rsp_md = m_worker->to_send_md;
+    const pb_msgdesc_t **input_desc = &m_worker->recv_desc;
+    const pb_msgdesc_t **output_desc = &m_worker->send_desc;
+    void **input_msg = &m_worker->to_recv_msg;
+    void **output_msg = &m_worker->to_send_msg;
+    // get data frame
+    CHECK_STATUS(m_worker->receiveFrame(), err);
+    LOGI(TAG, "receiveFrame()");
+    //recv inital metadata
+    CHECK_STATUS(m_worker->recv_inital_md(), err);
+    LOGI(TAG, "recv_inital_md()");
+
+    //find the method
+    CHECK_STATUS(findServiceByMetadata(req_md),err);
+    //filled message desc, so that we can receive message
+    m_method->filledMsgDesc(input_desc, input_msg, output_desc, output_msg);
+    
+    //recv messgae
+    CHECK_STATUS(m_worker->recv_msg(), err);
+    LOGI(TAG, "recv_msg()");
+    //recv trailing metadata
+    CHECK_STATUS(m_worker->recv_trailing_md(), err);
+    LOGI(TAG, "recv_trailing_md()");
+    
+    CHECK_STATUS(callMethodByMetadata(req_md, rsp_md, m_worker->to_recv_msg, m_worker->to_send_msg), err);
+
+    //send initial metadata
+    CHECK_STATUS(m_worker->send_inital_md(), err);
+    LOGI(TAG, "send_inital_md()");
+    //send msg
+    CHECK_STATUS(m_worker->send_msg(), err);
+    LOGI(TAG, "send_msg()");
+    //sned trailing metadata
+done:
+    rpc_status has_error = err;
+    // If the user didn't set a status, set it to the error code.Otherwise just keep it.
+    if (err != rpc_status::Success && ((rsp_md->has_status && rsp_md->status == rpc_status::Success) || !rsp_md->has_status)) {
+        rsp_md->has_status = true;
+        rsp_md->status = err;
+    }
+    //If connection has been closed, we don't need to send trailing metadata and should close the worker
+    if (err == rpc_status::ConnectionClosed) {
+        m_worker->close();
+        return ConnectionClosed;
+    }
+    //send trailing metadata
+    err = m_worker->send_trailing_md();
+    if (rpc_status::Success != err) {
+        LOGE(TAG, "Failed to send trailing md");
+    }
+    LOGI(TAG, "send_trailing_md()");
+    if (has_error != rpc_status::Success) {
+        LOGW(TAG, "RPC Call Failed Because: %s", StatusToString(has_error));
+        if (has_error == rpc_status::UnknownService) {
+            LOGW(TAG, "Request Service: %s", req_md->path);
+            for_each(methods.begin(), methods.end(),[this](MethodBase *method) {
+                LOGW(TAG, "Service: %s", method->getPath());
+            });
         }
-        m_codecFactory->dispose(codec);
     }
-}
-
-erpc_status_t ServerWorker::runInternal()
-{
-    MessageBuffer buff;
-    Codec *codec = nullptr;
-
-    // Handle the request.
-    message_type_t msgType;
-    uint32_t serviceId;
-    uint32_t methodId;
-    uint32_t sequence;
-
-    erpc_status_t err = runInternalBegin(&codec, buff, msgType, serviceId, methodId, sequence);
-    if (err == kErpcStatus_Success)
-    {
-        err = runInternalEnd(codec, msgType, serviceId, methodId, sequence);
+    else {
+        LOGI(TAG, "RPC Call Success\n");
     }
-
+    resetBuffers();
     return err;
 }
-
-erpc_status_t ServerWorker::runInternalBegin(Codec **codec, MessageBuffer &buff, message_type_t &msgType,
-    uint32_t &serviceId, uint32_t &methodId, uint32_t &sequence)
+rpc_status ServerWorker::resetBuffers(void)
 {
-    erpc_status_t err = kErpcStatus_Success;
+    if(m_method)m_method->destroyMsg(m_worker->to_recv_msg, m_worker->to_send_msg);
+    m_method = NULL;
+    return m_worker->resetBuffers();
+}
+rpc_status ServerWorker::findServiceByMetadata(myrpc_Meta *req) {
 
-    //创建接收缓冲区
-    if (m_messageFactory->createServerBuffer() == true)
-    {
-        buff = m_messageFactory->create();
-        if (nullptr == buff.get())
-        {
-            err = kErpcStatus_MemoryError;
-        }
+    auto iter_method = std::find_if(methods.begin(), methods.end(),[&](MethodBase *method)->bool {
+        return !strcmp(method->getPath(),req->path);
+    });
+    if(iter_method==methods.end()){
+        m_method = NULL;
+        return rpc_status::UnknownService;
+    }else{
+        m_method = *iter_method;
     }
-
-    // Receive the next invocation request.
-    if (err == kErpcStatus_Success)
-    {
-        err = m_worker->receive(&buff);
+    LOGI(this->TAG, "service `%s`", m_method->getPath());
+    return rpc_status::Success;
+}
+rpc_status ServerWorker::callMethodByMetadata(myrpc_Meta *req, myrpc_Meta *rsp, void *input, void *output)
+{
+    if (!m_method) {
+        LOGE(TAG, "Unknown service but called");
+        return rpc_status::UnknownService;
     }
-
-    //创建codec
-    if (err == kErpcStatus_Success)
-    {
-        *codec = m_codecFactory->create();
-        if (*codec == nullptr)
-        {
-            err = kErpcStatus_MemoryError;
-        }
-    }
-
-    //
-    if (err != kErpcStatus_Success)
-    {
-        // Dispose of buffers.
-        if (buff.get() != nullptr)
-        {
-            m_messageFactory->dispose(&buff);
-        }
-    }
-
-    if (err == kErpcStatus_Success)
-    {
-        (*codec)->setBuffer(buff);
-
-        err = readHeadOfMessage(*codec, msgType, serviceId, methodId, sequence);
-        
-        LOGI(this->TAG, "read head of message\n                "
-            "msgType: %" "d" 
-            ", serviceId: %" PRIu32
-            ",  methodId: %" PRIu32
-            ", sequence: %" PRIu32 "\n",
-            msgType, serviceId, methodId, sequence);
-        if (err != kErpcStatus_Success)
-        {
-            // Dispose of buffers and codecs.
-            disposeBufferAndCodec(*codec);
-        }
-    }
-    if (err != kErpcStatus_Success)
-    {
-        
-        LOGI(this->TAG,"runInternalBegin err: %d\n",   err);
-    }
-
+    rpc_status err = m_method->handleInvocation(input, output);
+    rsp->seq = req->seq;
+    rsp->version = req->version;
+    rsp->path = req->path;
+    rsp->has_status = true;
+    rsp->status = err;
+    rsp->has_send_end = false;
     return err;
-}
-
-erpc_status_t ServerWorker::runInternalEnd(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId,
-    uint32_t sequence)
-{
-    erpc_status_t err = processMessage(codec, msgType, serviceId, methodId, sequence);
-
-    if (err == kErpcStatus_Success)
-    {
-        if (msgType != kOnewayMessage)
-        {
-
-            err = m_worker->send(codec->getBuffer());
-        }
-    }
-    // Dispose of buffers and codecs.
-    disposeBufferAndCodec(codec);
-    if (err != kErpcStatus_Success)
-    {
-        LOGI(this->TAG,"runInternalEnd err: %d\n",   err);
-    }
-
-    return err;
-}
-
-erpc_status_t ServerWorker::readHeadOfMessage(Codec *codec, message_type_t &msgType, uint32_t &serviceId, uint32_t &methodId,
-    uint32_t &sequence)
-{
-    codec->startReadMessage(&msgType, &serviceId, &methodId, &sequence);
-    return codec->getStatus();
-}
-
-erpc_status_t ServerWorker::processMessage(Codec *codec, message_type_t msgType, uint32_t serviceId, uint32_t methodId,
-    uint32_t sequence)
-{
-    erpc_status_t err = kErpcStatus_Success;
-    Service *service;
-
-    if ((msgType != kInvocationMessage) && (msgType != kOnewayMessage))
-    {
-        err = kErpcStatus_InvalidArgument;
-    }
-
-    if (err == kErpcStatus_Success)
-    {
-        service = findServiceWithId(serviceId);
-        if (service == nullptr)
-        {
-            err = kErpcStatus_InvalidArgument;
-        }
-    }
-
-    if (err == kErpcStatus_Success)
-    {
-        err = service->handleInvocation(methodId, sequence, codec, m_messageFactory);
-        LOGI(this->TAG,"service `%s` invoked\n",   service->m_name);
-    }
-
-    if (err != kErpcStatus_Success)
-    {
-        LOGI(this->TAG,"processMessage err: %d\n",   err);
-    }
-
-    return err;
-}
-
-Service *ServerWorker::findServiceWithId(uint32_t serviceId)
-{
-    Service *service = m_firstService;
-    while (service != nullptr)
-    {
-        if (service->getServiceId() == serviceId)
-        {
-            break;
-        }
-
-        service = service->getNext();
-    }
-    // LOGI(this->TAG,"service No.%lu `%s` found\n",   serviceId, service->m_name);
-    return service;
 }
 
 void ServerWorker::workerStub(void *arg)
 {
-    int err = kErpcStatus_Fail;
-    auto *This = reinterpret_cast<ServerWorker *>(arg);
-    LOGI(This->TAG, "in stub");
-    if (This != nullptr)
+    rpc_status err = rpc_status::Success;
+    ServerWorker *This = reinterpret_cast<ServerWorker *>(arg);
+
+    if (This != NULL)
     {
-        int i = 1;
-        while (err != kErpcStatus_Success && i <= 5)
+        while (err == rpc_status::Success)
         {
             err = This->runInternal();
-            i++;
         }
-        This->m_worker->close();
     }
     LOGI(This->TAG, "work done\n");
 }

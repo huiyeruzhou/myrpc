@@ -50,25 +50,15 @@ INCLUDES += $(ERPC_C_ROOT)/infra \
 			$(ERPC_C_ROOT)/infra/server \
 			$(ERPC_C_ROOT)/infra/transport \
 			$(ERPC_C_ROOT)/infra/port \
-
-			
-
-SOURCES += 	$(ERPC_C_ROOT)/infra/codec/erpc_basic_codec.cpp \
-			$(ERPC_C_ROOT)/infra/codec/erpc_message_buffer.cpp \
-			\
-			$(ERPC_C_ROOT)/infra/client/client.cpp \
-			\
-			$(ERPC_C_ROOT)/infra/server/erpc_server.cpp \
-			$(ERPC_C_ROOT)/infra/server/erpc_simple_server.cpp \
-			$(ERPC_C_ROOT)/infra/server/server_worker.cpp\
-			\
-			$(ERPC_C_ROOT)/infra/transport/erpc_framed_transport.cpp \
-			$(ERPC_C_ROOT)/infra/transport/tcp_worker.cpp\
-			$(ERPC_C_ROOT)/infra/client_server_common.cpp \
-			\
-			$(ERPC_C_ROOT)/infra/port/erpc_port_stdlib.cpp \
-			$(ERPC_C_ROOT)/infra/port/erpc_threading_pthreads.cpp \
-
+			$(ERPC_C_ROOT)/infra/port/threading\
+			$(ERPC_C_ROOT)/infra/port/malloc_free\
+			$(ERPC_C_ROOT)/infra/port/log 
+INCLUDES += $(ERPC_C_ROOT)/include			
+INCLUDES += $(ERPC_C_ROOT)/nanopb
+SOURCES += 	$(foreach dir,$(subst ' ', ,$(INCLUDES)),$(wildcard $(dir)/*.cpp))
+SOURCES +=  $(foreach dir,$(subst ' ', ,$(INCLUDES)),$(wildcard $(dir)/*.c))
+CXXFLAGS += -g -O2
+CFLAGS += -g -O2
 
 MAKE_TARGET = $(TARGET_LIB)($(OBJECTS_ALL))
 
