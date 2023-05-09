@@ -125,22 +125,20 @@ extern const pb_msgdesc_t myrpc_matrix_multiply_OutputTest_msg;
 #define myrpc_matrix_multiply_proto_Nested_size  22
 
 /* Service Definations */
-class myrpc_matrix_multiply_MatrixMultiplyService : public erpc::Service {
+class myrpc_matrix_multiply_MatrixMultiplyService_Service : public erpc::Service {
 public:
-    myrpc_matrix_multiply_MatrixMultiplyService() {}
-    virtual ~myrpc_matrix_multiply_MatrixMultiplyService() {}
-    rpc_status myrpctest(myrpc_matrix_multiply_InputTest *request, myrpc_matrix_multiply_OutputTest *response);
+    myrpc_matrix_multiply_MatrixMultiplyService_Service();
+    virtual ~myrpc_matrix_multiply_MatrixMultiplyService_Service() {}
+    virtual rpc_status myrpctest(myrpc_matrix_multiply_InputTest *request, myrpc_matrix_multiply_OutputTest *response);
+;
 };
 
 /* Client Defination */
-class myrpc_matrix_multiply_MatrixMultiplyService : public erpc::Client {
+class myrpc_matrix_multiply_MatrixMultiplyService_Client : public erpc::Client {
 public:
-    myrpc_matrix_multiply_MatrixMultiplyService(const char *host, uint16_t port): erpc::Client(host, port) {}
-    virtual ~myrpc_matrix_multiply_MatrixMultiplyService() {}
-rpc_status myrpc_matrix_multiply_MatrixMultiplyService::myrpctest(myrpc_matrix_multiply_InputTest *req, myrpc_matrix_multiply_OutputTest *rsp) {
-    LOGW(myrpc_matrix_multiply_MatrixMultiplyService_method_names[0], "Service Unimplemented!");
-    return rpc_status::UnimplmentedService;
-}
+    myrpc_matrix_multiply_MatrixMultiplyService_Client(const char *host, uint16_t port): erpc::Client(host, port) {}
+    virtual ~myrpc_matrix_multiply_MatrixMultiplyService_Client() {}
+    virtual rpc_status myrpctest(myrpc_matrix_multiply_InputTest *request, myrpc_matrix_multiply_OutputTest *response);
 };
 #ifdef __cplusplus
 } /* extern "C" */

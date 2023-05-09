@@ -24,14 +24,22 @@ PB_BIND(myrpc_matrix_multiply_OutputTest, myrpc_matrix_multiply_OutputTest, AUTO
 static const char* myrpc_matrix_multiply_MatrixMultiplyService_method_names[] = {
     "/myrpc_matrix_multiply.MatrixMultiplyService/myrpctest",
 };
+/* Method Registration */
+myrpc_matrix_multiply_MatrixMultiplyService_Service::myrpc_matrix_multiply_MatrixMultiplyService_Service() {
+       addMethod(new erpc::Method<myrpc_matrix_multiply_InputTest, myrpc_matrix_multiply_OutputTest>(
+               myrpc_matrix_multiply_MatrixMultiplyService_method_names[0], myrpc_matrix_multiply_InputTest_fields, myrpc_matrix_multiply_OutputTest_fields,
+               [](Service *s, myrpc_matrix_multiply_InputTest *i, myrpc_matrix_multiply_OutputTest *o)->rpc_status {return reinterpret_cast<myrpc_matrix_multiply_MatrixMultiplyService_Service*>(s)->myrpctest(i, o);},
+               this));
+}
 /* Server stub */
-rpc_status myrpc_matrix_multiply_MatrixMultiplyService::myrpctest(myrpc_matrix_multiply_InputTest *req, myrpc_matrix_multiply_OutputTest *rsp) {
+rpc_status myrpc_matrix_multiply_MatrixMultiplyService_Service::myrpctest(myrpc_matrix_multiply_InputTest *req, myrpc_matrix_multiply_OutputTest *rsp) {
     LOGW(myrpc_matrix_multiply_MatrixMultiplyService_method_names[0], "Service Unimplemented!");
     return rpc_status::UnimplmentedService;
 }
 
 
 /* Client stub */
-rpc_status myrpc_matrix_multiply_MatrixMultiplyService::myrpctest(myrpc_matrix_multiply_InputTest *req, myrpc_matrix_multiply_OutputTest *rsp) {
+rpc_status myrpc_matrix_multiply_MatrixMultiplyService_Client::myrpctest(myrpc_matrix_multiply_InputTest *req, myrpc_matrix_multiply_OutputTest *rsp) {
     return performRequest(const_cast<char *>(myrpc_matrix_multiply_MatrixMultiplyService_method_names[0]), myrpc_matrix_multiply_InputTest_fields, (void *) req, myrpc_matrix_multiply_OutputTest_fields, (void *) rsp);
+}
 
