@@ -30,36 +30,32 @@ else
 	    PROTOC = $(NANOPB_DIR)/generator/protoc
 	endif
 endif
-CXXFLAGS += -g $(INCLUDE) -lpthread
-ERPC_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))../)
-ERPC_LIB=$(ERPC_ROOT)/Debug/Linux/erpc/lib/liberpc.a
+
 # Rule for building .pb.c and .pb.h
-%.pb.c %.pb.h: %.proto %.options
+%.pb.cpp %.pb.hpp: %.proto %.options
 	$(PROTOC) $(PROTOC_OPTS) --nanopb_out=. $<
 
-%.pb.c %.pb.h: %.proto
+%.pb.cpp %.pb.hpp: %.proto
 	$(PROTOC) $(PROTOC_OPTS) --nanopb_out=. $<
 
 # Compiler flags to enable all warnings & debug info
 CFLAGS = -Wall -Werror -g -O0
 CXXFLAGS += "-I$(NANOPB_DIR)" -I../include
 
+# Path to erpc root directory
+ERPC_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))../)
+ERPC_LIB=$(ERPC_ROOT)/Debug/Linux/erpc/lib/liberpc.a
+CXXFLAGS += -g $(INCLUDE) -lpthread
+
+
 # C source code files that are required
-SRC  = server.cpp                   # The main program
-CRC  = client.cpp                   # The main program
-SRC  += idl.pb.cpp                  # The main program
-CRC += idl.pb.cpp                # The compiled protocol definition
-SRC += $(NANOPB_DIR)/pb_encode.c  # The nanopb encoder
-SRC += $(NANOPB_DIR)/pb_decode.c  # The nanopb decoder
-SRC += $(NANOPB_DIR)/pb_common.c  # The nanopb common parts
-CRC += $(NANOPB_DIR)/pb_encode.c  # The nanopb encoder
-CRC += $(NANOPB_DIR)/pb_decode.c  # The nanopb decoder
-CRC += $(NANOPB_DIR)/pb_common.c  # The nanopb common parts
+SRC  = server.cpp idl.pb.cpp ${NANOPB_CORE}            # The main program
+CRC  = client.cpp idl.pb.cpp ${NANOPB_CORE}            # The main program
 
 .PHONY: all clean
 all: server client
 clean:
-	rm -f server client idl.pb.c idl.pb.h
+	rm -f server client *.pb.cpp *.pb.hpp
 # Build rule for the main program
 server: $(SRC) $(ERPC_LIB)
 	$(CXX) $(CXXFLAGS) -osimple $^
@@ -67,7 +63,3 @@ server: $(SRC) $(ERPC_LIB)
 # Build rule for the main program
 client: $(CRC) $(ERPC_LIB) 
 	$(CXX) $(CXXFLAGS) -osimpleclient $^
-
-# Build rule for the protocol
-idl.pb.cpp: idl.proto
-	$(PROTOC) $(PROTOC_OPTS) --nanopb_out=. $<
