@@ -1,5 +1,5 @@
 ## 简介
-代码可以在linux下单独运行，或者作为esp-idf框架中的component运行。还可以作为Android项目中的原生方法运行。
+代码可以在linux下单独运行，或者作为esp-idf框架中的component运行。还可以作为Android项目中的原生方法运行(详见doc/Android.md)。
 文件结构：
 ```bash
 .
