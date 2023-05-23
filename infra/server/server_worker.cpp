@@ -16,6 +16,7 @@ ServerWorker::~ServerWorker() {
     m_method->destroyMsg(m_worker->to_recv_msg, m_worker->to_send_msg);
     delete m_worker;
 };
+//TODO: 失败处理还很不完善,直接跳到trailing metadata不能优雅的取消操作!
 rpc_status ServerWorker::runInternal(void)
 {
     rpc_status err;
@@ -43,8 +44,9 @@ rpc_status ServerWorker::runInternal(void)
     //recv trailing metadata
     CHECK_STATUS(m_worker->recv_trailing_md(), err);
     LOGI(TAG, "recv_trailing_md()");
-    
-    CHECK_STATUS(callMethodByMetadata(req_md, rsp_md, m_worker->to_recv_msg, m_worker->to_send_msg), err);
+
+    //call method and filled the meta.
+    err = callMethodByMetadata(req_md, rsp_md, m_worker->to_recv_msg, m_worker->to_send_msg);
 
     //send initial metadata
     CHECK_STATUS(m_worker->send_inital_md(), err);
@@ -108,17 +110,19 @@ rpc_status ServerWorker::findServiceByMetadata(myrpc_Meta *req) {
 }
 rpc_status ServerWorker::callMethodByMetadata(myrpc_Meta *req, myrpc_Meta *rsp, void *input, void *output)
 {
-    if (!m_method) {
-        LOGE(TAG, "Unknown service but called");
-        return rpc_status::UnknownService;
-    }
-    rpc_status err = m_method->handleInvocation(input, output);
+    rpc_status err;
     rsp->seq = req->seq;
     rsp->version = req->version;
     rsp->path = req->path;
     rsp->has_status = true;
-    rsp->status = err;
     rsp->has_send_end = false;
+    if (!m_method) {
+        LOGE(TAG, "Unknown service but called");
+        rsp->status = rpc_status::UnknownService;
+        return rpc_status::UnknownService;
+    }
+    err = m_method->handleInvocation(input, output);
+    rsp->status = err;
     return err;
 }
 
