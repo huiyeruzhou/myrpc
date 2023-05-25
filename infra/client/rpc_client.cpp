@@ -14,7 +14,7 @@
 #include <string>
 
 extern "C" {
-    #include <signal.h>
+#include <signal.h>
     // #include <sys/socket.h>
     // #include <sys/types.h>
     // #include <unistd.h>
@@ -134,6 +134,17 @@ rpc_status Client::open(void) {
                 sock = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
                 if (sock < 0) {
                     LOGW(TAG, "try create a socket, but failed");
+                    continue;
+                }
+                // set socket timeout
+                struct timeval timeout;
+                timeout.tv_sec = 2;
+                timeout.tv_usec = 0;
+                set = setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (char *) &timeout, sizeof(timeout));
+                if (set < 0) {
+                    LOGW(TAG, "setsockopt failed, error: %s", strerror(errno));
+                    ::close(sock);
+                    sock = -1;
                     continue;
                 }
                 // Attempt to connect.
