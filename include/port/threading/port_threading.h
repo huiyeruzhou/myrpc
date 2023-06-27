@@ -98,7 +98,7 @@ public:
      * @param[in] stackPtr Mandatory task stack pointer for static api usage.
      */
     //TODO
-    Thread(thread_entry_t entry, uint32_t priority = 0, uint32_t stackSize = 2048, const char *name = "");
+    Thread(thread_entry_t entry, uint32_t priority = 5, uint32_t stackSize = 2048, const char *name = "");
 
     /*!
      * @brief Destructor.
@@ -132,7 +132,7 @@ public:
      * @param[in] priority Task priority.
      * @param[in] stackSize Stack size.
      */
-    void init(thread_entry_t entry, uint32_t priority = 0, uint32_t stackSize = 0);
+    void init(thread_entry_t entry, uint32_t priority = 5, uint32_t stackSize = 0);
 
     /*!
      * @brief This function starts thread execution.

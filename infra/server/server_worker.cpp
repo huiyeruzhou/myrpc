@@ -5,7 +5,7 @@ using namespace erpc;
 
 
 ServerWorker::ServerWorker(std::vector<erpc::MethodBase*> methods, TCPTransport *worker)
-    :m_workerThread(workerStub)
+    :m_workerThread(workerStub, 0)
     , methods(methods)
     , m_worker(worker)
 {
@@ -136,6 +136,7 @@ void ServerWorker::workerStub(void *arg)
         while (err == rpc_status::Success)
         {
             err = This->runInternal();
+            LOGI(This->TAG, "runInternal return\n");
         }
     }
     LOGI(This->TAG, "work done\n");

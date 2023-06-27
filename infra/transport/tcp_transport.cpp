@@ -30,7 +30,7 @@ rpc_status TCPTransport::close() {
 }
 rpc_status TCPTransport::receive(uint8_t *data, uint32_t size)
 {
-    ssize_t length;
+    // ssize_t length;
     rpc_status status = Success;
 
     if(m_socket <= 0)
@@ -40,32 +40,33 @@ rpc_status TCPTransport::receive(uint8_t *data, uint32_t size)
     }
 
     // Loop until all requested data is received.
-    while (size > 0U)
-    {
-        length = read(m_socket, data, size);
+    // while (size > 0U)
+    // {
+    //     length = read(m_socket, data, size);
 
-        // Length will be zero if the connection is closed.
-        if (length > 0)
-        {
-            size -= length;
-            data += length;
-        }
-        else
-        {
-            if (length == 0)
-            {
-                // close socket, not server
-                close();
-                status = ConnectionClosed;
-            }
-            else
-            {
-                status = ReceiveFailed;
-                printf("transport:   unknown error from tcp, return value of read is %zu\n", length);
-            }
-            break;
-        }
-    }
+    //     // Length will be zero if the connection is closed.
+    //     if (length > 0)
+    //     {
+    //         size -= length;
+    //         data += length;
+    //     }
+    //     else
+    //     {
+    //         if (length == 0)
+    //         {
+    //             // close socket, not server
+    //             close();
+    //             status = ConnectionClosed;
+    //         }
+    //         else
+    //         {
+    //             status = ReceiveFailed;
+    //             printf("transport:   unknown error from tcp, return value of read is %zu\n", length);
+    //         }
+    //         break;
+    //     }
+    // }
+    ::recv(m_socket, data, size, 0);
 
     return status;
 }
@@ -73,7 +74,7 @@ rpc_status TCPTransport::receive(uint8_t *data, uint32_t size)
 rpc_status TCPTransport::send(const uint8_t *data, uint32_t size)
 {
     rpc_status status = Success;
-    ssize_t result;
+    // ssize_t result;
 
     if (m_socket <= 0)
     {
@@ -83,29 +84,30 @@ rpc_status TCPTransport::send(const uint8_t *data, uint32_t size)
     else
     {
         // Loop until all data is sent.
-        while (size > 0U)
-        {
-            result = write(m_socket, data, size);
-            if (result >= 0)
-            {
-                size -= result;
-                data += result;
-            }
-            else
-            {
-                if (result == EPIPE)
-                {
-                    // close socket, not server
-                    close();
-                    status = ConnectionClosed;
-                }
-                else
-                {
-                    status = SendFailed;
-                }
-                break;
-            }
-        }
+        // while (size > 0U)
+        // {
+        //     result = write(m_socket, data, size);
+        //     if (result >= 0)
+        //     {
+        //         size -= result;
+        //         data += result;
+        //     }
+        //     else
+        //     {
+        //         if (result == EPIPE)
+        //         {
+        //             // close socket, not server
+        //             close();
+        //             status = ConnectionClosed;
+        //         }
+        //         else
+        //         {
+        //             status = SendFailed;
+        //         }
+        //         break;
+        //     }
+        // }
+        ::send(m_socket, data, size, 0);
     }
 
     return status;
@@ -165,6 +167,7 @@ rpc_status TCPTransport::receiveFrame() {
     {
         // Receive header first.
         retVal = receive((uint8_t *) &h, sizeof(h));
+        LOGI(TAG, "receive header");
 
         if (retVal == Success) {
             // received size can't be zero.
@@ -186,6 +189,7 @@ rpc_status TCPTransport::receiveFrame() {
             // Receive rest of the message now we know its size.
             retVal = receive(message->get(), h);
         }
+        LOGI(TAG, "receive message");
     }
     return retVal;
 }
