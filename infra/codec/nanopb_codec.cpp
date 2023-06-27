@@ -10,6 +10,7 @@ namespace erpc {
             return NanopbCodecError;
         }
         if (obuf->getWriteSize() < size + sizeof(uint32_t) + 1) {
+            LOGE(TAG, "write size is %" PRIu16 ", but encode size is %zu" , obuf->getWriteSize(), size + sizeof(uint32_t) + 1);
             return BufferOverrun;
         }
         //write size, write_pos will be set.
@@ -36,12 +37,22 @@ namespace erpc {
             return BufferOverrun;
         }
         ibuf->m_read_pos += 1;
-        
+        //LOGE(TAG, "m_read_pos = %" PRIu16, ibuf->m_read_pos);
+
         uint32_t size = ntohl(*(uint32_t *) ibuf->getRead());
         ibuf->m_read_pos += sizeof(uint32_t);
-        
+        //LOGE(TAG, "m_read_pos = %" PRIu16, ibuf->m_read_pos);
+
         //decode the message
         if (size > ibuf->getReadSize()) {
+            LOGE(TAG, "read size is %" PRIu16 ", but data size is %" PRIu32, ibuf->getReadSize(), size);
+            //print ibuf one byte by one
+            for (size_t i = 0; i < ibuf->getReadSize(); i++) {
+                printf("%02x ", ibuf->get()[i]);
+                if(i % 16 == 15) {
+                    printf("\n");
+                }
+            }
             return BufferOverrun;
         }
         pb_istream_t istream = pb_istream_from_buffer(ibuf->getRead(), (size_t) size);
@@ -52,6 +63,7 @@ namespace erpc {
         else {
             // set read position so that other may not read this poroto message again
             ibuf->m_read_pos += size;
+            //LOGE(TAG, "m_read_pos = %" PRIu16, ibuf->m_read_pos);
             return Success;
         }
     }

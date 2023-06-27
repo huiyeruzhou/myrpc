@@ -39,35 +39,10 @@ rpc_status TCPTransport::receive(uint8_t *data, uint32_t size)
         return status;
     }
 
-    // Loop until all requested data is received.
-    // while (size > 0U)
-    // {
-    //     length = read(m_socket, data, size);
-
-    //     // Length will be zero if the connection is closed.
-    //     if (length > 0)
-    //     {
-    //         size -= length;
-    //         data += length;
-    //     }
-    //     else
-    //     {
-    //         if (length == 0)
-    //         {
-    //             // close socket, not server
-    //             close();
-    //             status = ConnectionClosed;
-    //         }
-    //         else
-    //         {
-    //             status = ReceiveFailed;
-    //             printf("transport:   unknown error from tcp, return value of read is %zu\n", length);
-    //         }
-    //         break;
-    //     }
-    // }
-    ::recv(m_socket, data, size, 0);
-
+    int ret = ::recv(m_socket, data, size, 0);
+    if (ret == 0) {
+        status = rpc_status::ConnectionClosed;
+    }
     return status;
 }
 
@@ -83,31 +58,8 @@ rpc_status TCPTransport::send(const uint8_t *data, uint32_t size)
     }
     else
     {
-        // Loop until all data is sent.
-        // while (size > 0U)
-        // {
-        //     result = write(m_socket, data, size);
-        //     if (result >= 0)
-        //     {
-        //         size -= result;
-        //         data += result;
-        //     }
-        //     else
-        //     {
-        //         if (result == EPIPE)
-        //         {
-        //             // close socket, not server
-        //             close();
-        //             status = ConnectionClosed;
-        //         }
-        //         else
-        //         {
-        //             status = SendFailed;
-        //         }
-        //         break;
-        //     }
-        // }
-        ::send(m_socket, data, size, 0);
+        int ret = ::send(m_socket, data, size, 0);
+        if (ret < 0) status = ConnectionClosed;
     }
 
     return status;
@@ -167,7 +119,7 @@ rpc_status TCPTransport::receiveFrame() {
     {
         // Receive header first.
         retVal = receive((uint8_t *) &h, sizeof(h));
-        LOGI(TAG, "receive header");
+        LOGI(TAG, "receive header: %" PRIu32 , h);
 
         if (retVal == Success) {
             // received size can't be zero.
@@ -200,11 +152,10 @@ rpc_status TCPTransport::sendFrame() {
     //walk through message_list
     std::string message = message_list->JoinIntoString();
     uint32_t h = message.size();
-    ret = send((uint8_t *) &h, sizeof(h));
-    if (ret == Success) {
-        ret = send((uint8_t *) message.c_str(), h);
-    }
-
+    // send((uint8_t *) &h, sizeof(h));
+    LOGE(TAG, "length is %zu", std::string((char *) &h, sizeof(h)).size());
+    message = std::string((char *) &h, sizeof(h)) + message;
+    ret = send((uint8_t *) message.c_str(), h + sizeof(h));
     return ret;
 }
 rpc_status TCPTransport::resetBuffers() {

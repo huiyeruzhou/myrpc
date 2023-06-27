@@ -14,6 +14,7 @@
 using namespace erpc;
 using namespace std;
 
+const static char *TAG = "Message Buffer";
 ////////////////////////////////////////////////////////////////////////////////
 // Code
 ////////////////////////////////////////////////////////////////////////////////
@@ -83,6 +84,7 @@ rpc_status MessageBuffer::read(void *data, uint32_t length, uint16_t offset)
             m_read_pos = dest_pos > m_read_pos ? dest_pos : m_read_pos;
         }
     }
+    LOGE(TAG, "m_read_pos = %" PRIu16, m_read_pos);
     return err;
 }
 

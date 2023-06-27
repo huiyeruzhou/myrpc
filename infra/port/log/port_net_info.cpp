@@ -13,26 +13,25 @@ int getnameinfo(const struct sockaddr *addr, socklen_t addrlen,
 }
 #endif
 void sprint_net_info(char *netinfo, int netinfo_len, const sockaddr *__sockaddr, int __len) {
+    //get host ip by sockaddr    
     char host[16];
-    char service[6];
-    int ret = 0;
-    if ((ret = getnameinfo(__sockaddr, __len, host, 16, service, 6, 0)))
-    {
-#if CONFIG_HAS_POSIX
-        LOGW("net info log", "%s", gai_strerror(ret));
-#endif
-        LOGW("net info log", "SA_FAMILY: %d", __sockaddr->sa_family);
-    }
-    snprintf(netinfo, netinfo_len, "%s:%s", host, service);
+    inet_ntop(__sockaddr->sa_family, __sockaddr->sa_data, host, 16);
+    snprintf(netinfo, netinfo_len, "%s:%d", host, getPortFormAddr(__sockaddr, __len));
 }
 
 int getPortFormAddr(const sockaddr *__sockaddr, int __len) {
-    char service[32] = {};
-    in_port_t port;
-    getnameinfo(__sockaddr, __len, NULL, 0, service, 32, 0);
-    if (sscanf(service, "%" SCNin_port_t, &port) == 1)
-    {
-        return port;
+    if (__sockaddr->sa_family == AF_INET) {
+        auto casted_addr = reinterpret_cast<const struct sockaddr_in*>(__sockaddr);
+        return ntohs(casted_addr->sin_port);
+    }
+    else if (__sockaddr->sa_family == AF_INET6) {
+        auto casted_addr = reinterpret_cast<const struct sockaddr_in6*>(__sockaddr);
+        return ntohs(casted_addr->sin6_port);
+    }
+    else {
+        LOGW("net info log", "unknown SA_FAMILY: %d, interpret as AF_INET", __sockaddr->sa_family);
+        auto casted_addr = reinterpret_cast<const struct sockaddr_in *>(__sockaddr);
+        return ntohs(casted_addr->sin_port);
     }
     return -1;
 }
