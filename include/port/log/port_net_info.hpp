@@ -12,6 +12,7 @@
 extern "C" {
 #include <lwip/netdb.h>
 #include <lwip/sockets.h>
+#include <arpa/inet.h>
 }
 #else
 #include <cstdio>
@@ -20,6 +21,7 @@ extern "C" {
 #include<sys/types.h>
 #include<sys/socket.h>
 #include<netinet/in.h>
+#include <arpa/inet.h>
 }
 #endif
 #include <cstring>
