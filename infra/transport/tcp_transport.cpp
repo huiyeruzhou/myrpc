@@ -43,6 +43,9 @@ rpc_status TCPTransport::receive(uint8_t *data, uint32_t size)
     if (ret == 0) {
         status = rpc_status::ConnectionClosed;
     }
+    else if (ret < size) {
+        LOGE(TAG, "recvd %d bytes of data, excepted %" PRIu32, ret, size);
+    }
     return status;
 }
 
@@ -56,10 +59,13 @@ rpc_status TCPTransport::send(const uint8_t *data, uint32_t size)
         // we should not pretend to have a succesful Send or we create a deadlock
         status = ConnectionFailure;
     }
-    else
-    {
+    else {
         int ret = ::send(m_socket, data, size, 0);
-        if (ret < 0) status = ConnectionClosed;
+        if (ret < 0) {status = ConnectionClosed;
+        }
+        else if (ret < size) {
+            LOGE(TAG, "sent %d bytes of data, excepted %" PRIu32, ret, size);
+        }
     }
 
     return status;
