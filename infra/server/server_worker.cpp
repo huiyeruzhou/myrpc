@@ -5,7 +5,7 @@ using namespace erpc;
 
 
 ServerWorker::ServerWorker(std::vector<erpc::MethodBase*> methods, TCPTransport *worker)
-    :m_workerThread(workerStub, 0)
+    :m_workerThread(workerStub, 5)
     , methods(methods)
     , m_worker(worker)
 {

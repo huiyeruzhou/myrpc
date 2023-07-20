@@ -36,7 +36,7 @@ __attribute__((unused)) static const char *TAG = "server";
 SimpleServer::SimpleServer(const char *host, uint16_t port)
     : Server(host, port)
     , m_isServerOn(true)
-    , m_serverThread(SimpleServer::networkpollerStub)
+    , m_serverThread(SimpleServer::networkpollerStub, 1)
     , m_runServer(false)
 {
 
