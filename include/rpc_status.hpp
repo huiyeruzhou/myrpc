@@ -18,7 +18,7 @@ extern const char *status_string[];
 extern const char *StatusToString(int stat);
 #define CHECK_STATUS(status, err) \
     if (((err) = (status)) != rpc_status::Success) {\
-        LOGE(TAG,"Error occurred: %s", StatusToString((err)));\
+        LOGE(TAG,"In function `%s`, error occurred: %s",__func__, StatusToString((err)));\
         return (err); \
     }
 enum rpc_status

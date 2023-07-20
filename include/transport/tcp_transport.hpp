@@ -46,7 +46,9 @@ namespace erpc {
         void *to_send_msg = NULL;
 
         MessageBuffer *m_read_buffer;
-        MessageBufferList *m_send_buffer_list;
+        MessageBuffer *m_initial_md_buffer;
+        MessageBuffer *m_msg_buffer;
+//        MessageBufferList *m_send_buffer_list;
     };
 }
 #endif//_TCP_WORKER_H_

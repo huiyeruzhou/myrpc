@@ -40,13 +40,13 @@ extern "C" {
              * This function initializes object attributes.
              */
             MessageBuffer(void)
-                : m_buf(new uint8_t[256])
+                : m_buf((uint8_t*)malloc(256*sizeof(uint8_t)))
                 , m_len(256)
                 , m_read_pos(0)
                 , m_write_pos(0) 
             {
             }
-            ~MessageBuffer(void) { delete[] m_buf; }
+            ~MessageBuffer(void) { free(m_buf); }
             /*!
              * @brief Constructor.
              *
@@ -83,8 +83,8 @@ extern "C" {
 
             const uint8_t *getWrite(void) const { return m_buf + m_write_pos; }
 
-            uint16_t getReadSize(void) { return m_len - m_read_pos; }
-            uint16_t getWriteSize(void) { return m_len - m_write_pos; }
+            uint16_t getReadPos(void) { return m_read_pos; }
+            uint16_t getWritePos(void) { return m_write_pos; }
 
             /*!
              * @brief This function read data from local buffer.
@@ -95,8 +95,8 @@ extern "C" {
              *
              * @return Status from reading data.
              */
+            rpc_status read(void *data, uint32_t length){return read(data, length, m_read_pos);}
             rpc_status read(void *data, uint32_t length, uint16_t offset);
-            rpc_status read(void *data, uint32_t length) { return read(data, length, m_read_pos); }
             /*!
              * @brief This function write data to local buffer.
              *
@@ -106,43 +106,39 @@ extern "C" {
              *
              * @return Status from reading data.
              */
+            rpc_status write(const void *data, uint32_t length){return write(data, length, m_write_pos);}
             rpc_status write(const void *data, uint32_t length, uint16_t offset);
-            rpc_status write(const void *data, uint32_t length) { return write(data, length, m_write_pos); }
             rpc_status reset(void) { m_read_pos = 0;  m_write_pos = 0; return rpc_status::Success; }
+            /*!
+             * @brief move the position of read/write.
+             * @param length the distance of position to move.
+             * @return if success, return rpc_status::Success.
+             *     if failed when length > m_read_pos/m_write_pos, return rpc_status::InvalidArgument.
+             *     if length < 0, return rpc_status::InvalidArgument.
+             */
+            rpc_status moveReadPos(uint32_t length, uint16_t offset);
+            rpc_status moveReadPos(uint32_t length){return moveReadPos(length, m_read_pos);}
 
+            rpc_status moveWritePos(uint32_t length, uint16_t offset);
+            rpc_status moveWritePos(uint32_t length){return moveWritePos(length, m_write_pos);}
 
+            /*!
+             * @brief Prepare buffer for  read/write data.
+             *          do nothing if length > 0.
+             * @param length the length of data to  read/write.
+             * @return status, if success, return rpc_status::Success.
+             *      if failed when realloc, return rpc_status::MemoryError.
+             *      if length < 0, return rpc_status::InvalidArgument.
+             */
+            rpc_status prepareForWrite(uint32_t length, uint16_t offset);
+            rpc_status prepareForWrite(uint32_t length){return prepareForWrite(length, m_write_pos);}
+            rpc_status prepareForRead(uint32_t length, uint16_t offset);
+            rpc_status prepareForRead(uint32_t length){return prepareForRead(length, m_read_pos);}
+        private:
             uint8_t *m_buf;  /*!< Buffer used to read write data. */
             uint16_t m_len;  /*!< Length of buffer. */
             uint16_t m_read_pos; /*!< Used buffer bytes. */
             uint16_t m_write_pos; /*!< Left buffer bytes. */
-        };
-        #define MAX_BUFFER_COUNT 3
-        class MessageBufferList {
-        public:
-            MessageBufferList(void)
-                : m_count(0)
-                , m_buffers(new MessageBuffer *[MAX_BUFFER_COUNT])
-            {
-            }
-            ~MessageBufferList(void) {
-                for (size_t i = 0; i < m_count; i++) {
-                    m_buffers[i]->~MessageBuffer();
-                }
-                delete[] m_buffers;
-            }
-            //assert
-            rpc_status add(MessageBuffer *buf);
-            rpc_status append(MessageBuffer *buf);
-            rpc_status insert(MessageBuffer *buf, uint32_t index);
-            MessageBuffer *get(uint32_t index);
-            rpc_status destroy(void);
-            void Clear();
-            rpc_status reset();
-            std::string JoinIntoString() const;
-            uint32_t count(void) { return m_count; }
-        private:
-            size_t m_count;
-            MessageBuffer **m_buffers;
         };
     } // namespace erpc
 

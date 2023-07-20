@@ -5,103 +5,87 @@ using namespace erpc;
 using namespace std;
 
 const static char *TAG = "Message Buffer";
+
 ////////////////////////////////////////////////////////////////////////////////
 // Code
 ////////////////////////////////////////////////////////////////////////////////
-rpc_status MessageBuffer::read(void *data, uint32_t length, uint16_t offset)
-{
+rpc_status MessageBuffer::read(void *data, uint32_t length, uint16_t offset) {
     rpc_status err = Success;
-    uint16_t dest_pos = offset + length;
-    
-    if (length > 0U)
-    {
-        if (data == NULL)
-        {
-            err = MemoryError;
-        }
-        else if ((dest_pos) > m_len || (dest_pos) < offset)
-        {
-            err = BufferOverrun;
-        }
-        else
-        {
-            (void) memcpy(data, &m_buf[offset], length);
-            m_read_pos = dest_pos > m_read_pos ? dest_pos : m_read_pos;
-        }
+    if (data == NULL) {
+        return MemoryError;
     }
-    LOGE(TAG, "m_read_pos = %" PRIu16, m_read_pos);
+    CHECK_STATUS(prepareForRead(length, offset), err);
+    (void) memcpy(data, &m_buf[offset], length);
+    CHECK_STATUS(moveReadPos(length, offset), err);
     return err;
 }
 
-rpc_status MessageBuffer::write(const void *data, uint32_t length, uint16_t offset)
-{
+rpc_status MessageBuffer::write(const void *data, uint32_t length, uint16_t offset) {
     rpc_status err = Success;
-    uint16_t dest_pos = offset + length;
-    
-    if (length > 0U)
-    {
-        if (data == NULL)
-        {
-            err = MemoryError;
-        }
-        else if ((dest_pos) > m_len || (dest_pos) < offset)
-        {
-            err = BufferOverrun;
-        }
-        else
-        {
-            (void) memcpy(&m_buf[offset], data, length);
-            m_write_pos = dest_pos > m_write_pos ? dest_pos : m_write_pos;
-        }
+    CHECK_STATUS(prepareForWrite(length, offset), err);
+    if (data == NULL) {
+        return InvalidArgument;
     }
-    return err;
+    (void) memcpy(&m_buf[offset], data, length);
+    CHECK_STATUS(moveWritePos(length, offset), err);
+    return Success;
 }
 
-
-rpc_status MessageBufferList::add(MessageBuffer *buf)
-{
-    erpc_assert(m_count < MAX_BUFFER_COUNT);
-    m_buffers[m_count++] = buf;
-    return Success;
-}
-rpc_status MessageBufferList::append(MessageBuffer *buf)
-{
-    erpc_assert(m_count < MAX_BUFFER_COUNT);
-    m_buffers[m_count++] = buf;
-    return Success;
-}
-rpc_status MessageBufferList::insert(MessageBuffer *buf, uint32_t index)
-{
-    erpc_assert(index < m_count);
-    for (size_t i = index; i < m_count; i++)
-    {
-        m_buffers[i + 1] = m_buffers[i];
+rpc_status MessageBuffer::moveReadPos(uint32_t length, uint16_t offset) {
+    //check if dst_pos > m_len
+    if (offset + length > m_len) {
+        LOGE(TAG, "moveReadPos BufferOverrun: offset = %" PRIu16 ", length = %" PRIu32 ", m_len = %" PRIu16, offset, length, m_len);
+        return rpc_status::BufferOverrun;
     }
-    m_buffers[index] = buf;
-    return Success;
-}
-MessageBuffer *MessageBufferList::get(uint32_t index)
-{
-    erpc_assert(index < m_count);
-    return m_buffers[index];
-}
-void MessageBufferList::Clear()
-{
-    m_count = 0;
+    m_read_pos = offset + length;
+    return rpc_status::Success;
 }
 
-std::string MessageBufferList::JoinIntoString() const {
-    std::string result;
-    // result.reserve(slice_buffer_.length);
-    for (size_t i = 0; i < this->m_count; i++) {
-        result.append(reinterpret_cast<const char *>(m_buffers[i]->m_buf), m_buffers[i]->m_write_pos);
+rpc_status MessageBuffer::moveWritePos(uint32_t length, uint16_t offset) {
+    //check if dst_pos > m_len
+    if (offset + length > m_len) {
+        LOGE(TAG, "moveWritePos BufferOverrun: offset = %" PRIu16 ", length = %" PRIu32 ", m_len = %" PRIu16, offset, length, m_len);
+        return rpc_status::BufferOverrun;
     }
-    return result;
+    m_write_pos = offset + length;
+    return rpc_status::Success;
 }
-rpc_status MessageBufferList::reset() {
-    for (size_t i = 0; i < m_count; i++) {
-        delete m_buffers[i];
+
+rpc_status MessageBuffer::prepareForWrite(uint32_t length, uint16_t offset) {
+    //realloc memory if needed
+    uint16_t dst = offset + length;
+    if (dst > m_len) {
+        uint16_t new_len = dst < 2 * m_len ? 2 * m_len : dst;
+        uint8_t *new_buf = (uint8_t *) realloc(m_buf, new_len);
+        m_buf = new_buf;
+        if (new_buf == NULL) {
+            LOGE(TAG, "prepareForWrite failed to realloc: offset = %" PRIu16 ", length = %" PRIu32 ", m_len = %" PRIu16
+                        ", new_len = %" PRIu16, offset, length, m_len, new_len);
+            return rpc_status::MemoryError;
+        }
+        LOGW(TAG, "prepareForWrite realloc: offset = %" PRIu16 ", length = %" PRIu32 ", m_len = %" PRIu16
+                ", new_len = %" PRIu16, offset, length, m_len, new_len);
+        m_len = new_len;
     }
-    m_count = 0;
-    return Success;
+    return rpc_status::Success;
+
+}
+
+rpc_status MessageBuffer::prepareForRead(uint32_t length, uint16_t offset) {
+    uint16_t dst = offset + length;
+    if (dst > m_len) {
+        uint16_t new_len = dst < 2 * m_len ? 2 * m_len : dst;
+        uint8_t *new_buf = (uint8_t *) realloc(m_buf, new_len);
+        m_buf = new_buf;
+        if (new_buf == NULL) {
+            LOGE(TAG, "prepareForRead failed to realloc: offset = %" PRIu16 ", length = %" PRIu32 ", m_len = %" PRIu16
+                        ", new_len = %" PRIu16, offset, length, m_len, new_len);
+            return rpc_status::MemoryError;
+        }
+        LOGW(TAG, "prepareForRead realloc: offset = %" PRIu16 ", length = %" PRIu32 ", m_len = %" PRIu16
+                ", new_len = %" PRIu16, offset, length, m_len, new_len);
+        m_len = new_len;
+    }
+    return rpc_status::Success;
+
 }

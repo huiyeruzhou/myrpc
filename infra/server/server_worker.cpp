@@ -35,8 +35,10 @@ rpc_status ServerWorker::runInternal(void)
 
     //find the method
     CHECK_STATUS(findServiceByMetadata(req_md),err);
+    LOGI(TAG, "findServiceByMetadata()");
     //filled message desc, so that we can receive message
     m_method->filledMsgDesc(input_desc, input_msg, output_desc, output_msg);
+    LOGI(TAG, "filledMsgDesc()");
     
     //recv messgae
     CHECK_STATUS(m_worker->recv_msg(), err);

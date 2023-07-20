@@ -43,9 +43,17 @@ Client::~Client(void) {
     delete this->m_transport;
 }
 
-
+#undef CHECK_STATUS
+#define CHECK_STATUS(status, err) \
+    if (((err) = (status)) != rpc_status::Success) {\
+        LOGE(TAG,"In function `%s`, error occurred: %s",__func__, StatusToString((err)));\
+        goto done; \
+    }
 rpc_status Client::performRequest(char *path, const pb_msgdesc_t *req_desc, void *req, const pb_msgdesc_t *rsp_desc, void *rsp) {
-
+    if(m_transport == NULL) {
+        LOGE(TAG, "transport is NULL, please open first.");
+        return Fail;
+    }
     m_transport->to_send_msg = req;
     m_transport->to_recv_msg = rsp;
     m_transport->send_desc = req_desc;
@@ -86,6 +94,7 @@ rpc_status Client::performRequest(char *path, const pb_msgdesc_t *req_desc, void
     err = m_transport->to_recv_md->has_status ? static_cast<rpc_status>(m_transport->to_recv_md->status)
         : UnExpectedMsgType;
 
+done:
     m_transport->resetBuffers();
     return err;
 }
