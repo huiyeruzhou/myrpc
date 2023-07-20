@@ -5,12 +5,12 @@ using namespace erpc;
 
 
 ServerWorker::ServerWorker(std::vector<erpc::MethodBase*> methods, TCPTransport *worker)
-    :m_workerThread(workerStub, 5)
+    : m_worker_thread(workerStub, 5)
     , methods(methods)
     , m_worker(worker)
 {
     snprintf(TAG, sizeof(TAG) - 1, "worker %" PRIin_port_t, m_worker->m_port);
-    m_workerThread.setName(TAG);
+    m_worker_thread.setName(TAG);
 }
 ServerWorker::~ServerWorker() {
     m_method->destroyMsg(m_worker->to_recv_msg, m_worker->to_send_msg);
@@ -144,5 +144,5 @@ void ServerWorker::workerStub(void *arg)
 
 void ServerWorker::start()
 {
-    m_workerThread.start(this);
+    m_worker_thread.start(this);
 }

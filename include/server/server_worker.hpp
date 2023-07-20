@@ -30,7 +30,7 @@ namespace erpc
         static void workerStub(void *arg);
         void start(void);
     private:
-        Thread m_workerThread;
+        Thread m_worker_thread;
 #if ERPC_THREADS_IS(PTHREADS)
         char TAG[CONFIG_MAX_PTHREAD_NAME_LEN];
 #elif ERPC_THREADS_IS(FREERTOS)

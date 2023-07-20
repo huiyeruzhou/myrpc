@@ -1,13 +1,3 @@
-/*
- * Copyright (c) 2014, Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
- * Copyright 2019-2021 ACRIOS Systems s.r.o.
- * All rights reserved.
- *
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
-
 #include "server/simple_server.hpp"
 using namespace erpc;
 __attribute__((unused)) static const char *TAG = "server";
@@ -176,7 +166,7 @@ void SimpleServer::networkpollerThread(void)
                 yes = 1;
                 setsockopt(m_sockfd, IPPROTO_TCP, TCP_NODELAY, (void *) &yes, sizeof(yes));
                 // addfd(epfd, incomingSocket, true);
-                onNewSocket(incomingSocket, getPortFormAddr(&incomingAddress, incomingAddressLength));
+                onNewSocket(incomingSocket, get_port_from_addr(&incomingAddress, incomingAddressLength));
             }
             else
             {

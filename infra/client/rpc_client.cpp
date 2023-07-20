@@ -94,7 +94,7 @@ rpc_status Client::performRequest(char *path, const pb_msgdesc_t *req_desc, void
 rpc_status Client::open(void) {
     rpc_status status = Success;
     struct addrinfo hints = {};
-    char portString[8];
+    char port_str[8];
     struct addrinfo *res0;
     int result, set;
     int sock = -1;
@@ -110,7 +110,7 @@ rpc_status Client::open(void) {
         hints.ai_socktype = SOCK_STREAM;
 
         // Convert port number to a string.
-        result = snprintf(portString, sizeof(portString), "%d", m_port);
+        result = snprintf(port_str, sizeof(port_str), "%d", m_port);
         if (result < 0) {
             LOGE(TAG, "snprintf failed, error: %s", strerror(errno));
             status = Fail;
@@ -118,7 +118,7 @@ rpc_status Client::open(void) {
 
         if (status == Success) {
             // Perform the name lookup.
-            result = getaddrinfo(m_host, portString, &hints, &res0);
+            result = getaddrinfo(m_host, port_str, &hints, &res0);
             if (result != 0) {
                 // TODO check EAI_NONAME
                 LOGE(TAG, "gettaddrinfo failed, error: %s", strerror(errno));

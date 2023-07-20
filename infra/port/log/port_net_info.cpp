@@ -16,10 +16,10 @@ void sprint_net_info(char *netinfo, int netinfo_len, const sockaddr *__sockaddr,
     //get host ip by sockaddr    
     char host[16];
     inet_ntop(__sockaddr->sa_family, __sockaddr->sa_data, host, 16);
-    snprintf(netinfo, netinfo_len, "%s:%d", host, getPortFormAddr(__sockaddr, __len));
+    snprintf(netinfo, netinfo_len, "%s:%d", host, get_port_from_addr(__sockaddr, __len));
 }
 
-int getPortFormAddr(const sockaddr *__sockaddr, int __len) {
+int get_port_from_addr(const sockaddr *__sockaddr, int __len) {
     if (__sockaddr->sa_family == AF_INET) {
         auto casted_addr = reinterpret_cast<const struct sockaddr_in*>(__sockaddr);
         return ntohs(casted_addr->sin_port);

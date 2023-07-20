@@ -1,12 +1,3 @@
-/*
- * Copyright 2020 NXP
- * Copyright 2020 ACRIOS Systems s.r.o.
- * All rights reserved.
- *
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
-
 #ifndef RPC_BASE_H
 #define RPC_BASE_H
 

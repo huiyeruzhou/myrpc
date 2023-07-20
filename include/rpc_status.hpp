@@ -1,13 +1,3 @@
-/*
- * Copyright (c) 2015-2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2017 NXP
- * Copyright 2021 ACRIOS Systems s.r.o.
- * All rights reserved.
- *
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
-
 #ifndef RPC_STATUS_H
 #define RPC_STATUS_H
 #ifdef  __cplusplus  

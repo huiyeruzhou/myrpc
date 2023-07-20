@@ -26,6 +26,6 @@ extern "C" {
 #endif
 #include <cstring>
 void sprint_net_info(char *netinfo, int netinfo_len, const sockaddr *__sockaddr, int __len);
-int getPortFormAddr(const sockaddr * __sockaddr, int __len);
+int get_port_from_addr(const sockaddr * __sockaddr, int __len);
 
 #endif //RPC_PORT_NET_INFO_H

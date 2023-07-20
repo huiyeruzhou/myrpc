@@ -1,13 +1,3 @@
-/*
- * Copyright (c) 2014-2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
- * Copyright 2021 ACRIOS Systems s.r.o.
- * All rights reserved.
- *
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
-
 #include "codec/message_buffer.hpp"
 
 
@@ -18,51 +8,6 @@ const static char *TAG = "Message Buffer";
 ////////////////////////////////////////////////////////////////////////////////
 // Code
 ////////////////////////////////////////////////////////////////////////////////
-#define GRPC_SLICE_INLINE_EXTRA_SIZE sizeof(void*)
-
-#define GRPC_SLICE_INLINED_SIZE \
-  (sizeof(size_t) + sizeof(uint8_t*) - 1 + GRPC_SLICE_INLINE_EXTRA_SIZE)
-
-struct grpc_slice_refcount;
-/** A grpc_slice s, if initialized, represents the byte range
-   s.bytes[0..s.length-1].
-
-   It can have an associated ref count which has a destruction routine to be run
-   when the ref count reaches zero (see grpc_slice_new() and grp_slice_unref()).
-   Multiple grpc_slice values may share a ref count.
-
-   If the slice does not have a refcount, it represents an inlined small piece
-   of data that is copied by value.
-
-   As a special case, a slice can be given refcount == uintptr_t(1), meaning
-   that the slice represents external data that is not refcounted. */
-struct grpc_slice {
-    uint8_t length;
-    uint8_t bytes[GRPC_SLICE_INLINED_SIZE];
-};
-
-#define GRPC_SLICE_BUFFER_INLINE_ELEMENTS 8
-
-/** Represents an -expandable array of slices, to be interpreted as a
-   single item. */
-typedef struct grpc_slice_buffer {
-    /** This is for internal use only. External users (i.e any code outside grpc
-     * core) MUST NOT use this field */
-    grpc_slice *base_slices;
-
-    /** slices in the array (Points to the first valid grpc_slice in the array) */
-    grpc_slice *slices;
-    /** the number of slices in the array */
-    size_t count;
-    /** the number of slices allocated in the array. External users (i.e any code
-     * outside grpc core) MUST NOT use this field */
-    size_t capacity;
-    /** the combined length of all slices in the array */
-    size_t length;
-    /** inlined elements to avoid allocations */
-    grpc_slice inlined[GRPC_SLICE_BUFFER_INLINE_ELEMENTS];
-} grpc_slice_buffer;
-
 rpc_status MessageBuffer::read(void *data, uint32_t length, uint16_t offset)
 {
     rpc_status err = Success;

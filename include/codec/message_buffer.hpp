@@ -1,12 +1,3 @@
-/*
- * Copyright (c) 2014-2016, Freescale Semiconductor, Inc.
- * Copyright 2016 NXP
- * All rights reserved.
- *
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
-
 #ifndef MESSAGE_BUFFER_H
 #define MESSAGE_BUFFER_H
 #include "port/port.h"

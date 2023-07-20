@@ -1,13 +1,3 @@
-/*
- * Copyright (c) 2014, Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
- * Copyright 2021 ACRIOS Systems s.r.o.
- * All rights reserved.
- *
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
-
 #include "server/server_base.hpp"
 
 using namespace erpc;
