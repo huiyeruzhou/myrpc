@@ -6,23 +6,20 @@
 #include <stdio.h>
 using namespace erpc;
 __attribute__((unused)) const static char *TAG = "tcp";
-TCPTransport::TCPTransport(int sockfd, int port):
+TCPTransport::TCPTransport(int sockfd, int port) :
     m_socket(sockfd),
     m_port(port),
     to_recv_md(new myrpc_Meta()),
     to_send_md(new myrpc_Meta()),
     m_read_buffer(new MessageBuffer()),
     m_initial_md_buffer(new MessageBuffer()),
-    m_msg_buffer(new MessageBuffer())
-//    m_send_buffer_list(new MessageBufferList())
-{
+    m_msg_buffer(new MessageBuffer()) {
 }
 TCPTransport::~TCPTransport(void) {
     ::close(m_socket);
     delete m_read_buffer;
     delete m_initial_md_buffer;
     delete m_msg_buffer;
-//    m_send_buffer_list->~MessageBufferList();
     delete to_recv_md;
     delete to_send_md;
 }
@@ -32,20 +29,21 @@ rpc_status TCPTransport::close() {
     }
     return rpc_status::Success;
 }
-rpc_status TCPTransport::receive(uint8_t *data, uint32_t size)
-{
+rpc_status TCPTransport::receive(uint8_t *data, uint32_t size) {
     // ssize_t length;
     rpc_status status = Success;
 
-    if(m_socket <= 0)
-    {
-        status = ConnectionFailure;
+    if (m_socket <= 0) {
+        LOGE(TAG, "m_socket: %d, ret: %d, data: %s, size: %" PRIu32, m_socket, ret, data, size);
+        status = ConnectionClosed;
         return status;
     }
 
     int ret = ::recv(m_socket, data, size, 0);
-    if (ret == 0) {
-        status = rpc_status::ConnectionClosed;
+    if (ret <= 0) {
+        LOGE(TAG, "recv error: %s", strerror(errno));
+        LOGE(TAG, "m_socket: %d, ret: %d, data: %s, size: %" PRIu32, m_socket, ret, data, size);
+        status = ret == 0 ? rpc_status::ConnectionClosed : rpc_status::ConnectionFailure;
     }
     else if (ret < size) {
         LOGE(TAG, "recvd %d bytes of data, excepted %" PRIu32, ret, size);
@@ -53,19 +51,20 @@ rpc_status TCPTransport::receive(uint8_t *data, uint32_t size)
     return status;
 }
 
-rpc_status TCPTransport::send(const uint8_t *data, uint32_t size)
-{
+rpc_status TCPTransport::send(const uint8_t *data, uint32_t size) {
     rpc_status status = Success;
     // ssize_t result;
 
-    if (m_socket <= 0)
-    {
-        // we should not pretend to have a succesful Send or we create a deadlock
-        status = ConnectionFailure;
+    if (m_socket <= 0) {
+        LOGE(TAG, "m_socket: %d, ret: %d, data: %s, size: %" PRIu32, m_socket, ret, data, size);
+        status = ConnectionClosed;
     }
     else {
         int ret = ::send(m_socket, data, size, 0);
-        if (ret < 0) {status = ConnectionClosed;
+        if (ret < 0) {
+            LOGE(TAG, "recv error: %s", strerror(errno));
+            LOGE(TAG, "m_socket: %d, ret: %d, data: %s, size: %" PRIu32, m_socket, ret, data, size);
+            status = ConnectionClosed;
         }
         else if (ret < size) {
             LOGE(TAG, "sent %d bytes of data, excepted %" PRIu32, ret, size);
@@ -99,7 +98,7 @@ rpc_status TCPTransport::recv_trailing_md() {
 rpc_status TCPTransport::send_inital_md() {
     rpc_status err = rpc_status::NanopbCodecError;
     CHECK_STATUS(m_codec.write(m_initial_md_buffer, myrpc_Meta_fields, to_send_md), err);
-//    CHECK_STATUS(m_send_buffer_list->add(initial_md_buffer), err);
+    //    CHECK_STATUS(m_send_buffer_list->add(initial_md_buffer), err);
     return err;
 }
 rpc_status TCPTransport::send_msg() {
@@ -110,7 +109,7 @@ rpc_status TCPTransport::send_msg() {
     else {
         LOGE(TAG, "send_desc or to_send_msg  is NULL");
     }
-//    m_send_buffer_list->add(msg_buffer);
+    //    m_send_buffer_list->add(msg_buffer);
     return err;
 }
 rpc_status TCPTransport::send_trailing_md() {
@@ -127,7 +126,7 @@ rpc_status TCPTransport::receiveFrame() {
     {
         // Receive header first.
         retVal = receive((uint8_t *) &h, sizeof(h));
-        LOGI(TAG, "receive header: %" PRIu32 , h);
+        LOGI(TAG, "receive header: %" PRIu32, h);
 
         if (retVal == Success) {
             // received size can't be zero.
@@ -153,15 +152,10 @@ rpc_status TCPTransport::receiveFrame() {
 
 rpc_status TCPTransport::sendFrame() {
     rpc_status ret;
-//    MessageBufferList *message_list = m_send_buffer_list;
-    //walk through message_list
-//    std::string message = message_list->JoinIntoString();
     std::string message;
-    // result.reserve(slice_buffer_.length);
     message.append(reinterpret_cast<const char *>(m_initial_md_buffer->get()), m_initial_md_buffer->getWritePos());
     message.append(reinterpret_cast<const char *>(m_msg_buffer->get()), m_msg_buffer->getWritePos());
     uint32_t h = message.size();
-    // send((uint8_t *) &h, sizeof(h));
     LOGE(TAG, "length is %zu", std::string((char *) &h, sizeof(h)).size());
     message = std::string((char *) &h, sizeof(h)) + message;
     ret = send((uint8_t *) message.c_str(), h + sizeof(h));
@@ -171,7 +165,6 @@ rpc_status TCPTransport::resetBuffers() {
     m_read_buffer->reset();
     m_initial_md_buffer->reset();
     m_msg_buffer->reset();
-//    m_send_buffer_list->reset();
     recv_desc = NULL;
     send_desc = NULL;
     to_recv_msg = NULL;
