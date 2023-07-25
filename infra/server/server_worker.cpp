@@ -4,11 +4,10 @@
 using namespace erpc;
 
 
-ServerWorker::ServerWorker(std::vector<erpc::MethodBase*> methods, TCPTransport *worker)
+ServerWorker::ServerWorker(std::vector<erpc::MethodBase *> methods, TCPTransport *worker)
     : m_worker_thread(workerStub, 5)
     , methods(methods)
-    , m_worker(worker)
-{
+    , m_worker(worker) {
     snprintf(TAG, sizeof(TAG) - 1, "worker %" PRIin_port_t, m_worker->m_port);
     m_worker_thread.setName(TAG);
 }
@@ -17,8 +16,7 @@ ServerWorker::~ServerWorker() {
     delete m_worker;
 };
 //TODO: 失败处理还很不完善,直接跳到trailing metadata不能优雅的取消操作!
-rpc_status ServerWorker::runInternal(void)
-{
+rpc_status ServerWorker::runInternal(void) {
     rpc_status err;
     myrpc_Meta *req_md = m_worker->to_recv_md;
     myrpc_Meta *rsp_md = m_worker->to_send_md;
@@ -34,12 +32,12 @@ rpc_status ServerWorker::runInternal(void)
     LOGI(TAG, "recv_inital_md()");
 
     //find the method
-    CHECK_STATUS(findServiceByMetadata(req_md),err);
+    CHECK_STATUS(findServiceByMetadata(req_md), err);
     LOGI(TAG, "findServiceByMetadata()");
     //filled message desc, so that we can receive message
     m_method->filledMsgDesc(input_desc, input_msg, output_desc, output_msg);
     LOGI(TAG, "filledMsgDesc()");
-    
+
     //recv messgae
     CHECK_STATUS(m_worker->recv_msg(), err);
     LOGI(TAG, "recv_msg()");
@@ -56,33 +54,33 @@ rpc_status ServerWorker::runInternal(void)
     //send msg
     CHECK_STATUS(m_worker->send_msg(), err);
     LOGI(TAG, "send_msg()");
-    //sned trailing metadata
-done:
-    rpc_status has_error = err;
-    // If the user didn't set a status, set it to the error code.Otherwise just keep it.
-    if (err != rpc_status::Success && ((rsp_md->has_status && rsp_md->status == rpc_status::Success) || !rsp_md->has_status)) {
-        rsp_md->has_status = true;
-        rsp_md->status = err;
-    }
-    //If connection has been closed, we don't need to send trailing metadata and should close the worker
-    if (err == rpc_status::ConnectionClosed) {
-        m_worker->close();
-        return ConnectionClosed;
-    }
+    // //sned trailing metadata
+    // rpc_status has_error = err;
+    // // If the user didn't set a status, set it to the error code.Otherwise just keep it.
+    // if (has_error != rpc_status::Success && ((rsp_md->has_status && rsp_md->status == rpc_status::Success) || !rsp_md->has_status)) {
+    //     rsp_md->has_status = true;
+    //     rsp_md->status = has_error;
+    // }
+    // //If connection has been closed, we don't need to send trailing metadata and should close the worker
+    // if (has_error == rpc_status::ConnectionClosed) {
+    //     goto done;
+    // }
     //send trailing metadata
-    err = m_worker->send_trailing_md();
-    if (rpc_status::Success != err) {
-        LOGE(TAG, "Failed to send trailing md");
-    }
+    rsp_md->has_status = true;
+    rsp_md->status = err;
+    CHECK_STATUS(m_worker->send_trailing_md(), err);
     LOGI(TAG, "send_trailing_md()");
-    if (has_error != rpc_status::Success) {
-        LOGW(TAG, "RPC Call Failed Because: %s", StatusToString(has_error));
-        if (has_error == rpc_status::UnknownService) {
+done:
+    if (err != rpc_status::Success) {
+        LOGW(TAG, "RPC Call Failed Because: %s", StatusToString(err));
+        if (err == rpc_status::UnknownService) {
             LOGW(TAG, "Request Service: %s", req_md->path);
-            for_each(methods.begin(), methods.end(),[this](MethodBase *method) {
+            LOGE(TAG, "Available Services:");
+            for_each(methods.begin(), methods.end(), [this](MethodBase *method) {
                 LOGW(TAG, "Service: %s", method->getPath());
             });
         }
+        m_worker->close();
     }
     else {
         LOGI(TAG, "RPC Call Success\n");
@@ -90,28 +88,27 @@ done:
     resetBuffers();
     return err;
 }
-rpc_status ServerWorker::resetBuffers(void)
-{
-    if(m_method)m_method->destroyMsg(m_worker->to_recv_msg, m_worker->to_send_msg);
+rpc_status ServerWorker::resetBuffers(void) {
+    if (m_method)m_method->destroyMsg(m_worker->to_recv_msg, m_worker->to_send_msg);
     m_method = NULL;
     return m_worker->resetBuffers();
 }
 rpc_status ServerWorker::findServiceByMetadata(myrpc_Meta *req) {
 
-    auto iter_method = std::find_if(methods.begin(), methods.end(),[&](MethodBase *method)->bool {
-        return !strcmp(method->getPath(),req->path);
-    });
-    if(iter_method==methods.end()){
+    auto iter_method = std::find_if(methods.begin(), methods.end(), [&](MethodBase *method)->bool {
+        return !strcmp(method->getPath(), req->path);
+        });
+    if (iter_method == methods.end()) {
         m_method = NULL;
         return rpc_status::UnknownService;
-    }else{
+    }
+    else {
         m_method = *iter_method;
     }
     LOGI(this->TAG, "service `%s`", m_method->getPath());
     return rpc_status::Success;
 }
-rpc_status ServerWorker::callMethodByMetadata(myrpc_Meta *req, myrpc_Meta *rsp, void *input, void *output)
-{
+rpc_status ServerWorker::callMethodByMetadata(myrpc_Meta *req, myrpc_Meta *rsp, void *input, void *output) {
     rpc_status err;
     rsp->seq = req->seq;
     rsp->version = req->version;
@@ -128,15 +125,12 @@ rpc_status ServerWorker::callMethodByMetadata(myrpc_Meta *req, myrpc_Meta *rsp, 
     return err;
 }
 
-void ServerWorker::workerStub(void *arg)
-{
+void ServerWorker::workerStub(void *arg) {
     rpc_status err = rpc_status::Success;
     ServerWorker *This = reinterpret_cast<ServerWorker *>(arg);
 
-    if (This != NULL)
-    {
-        while (err == rpc_status::Success)
-        {
+    if (This != NULL) {
+        while (err == rpc_status::Success) {
             err = This->runInternal();
             LOGI(This->TAG, "runInternal return\n");
         }
@@ -144,7 +138,6 @@ void ServerWorker::workerStub(void *arg)
     LOGI(This->TAG, "work done\n");
 }
 
-void ServerWorker::start()
-{
+void ServerWorker::start() {
     m_worker_thread.start(this);
 }

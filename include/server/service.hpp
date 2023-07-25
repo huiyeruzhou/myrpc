@@ -31,12 +31,12 @@ namespace erpc
         const pb_msgdesc_t *m_output_desc;
     };
 
-    class Service{
+    class Service {
     public:
-        Service(){}
-        virtual ~Service(void){}
-        void addMethod(MethodBase *method){methods.emplace_back(method);}
-        std::vector<erpc::MethodBase*> methods;
+        Service() {}
+        virtual ~Service(void) {}
+        void addMethod(MethodBase *method) { methods.emplace_back(method); }
+        std::vector<erpc::MethodBase *> methods;
     };
 
     // class MethodHandlerBase
@@ -61,9 +61,9 @@ namespace erpc
     // private:
     //     std::function<rpc_status(ServiceType *, InputType *, OutputType *)> func;
     // };
-    
+
     template <class InputType, class OutputType>
-    class Method: public MethodBase
+    class Method : public MethodBase
     {
     public:
         /*!
@@ -72,17 +72,16 @@ namespace erpc
          * This function initializes object attributes.
          */
         Method(const char *serviceId, const pb_msgdesc_t *input_desc, const pb_msgdesc_t *output_desc,
-               std::function<rpc_status(Service *, InputType *, OutputType *)> func, Service* service)
+            std::function<rpc_status(Service *, InputType *, OutputType *)> func, Service *service)
             : MethodBase(serviceId, input_desc, output_desc),
-              func(func),
-              service(service)
-        {
+            func(func),
+            service(service) {
         }
         virtual ~Method() {
         }
 
-        virtual rpc_status handleInvocation(void *input, void *output){
-            return func(reinterpret_cast<erpc::Service*>(service), (InputType*)input, (OutputType*)output);
+        virtual rpc_status handleInvocation(void *input, void *output) {
+            return func(reinterpret_cast<erpc::Service *>(service), (InputType *) input, (OutputType *) output);
         }
         void filledMsgDesc(const pb_msgdesc_t **input_desc, void **input_msg, const pb_msgdesc_t **output_desc, void **output) override {
             *input_desc = m_input_desc;
@@ -93,7 +92,7 @@ namespace erpc
         void destroyMsg(void *input, void *output) override { if (input) delete (InputType *) input; if (output) delete (OutputType *) output; }
     private:
         std::function<rpc_status(Service *, InputType *, OutputType *)> func;
-        Service* service;
+        Service *service;
     };
 
 } // namespace erpc
