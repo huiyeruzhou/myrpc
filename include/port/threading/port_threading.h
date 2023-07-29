@@ -97,7 +97,7 @@ public:
      * @param[in] name Optional name for the thread.
      * @param[in] stackPtr Mandatory task stack pointer for static api usage.
      */
-    //TODO
+
     Thread(thread_entry_t entry, uint32_t priority = 5, uint32_t stackSize = 2048, const char *name = "");
 
     /*!
