@@ -15,7 +15,7 @@ ServerWorker::~ServerWorker() {
     m_method->destroyMsg(m_worker->to_recv_msg, m_worker->to_send_msg);
     delete m_worker;
 };
-//TODO: 失败处理还很不完善,直接跳到trailing metadata不能优雅的取消操作!
+
 rpc_status ServerWorker::runInternal(void) {
     rpc_status err;
     myrpc_Meta *req_md = m_worker->to_recv_md;

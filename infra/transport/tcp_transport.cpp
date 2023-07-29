@@ -34,7 +34,7 @@ rpc_status TCPTransport::receive(uint8_t *data, uint32_t size) {
     rpc_status status = Success;
 
     if (m_socket <= 0) {
-        LOGE(TAG, "m_socket: %d, ret: %d, data: %s, size: %" PRIu32, m_socket, ret, data, size);
+        LOGE(TAG, "m_socket <= 0: %d, data: %s, size: %" PRIu32, m_socket, data, size);
         status = ConnectionClosed;
         return status;
     }
@@ -56,7 +56,7 @@ rpc_status TCPTransport::send(const uint8_t *data, uint32_t size) {
     // ssize_t result;
 
     if (m_socket <= 0) {
-        LOGE(TAG, "m_socket: %d, ret: %d, data: %s, size: %" PRIu32, m_socket, ret, data, size);
+        LOGE(TAG, "m_socket <= 0: %d, data: %s, size: %" PRIu32, m_socket, data, size);
         status = ConnectionClosed;
     }
     else {
