@@ -33,7 +33,7 @@ SimpleServer::SimpleServer(const char *host, uint16_t port)
 
 SimpleServer::~SimpleServer() {
     // Close server.
-    close();
+    stop();
 }
 
 rpc_status SimpleServer::run(void) {
@@ -48,6 +48,7 @@ rpc_status SimpleServer::run(void) {
 
 void SimpleServer::stop(void) {
     m_isServerOn = false;
+    close();
 }
 
 void SimpleServer::onNewSocket(int sockfd, int port) {
@@ -58,13 +59,10 @@ void SimpleServer::onNewSocket(int sockfd, int port) {
 
 rpc_status SimpleServer::close() {
     m_runServer = false;
-
     if (m_sockfd != -1) {
         ::close(m_sockfd);
         m_sockfd = -1;
     }
-    // write(pipeline[1], "close", 5);
-
     return Success;
 }
 
@@ -80,22 +78,7 @@ void SimpleServer::networkpollerThread(void) {
     // FD_SET(pipeline[0], &readFds);
 
     LOGI(TAG, "%s", "networkpollerThread");
-    while (m_runServer) {
-
-        // fd_set currentFds = readFds;
-        // int maxFd = m_sockfd + 1;
-        // int result = select(maxFd, &currentFds, nullptr, nullptr, nullptr);
-        // if (result == -1) {
-        //     LOGE(TAG, "select failed, error: %s", strerror(errno));
-        //     break;
-        // }
-
-        // // if (FD_ISSET(pipeline[0], &currentFds)) {
-        // //     break;
-        // // }
-
-        // if (FD_ISSET(m_sockfd, &currentFds)) {
-            // 有连接请求
+    while (m_runServer && m_sockfd > 0) {
         incomingSocket = accept(m_sockfd, &incomingAddress, &incomingAddressLength);
         if (incomingSocket >= 0) {
             // Successfully accepted a connection.
@@ -109,13 +92,9 @@ void SimpleServer::networkpollerThread(void) {
             onNewSocket(incomingSocket, get_port_from_addr(&incomingAddress, incomingAddressLength));
         }
         else {
-            LOGE(TAG, "accept failed, error: %s", strerror(errno));
+            LOGE(TAG, "accept failed,errorno: %d, m_sockfd: %d, error: %s",errno, m_sockfd, strerror(errno));
         }
-        // }
-
-
     }
-    m_isServerOn = false;
     if (m_sockfd > 0) ::close(m_sockfd);
 }
 
@@ -124,6 +103,10 @@ void SimpleServer::networkpollerStub(void *arg) {
     SimpleServer *This = reinterpret_cast<SimpleServer *>(arg);
     if (This != NULL) {
         This->networkpollerThread();
+    }
+    if (!This->m_isServerOn) {
+        LOGE(TAG, "server is topped, delete it.");
+        delete This;
     }
 }
 
@@ -152,7 +135,16 @@ rpc_status SimpleServer::open(void) {
         ::close(m_sockfd);
         return rpc_status::IOError;
     }
-
+    //set accept timeout
+    struct timeval timeout;
+    timeout.tv_sec = 5;
+    timeout.tv_usec = 0;
+    result = setsockopt(m_sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeout, sizeof(struct timeval));
+    if (result < 0) {
+        LOGE(TAG, "setsockopt failed, error: %s", strerror(errno));
+        ::close(m_sockfd);
+        return rpc_status::IOError;
+    }
 
     // Bind socket to address.
     result = bind(m_sockfd, (struct sockaddr *) &serverAddress, sizeof(serverAddress));
