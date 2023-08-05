@@ -105,7 +105,7 @@ void SimpleServer::networkpollerStub(void *arg) {
         This->networkpollerThread();
     }
     if (!This->m_isServerOn) {
-        LOGE(TAG, "server is topped, delete it.");
+        LOGE(TAG, "server is stopped, delete it.");
         delete This;
     }
 }
@@ -173,12 +173,6 @@ rpc_status SimpleServer::open(void) {
     }
     //on Success
     LOGI(TAG, "%s", "Listening for connections\n");
-
-    // if (pipe(pipeline) == -1) {
-    //     LOGE(TAG, "pipe failed, error: %s", strerror(errno));
-    //     ::close(m_sockfd);
-    //     return rpc_status::IOError;
-    // }
     m_serverThread.setName("Network Poller");
     m_runServer = true;
     m_serverThread.start(this);

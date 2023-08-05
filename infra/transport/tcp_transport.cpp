@@ -119,7 +119,7 @@ rpc_status TCPTransport::send_trailing_md() {
 }
 
 rpc_status TCPTransport::receiveFrame() {
-    uint32_t h;
+    uint32_t h = 0;
     rpc_status retVal;
     MessageBuffer *message = m_read_buffer;
 
