@@ -80,7 +80,7 @@ namespace erpc
         virtual ~Method() {
         }
 
-        virtual rpc_status handleInvocation(void *input, void *output) {
+        virtual rpc_status handleInvocation(void *input, void *output) override {
             return func(reinterpret_cast<erpc::Service *>(service), (InputType *) input, (OutputType *) output);
         }
         void filledMsgDesc(const pb_msgdesc_t **input_desc, void **input_msg, const pb_msgdesc_t **output_desc, void **output) override {

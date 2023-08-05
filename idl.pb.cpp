@@ -6,40 +6,147 @@
 #error Regenerate this file with the current version of nanopb generator.
 #endif
 
-PB_BIND(myrpc_matrix_multiply_proto, myrpc_matrix_multiply_proto, AUTO)
+PB_BIND(camera_DeviceId, camera_DeviceId, AUTO)
 
 
-PB_BIND(myrpc_matrix_multiply_proto_Nested, myrpc_matrix_multiply_proto_Nested, AUTO)
+PB_BIND(camera_Session, camera_Session, AUTO)
 
 
-PB_BIND(myrpc_matrix_multiply_InputTest, myrpc_matrix_multiply_InputTest, AUTO)
+PB_BIND(camera_DeviceCharacter, camera_DeviceCharacter, AUTO)
 
 
-PB_BIND(myrpc_matrix_multiply_OutputTest, myrpc_matrix_multiply_OutputTest, AUTO)
+PB_BIND(camera_BasicDevice, camera_BasicDevice, AUTO)
+
+
+PB_BIND(camera_BasicHolder, camera_BasicHolder, AUTO)
+
+
+PB_BIND(camera_Size, camera_Size, AUTO)
+
+
+PB_BIND(camera_Range, camera_Range, AUTO)
+
+
+PB_BIND(camera_CameraSession, camera_CameraSession, AUTO)
+
+
+PB_BIND(camera_VirtualCameraDevice, camera_VirtualCameraDevice, AUTO)
+
+
+PB_BIND(camera_CameraInfoRequest, camera_CameraInfoRequest, AUTO)
+
+
+PB_BIND(camera_CameraInfoResult, camera_CameraInfoResult, AUTO)
+
+
+PB_BIND(camera_RawData, camera_RawData, AUTO)
+
+
+PB_BIND(camera_CaptureRequest, camera_CaptureRequest, AUTO)
+
+
+PB_BIND(camera_CaptureResult, camera_CaptureResult, AUTO)
+
+
+PB_BIND(camera_CameraResult, camera_CameraResult, AUTO)
+
+
+PB_BIND(camera_RtspUrl, camera_RtspUrl, AUTO)
+
 
 
 
 
 /* Name table */
-static const char* myrpc_matrix_multiply_MatrixMultiplyService_method_names[] = {
-    "/myrpc_matrix_multiply.MatrixMultiplyService/myrpctest",
+static const char* camera_VirtualCamera_method_names[] = {
+    "/camera.VirtualCamera/getCameraInfo",
+    "/camera.VirtualCamera/open",
+    "/camera.VirtualCamera/close",
+    "/camera.VirtualCamera/capture",
+    "/camera.VirtualCamera/configure",
+    "/camera.VirtualCamera/startRtsp",
 };
 /* Method Registration */
-myrpc_matrix_multiply_MatrixMultiplyService_Service::myrpc_matrix_multiply_MatrixMultiplyService_Service() {
-       addMethod(new erpc::Method<myrpc_matrix_multiply_InputTest, myrpc_matrix_multiply_OutputTest>(
-               myrpc_matrix_multiply_MatrixMultiplyService_method_names[0], myrpc_matrix_multiply_InputTest_fields, myrpc_matrix_multiply_OutputTest_fields,
-               [](Service *s, myrpc_matrix_multiply_InputTest *i, myrpc_matrix_multiply_OutputTest *o)->rpc_status {return reinterpret_cast<myrpc_matrix_multiply_MatrixMultiplyService_Service*>(s)->myrpctest(i, o);},
+camera_VirtualCamera_Service::camera_VirtualCamera_Service() {
+       addMethod(new erpc::Method<camera_CameraInfoRequest, camera_CameraInfoResult>(
+               camera_VirtualCamera_method_names[0], camera_CameraInfoRequest_fields, camera_CameraInfoResult_fields,
+               [](Service *s, camera_CameraInfoRequest *i, camera_CameraInfoResult *o)->rpc_status {return reinterpret_cast<camera_VirtualCamera_Service*>(s)->getCameraInfo(i, o);},
+               this));
+       addMethod(new erpc::Method<camera_CameraSession, camera_CameraResult>(
+               camera_VirtualCamera_method_names[1], camera_CameraSession_fields, camera_CameraResult_fields,
+               [](Service *s, camera_CameraSession *i, camera_CameraResult *o)->rpc_status {return reinterpret_cast<camera_VirtualCamera_Service*>(s)->open(i, o);},
+               this));
+       addMethod(new erpc::Method<camera_DeviceId, camera_CameraResult>(
+               camera_VirtualCamera_method_names[2], camera_DeviceId_fields, camera_CameraResult_fields,
+               [](Service *s, camera_DeviceId *i, camera_CameraResult *o)->rpc_status {return reinterpret_cast<camera_VirtualCamera_Service*>(s)->close(i, o);},
+               this));
+       addMethod(new erpc::Method<camera_CaptureRequest, camera_CaptureResult>(
+               camera_VirtualCamera_method_names[3], camera_CaptureRequest_fields, camera_CaptureResult_fields,
+               [](Service *s, camera_CaptureRequest *i, camera_CaptureResult *o)->rpc_status {return reinterpret_cast<camera_VirtualCamera_Service*>(s)->capture(i, o);},
+               this));
+       addMethod(new erpc::Method<camera_CameraSession, camera_CameraResult>(
+               camera_VirtualCamera_method_names[4], camera_CameraSession_fields, camera_CameraResult_fields,
+               [](Service *s, camera_CameraSession *i, camera_CameraResult *o)->rpc_status {return reinterpret_cast<camera_VirtualCamera_Service*>(s)->configure(i, o);},
+               this));
+       addMethod(new erpc::Method<camera_CaptureRequest, camera_RtspUrl>(
+               camera_VirtualCamera_method_names[5], camera_CaptureRequest_fields, camera_RtspUrl_fields,
+               [](Service *s, camera_CaptureRequest *i, camera_RtspUrl *o)->rpc_status {return reinterpret_cast<camera_VirtualCamera_Service*>(s)->startRtsp(i, o);},
                this));
 }
 /* Server stub */
-rpc_status myrpc_matrix_multiply_MatrixMultiplyService_Service::myrpctest(myrpc_matrix_multiply_InputTest *req, myrpc_matrix_multiply_OutputTest *rsp) {
-    LOGW(myrpc_matrix_multiply_MatrixMultiplyService_method_names[0], "Service Unimplemented!");
+rpc_status camera_VirtualCamera_Service::getCameraInfo(camera_CameraInfoRequest *req, camera_CameraInfoResult *rsp) {
+    LOGW(camera_VirtualCamera_method_names[0], "Service Unimplemented!");
+    return rpc_status::UnimplmentedService;
+}
+
+rpc_status camera_VirtualCamera_Service::open(camera_CameraSession *req, camera_CameraResult *rsp) {
+    LOGW(camera_VirtualCamera_method_names[1], "Service Unimplemented!");
+    return rpc_status::UnimplmentedService;
+}
+
+rpc_status camera_VirtualCamera_Service::close(camera_DeviceId *req, camera_CameraResult *rsp) {
+    LOGW(camera_VirtualCamera_method_names[2], "Service Unimplemented!");
+    return rpc_status::UnimplmentedService;
+}
+
+rpc_status camera_VirtualCamera_Service::capture(camera_CaptureRequest *req, camera_CaptureResult *rsp) {
+    LOGW(camera_VirtualCamera_method_names[3], "Service Unimplemented!");
+    return rpc_status::UnimplmentedService;
+}
+
+rpc_status camera_VirtualCamera_Service::configure(camera_CameraSession *req, camera_CameraResult *rsp) {
+    LOGW(camera_VirtualCamera_method_names[4], "Service Unimplemented!");
+    return rpc_status::UnimplmentedService;
+}
+
+rpc_status camera_VirtualCamera_Service::startRtsp(camera_CaptureRequest *req, camera_RtspUrl *rsp) {
+    LOGW(camera_VirtualCamera_method_names[5], "Service Unimplemented!");
     return rpc_status::UnimplmentedService;
 }
 
 
 /* Client stub */
-rpc_status myrpc_matrix_multiply_MatrixMultiplyService_Client::myrpctest(myrpc_matrix_multiply_InputTest *req, myrpc_matrix_multiply_OutputTest *rsp) {
-    return performRequest(const_cast<char *>(myrpc_matrix_multiply_MatrixMultiplyService_method_names[0]), myrpc_matrix_multiply_InputTest_fields, (void *) req, myrpc_matrix_multiply_OutputTest_fields, (void *) rsp);
+rpc_status camera_VirtualCamera_Client::getCameraInfo(camera_CameraInfoRequest *req, camera_CameraInfoResult *rsp) {
+    return performRequest(const_cast<char *>(camera_VirtualCamera_method_names[0]), camera_CameraInfoRequest_fields, (void *) req, camera_CameraInfoResult_fields, (void *) rsp);
+}
+
+rpc_status camera_VirtualCamera_Client::open(camera_CameraSession *req, camera_CameraResult *rsp) {
+    return performRequest(const_cast<char *>(camera_VirtualCamera_method_names[1]), camera_CameraSession_fields, (void *) req, camera_CameraResult_fields, (void *) rsp);
+}
+
+rpc_status camera_VirtualCamera_Client::close(camera_DeviceId *req, camera_CameraResult *rsp) {
+    return performRequest(const_cast<char *>(camera_VirtualCamera_method_names[2]), camera_DeviceId_fields, (void *) req, camera_CameraResult_fields, (void *) rsp);
+}
+
+rpc_status camera_VirtualCamera_Client::capture(camera_CaptureRequest *req, camera_CaptureResult *rsp) {
+    return performRequest(const_cast<char *>(camera_VirtualCamera_method_names[3]), camera_CaptureRequest_fields, (void *) req, camera_CaptureResult_fields, (void *) rsp);
+}
+
+rpc_status camera_VirtualCamera_Client::configure(camera_CameraSession *req, camera_CameraResult *rsp) {
+    return performRequest(const_cast<char *>(camera_VirtualCamera_method_names[4]), camera_CameraSession_fields, (void *) req, camera_CameraResult_fields, (void *) rsp);
+}
+
+rpc_status camera_VirtualCamera_Client::startRtsp(camera_CaptureRequest *req, camera_RtspUrl *rsp) {
+    return performRequest(const_cast<char *>(camera_VirtualCamera_method_names[5]), camera_CaptureRequest_fields, (void *) req, camera_RtspUrl_fields, (void *) rsp);
 }
 

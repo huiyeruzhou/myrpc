@@ -1,33 +1,123 @@
-syntax="proto2";
+/***********************************************************
+ ** Copyright (C), 2020-2021, OPPO Mobile Comm Corp., Ltd.
+ ** VENDOR_EDIT
+ ** File: - VirtualCamera.proto
+ ** Description:  define the Virtual Camera rpc message for VDM
+ ** Version: 1.0
+ ** Date : 2021/01/04
+ ** Author: Guangming.Chen@NO.NEUTRON.VDM
+ **
+ ** ----------------------Revision History: --------------------
+ **  <author>              <date>    <version >         <desc>
+ **  chenguangming       2021/01/04     1.0           first add
+ ****************************************************************/
 
-package myrpc_matrix_multiply; 
-enum e{
-    e1 = 1;
-    e2 = 2;
-}
-message proto{
-    required int32 num1 = 1;
-    required string qaq = 3;
-    repeated int32 waw = 4;
-    message Nested{
-        required int32 num1 = 1;
-        required int32 num2 = 2;
-    }
-    required Nested nested = 2;
-}
+syntax = "proto3";
+package camera;
 
-message InputTest{
-    required int32 num1 = 1;
-    required int32 num2 = 2;
-}
+option java_multiple_files = true;
+option java_package = "com.oplus.vd.camera.rpc";
 
-message OutputTest{
-    required int32 ret = 1;
+enum Result {
+    OK = 0;
+    FAILED = 1;
 }
 
-service MatrixMultiplyService 
-{
-    rpc myrpctest(InputTest) returns (OutputTest) {}
+message DeviceId {
+    int64 value = 1;
+}
+
+message Session {
+    int32 accessoryId = 1;
+    DeviceId deviceId = 2;
+}
+
+message DeviceCharacter {
+    int32 max_width = 1;
+    int32 max_height = 2;
+    int32 max_fps = 3;
+    int32 min_fps = 4;
+}
+
+message BasicDevice {
+    string name = 1;
+    DeviceId id = 2;
+    int32 direction = 3;
+    int32 type = 4;
+    DeviceCharacter character = 5;
+}
+
+message BasicHolder {
+    int32 holder_type = 1;
+    int64 holder_id = 2;
+    string holder_name = 3;
 }
 
 
+message Size {
+    int32 width = 1;
+    int32 height = 2;
+}
+
+message Range {
+    int32 lower = 1;
+    int32 upper = 2;
+}
+
+message CameraSession {
+    DeviceId id = 1;
+    Size size = 2;
+    Range fpsRange = 3;
+}
+
+message VirtualCameraDevice {
+    BasicDevice basic = 1;
+    string characteristics = 2;
+}
+
+message CameraInfoRequest {
+    int32 accessory_id = 1;
+}
+
+message CameraInfoResult {
+    BasicHolder holder = 1;
+    repeated VirtualCameraDevice devices = 2;
+}
+
+enum DataType {
+    TYPE_CSD = 0;
+    TYPE_DATA = 1;
+}
+
+message RawData {
+    bytes data = 1;
+}
+
+message CaptureRequest {
+    DeviceId id = 1;
+    string metadata = 2;
+}
+
+message CaptureResult {
+    DeviceId id = 1;
+    DataType type = 2;
+    int64 frameNumber = 3;
+    RawData raw = 4;
+}
+
+message CameraResult {
+    Result result = 1;
+}
+
+message RtspUrl{
+    string url = 1;
+}
+
+service VirtualCamera {
+    rpc getCameraInfo(CameraInfoRequest) returns (CameraInfoResult) {}
+    rpc open(CameraSession) returns (CameraResult) {}
+    rpc close(DeviceId) returns (CameraResult) {}
+    rpc capture (CaptureRequest) returns (stream CaptureResult) {}
+    rpc configure(CameraSession) returns (CameraResult) {}
+    rpc startRtsp(CaptureRequest) returns (RtspUrl){}
+}
