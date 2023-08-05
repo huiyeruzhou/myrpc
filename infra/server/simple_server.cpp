@@ -1,27 +1,7 @@
 #include "server/simple_server.hpp"
 using namespace erpc;
 __attribute__((unused)) static const char *TAG = "server";
-// #define EPOLL_SIZE 1024
-// int setnonblocking(int sockfd)//非阻塞模式设置
-// {
-//     fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFD, 0) | O_NONBLOCK);
-//     return 0;
-// }
-// void addfd(int epollfd, int fd, bool enable_et)//将fd加入到epoll中，并设置边缘触发模式
-// {
-//     struct epoll_event ev;
-//     ev.data.fd = fd;
-//     ev.events = EPOLLIN;
-//     if (enable_et)
-//         ev.events = EPOLLIN | EPOLLET;
-//     epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev);
-//     setnonblocking(fd);
-//     printf(TAG, "fd No.%d added to epoll!\n", fd);
-// }
 
-////////////////////////////////////////////////////////////////////////////////
-// Code
-////////////////////////////////////////////////////////////////////////////////
 
 SimpleServer::SimpleServer(const char *host, uint16_t port)
     : Server(host, port)
@@ -88,7 +68,11 @@ void SimpleServer::networkpollerThread(void) {
             // should be inherited from accept() socket but it's not always ...
             int yes = 1;
             setsockopt(m_sockfd, IPPROTO_TCP, TCP_NODELAY, (void *) &yes, sizeof(yes));
-            // addfd(epfd, incomingSocket, true);
+            // cancel recv timeout
+            struct timeval timeout;
+            timeout.tv_sec = 0;
+            timeout.tv_usec = 0;
+            setsockopt(m_sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeout, sizeof(struct timeval));
             onNewSocket(incomingSocket, get_port_from_addr(&incomingAddress, incomingAddressLength));
         }
         else {
@@ -124,7 +108,7 @@ rpc_status SimpleServer::open(void) {
     // Fill in address struct.
     (void) memset(&serverAddress, 0, sizeof(serverAddress));
     serverAddress.sin_family = AF_INET;
-    serverAddress.sin_addr.s_addr = INADDR_ANY; // htonl(local ? INADDR_LOOPBACK : INADDR_ANY);
+    serverAddress.sin_addr.s_addr = INADDR_ANY; 
     serverAddress.sin_port = htons(m_port);
 
     // Turn on reuse address option.
