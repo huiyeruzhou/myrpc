@@ -1,12 +1,3 @@
-/*
- * Copyright (c) 2014, Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
- * Copyright 2021 ACRIOS Systems s.r.o.
- * All rights reserved.
- *
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
 extern "C" {
 #include <signal.h>
 // #include <sys/socket.h>
@@ -20,21 +11,10 @@ extern "C" {
 #include "transport/tcp_transport.hpp"
 
 __attribute__((unused)) static const char *TAG = "client";
-////////////////////////////////////////////////////////////////////////////////
-// Code
-////////////////////////////////////////////////////////////////////////////////
 
-/*!
- * @brief Constructor.
- *
- * This function initializes object attributes.
- */
 erpc::Client::Client(const char *host, uint16_t port)
     : CSBase(host, port), m_sequence(0) {}
 
-/*!
- * @brief Client destructor
- */
 erpc::Client::~Client(void) { delete this->m_transport; }
 
 #undef CHECK_STATUS
@@ -44,6 +24,7 @@ erpc::Client::~Client(void) { delete this->m_transport; }
          StatusToString((err)));                                \
     goto done;                                                  \
   }
+
 rpc_status erpc::Client::performRequest(char *path,
                                         const pb_msgdesc_t *req_desc, void *req,
                                         const pb_msgdesc_t *rsp_desc,
@@ -145,8 +126,8 @@ rpc_status erpc::Client::open(void) {
         struct timeval timeout;
         timeout.tv_sec = 2;
         timeout.tv_usec = 0;
-        set = setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout,
-                         sizeof(timeout));
+        set = setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO,
+                         reinterpret_cast<void *>(&timeout), sizeof(timeout));
         if (set < 0) {
           LOGW(TAG, "setsockopt failed, error: %s", strerror(errno));
           ::close(sock);

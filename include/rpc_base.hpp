@@ -3,7 +3,6 @@
 
 #include "port/port.h"
 #include "transport/tcp_transport.hpp"
-#include "transport/transport_base.hpp"
 
 #if CONFIG_HAS_FREERTOS
 #ifdef __cplusplus
