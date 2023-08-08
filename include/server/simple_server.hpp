@@ -8,30 +8,20 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#ifndef SIMPLE_SERVER_H
-#define SIMPLE_SERVER_H
+#ifndef SERVER_SIMPLE_SERVER_HPP_
+#define SERVER_SIMPLE_SERVER_HPP_
+
+#include <fcntl.h>
 
 #include "port/port.h"
 #include "server/server_base.hpp"
-#include "transport/tcp_transport.hpp"
 #include "server/server_worker.hpp"
-#include <fcntl.h>
+#include "transport/tcp_transport.hpp"
 #ifdef CONFIG_HAS_ANDROID
-#include<sys/types.h>
-#include<sys/socket.h>
-#include<netinet/in.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 #endif
-
-
- /*!
- * @addtogroup infra_server
- * @{
- * @file
- */
-
-////////////////////////////////////////////////////////////////////////////////
-// Classes
-////////////////////////////////////////////////////////////////////////////////
 
 namespace erpc {
 /*!
@@ -39,88 +29,56 @@ namespace erpc {
  *
  * @ingroup infra_server
  */
-class SimpleServer : public Server
-{
-public:
-    /*!
-     * @brief Constructor.
-     *
-     * This function initializes object attributes.
-     */
-    SimpleServer(const char *host, uint16_t port);
+class SimpleServer : public Server {
+ public:
+  SimpleServer(const char *host, uint16_t port);
 
-    ~SimpleServer();
-    /*!
-     * @brief Run server in infinite loop.
-     *
-     * Will never jump out from this function.
-     */
-    virtual rpc_status run(void) override;
+  ~SimpleServer();
 
+  rpc_status run(void) override;
 
+  void stop(void) override;
 
-    /*!
-     * @brief This function sets server from ON to OFF
-     */
-    virtual void stop(void) override;
+  rpc_status open(void) override;
 
-    /*!
-     * @brief Open the server 
-     *
-     * Awake the network poller thread and begin to listen 
-     */
-    virtual rpc_status open(void) override;
-    
-    /*!
-     * @brief This function disconnects client or stop server host.
-     *
-     * @param[in] stopServer Specify is server shall be closed as well (stop listen())
-     * @retval #Success Always return this.
-     */
-    virtual rpc_status close(void);
-    
+  virtual rpc_status close(void);
 
-private:
-    /*!
-     * @brief callback called when new socket accepted
-     *
-     * Create and start a server_worker to handle this connection
-     * @param[in] sockfd return value of accept()
-     * @param[in] port port numeber of the tcp connection
-     */
-    void onNewSocket(int socketfd, int port);
+ private:
+  /*!
+   * @brief callback called when new socket accepted
+   *
+   * Create and start a server_worker to handle this connection
+   * @param[in] sockfd return value of accept()
+   * @param[in] port port numeber of the tcp connection
+   */
+  void onNewSocket(int socketfd, int port);
+  /* Information if server is ON or OFF. OFF means never
+    accept incoming connection.
+    Call stop() will set m_isServerOn to false*/
+  bool m_isServerOn;
+  Thread m_serverThread; /* Pointer to server thread. */
+  /* Thread is executed while this is true. Call close() will set it to false*/
+  bool m_runServer;
 
-//     /*!
-//      * @brief Disposing message buffers and codecs.
-//      *
-//      * @param[in] codec Pointer to codec to dispose. It contains also message buffer to dispose.
-//      */
-//     void disposeBufferAndCodec(Codec *codec);
-
-    bool  m_isServerOn; /*!< Information if server is ON or OFF. */
-    Thread m_serverThread; /*!< Pointer to server thread. */
-    bool m_runServer;      /*!< Thread is executed while this is true. */
-
-protected:
-    /*!
-    * @brief Server thread function.
-    * Listen on the given port, after socket accpeted it will call the `onNewSocket` function
-    */
-    void networkpollerThread(void);
-    /*!
-    * @brief Thread entry point.
-    *
-    * Control is passed to the networkpollerThread() method of the SimpleServer instance pointed to
-    * by the @c arg parameter.
-    *
-    * @param arg Thread argument. The pointer to the SimpleServer instance is passed through
-    *  this argument.
-    */
-    static void networkpollerStub(void *arg);
+ protected:
+  /*!
+   * @brief Server thread function.
+   * Listen on the given port, after socket accpeted it will call the
+   * `onNewSocket` function
+   */
+  void networkpollerThread(void);
+  /*!
+   * @brief Thread entry point.
+   *
+   * Control is passed to the networkpollerThread() method of the SimpleServer
+   * instance pointed to by the @c arg parameter.
+   *
+   * @param arg Thread argument. The pointer to the SimpleServer instance is
+   * passed through this argument.
+   */
+  static void networkpollerStub(void *arg);
 };
 
-} // namespace erpc
+}  // namespace erpc
 
-/*! @} */
-
-#endif // SIMPLE_SERVER_H
+#endif  // SERVER_SIMPLE_SERVER_HPP_
