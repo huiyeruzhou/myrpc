@@ -24,16 +24,7 @@ using namespace erpc;
 // Code
 ////////////////////////////////////////////////////////////////////////////////
 
-Thread::Thread(const char *name)
-    : m_entry(0)
-    , m_arg(0)
-    , m_stackSize(0)
-    , m_priority(0)
-    , m_task(0)
-    , m_next(0)
-{
-    strncpy(m_name, name, configMAX_TASK_NAME_LEN);
-}
+
 
 //默认传入后三个参数
 Thread::Thread(thread_entry_t entry, uint32_t priority, uint32_t stackSize, const char *name)
@@ -103,7 +94,7 @@ void Thread::threadEntryPoint(void)
 void Thread::threadEntryPointStub(void *arg)
 {
     Thread *_this = reinterpret_cast<Thread *>(arg);
-    erpc_assert((_this != NULL) && ("Reinterpreting 'void *arg' to 'Thread *' failed." != NULL));
+    assert((_this != NULL) && ("Reinterpreting 'void *arg' to 'Thread *' failed." != NULL));
     _this->threadEntryPoint();
 
     // Handle a task returning from its function. Delete or suspend the task, if the API is

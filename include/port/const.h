@@ -1,15 +1,12 @@
-#ifndef CONST_H
-#define CONST_H
+#ifndef PORT_CONST_H_
+#define PORT_CONST_H_
 
 #ifndef ERPC_DEFAULT_BUFFER_SIZE
-//! @brief Size of buffers allocated by BasicMessageBufferFactory in setup functions.
 #define ERPC_DEFAULT_BUFFER_SIZE (256U)
 #endif
 
 #ifndef CONFIG_MAX_PTHREAD_NAME_LEN
-//! @brief Size of
 #define CONFIG_MAX_PTHREAD_NAME_LEN (16U)
 #endif
-//#define CONFIG_HAS_POSIX 1
-//#define CONFIG_HAS_FREERTOS 0
-#endif
+
+#endif  // PORT_CONST_H_

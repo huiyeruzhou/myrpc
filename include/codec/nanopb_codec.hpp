@@ -1,26 +1,28 @@
-#ifndef NANOPB_TRANSPORT_H_
-#define NANOPB_TRANSPORT_H_
+#ifndef CODEC_NANOPB_CODEC_HPP_
+#define CODEC_NANOPB_CODEC_HPP_
 
-#include "port/port.h"
 #include "codec/message_buffer.hpp"
+#include "port/port.h"
 #include "rpc_status.hpp"
-#ifdef  __cplusplus  
+#ifdef __cplusplus
 extern "C" {
-#endif  
+#endif
 #include "nanopb/pb.h"
+#include "nanopb/pb_common.h"
 #include "nanopb/pb_decode.h"
 #include "nanopb/pb_encode.h"
-#include "nanopb/pb_common.h"
 
 namespace erpc {
-    class NanopbCodec{
-    public:
-        ~NanopbCodec() = default;
-        rpc_status write(MessageBuffer *obuf, const pb_msgdesc_t *fields, const void *src_struct);
-        rpc_status get(MessageBuffer *ibuf, const pb_msgdesc_t *fields, void *dst_struct);
-    };
+class NanopbCodec {
+ public:
+  ~NanopbCodec() = default;
+  rpc_status write(MessageBuffer *obuf, const pb_msgdesc_t *fields,
+                   const void *src_struct);
+  rpc_status get(MessageBuffer *ibuf, const pb_msgdesc_t *fields,
+                 void *dst_struct);
+};
+}  // namespace erpc
+#ifdef __cplusplus
 }
-#ifdef  __cplusplus  
-}
-#endif  
-#endif//NANOPB_TRANSPORT_H_
+#endif
+#endif  // CODEC_NANOPB_CODEC_HPP_
