@@ -11,9 +11,12 @@ namespace erpc {
 
 class Server : public CSBase {
  public:
-  Server(const char *host, uint16_t port) : CSBase(host, port) {}
+  Server(const char *host, uint16_t port)
+      : CSBase(host, port), methods(new MethodVector()) {
+    // LOGE("memory", "server construct methods=%ld", methods.use_count());
+  }
 
-  virtual ~Server(void) {}
+  virtual ~Server(void);
 
   /*!
    * @brief Add service.
@@ -51,7 +54,7 @@ class Server : public CSBase {
   virtual void stop(void) = 0;
 
  protected:
-  std::vector<MethodBase *> methods;
+  std::shared_ptr<MethodVector> methods;
 
  private:
   // Disable copy ctor.

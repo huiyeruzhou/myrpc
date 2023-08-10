@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <memory>
 #include <vector>
 
 #include "codec/message_buffer.hpp"
@@ -19,7 +20,7 @@ class MethodBase {
         m_input_desc(input_desc),
         m_output_desc(output_desc) {}
 
-  virtual ~MethodBase(void) {}
+  virtual ~MethodBase(void) { LOGE("Method", "MethodBase::~MethodBase"); }
   const char *getPath(void) const { return m_path; }
   virtual rpc_status handleInvocation(void *input, void *output) = 0;
   virtual void filledMsgDesc(const pb_msgdesc_t **input_desc, void **input_msg,
@@ -52,15 +53,14 @@ class Method : public MethodBase {
   Method(const char *serviceId, const pb_msgdesc_t *input_desc,
          const pb_msgdesc_t *output_desc,
          std::function<rpc_status(Service *, InputType *, OutputType *)> func,
-         Service *service)
+         std::shared_ptr<Service> service)
       : MethodBase(serviceId, input_desc, output_desc),
         func(func),
         service(service) {}
   virtual ~Method() {}
 
   rpc_status handleInvocation(void *input, void *output) override {
-    return func(reinterpret_cast<erpc::Service *>(service),
-                static_cast<InputType *>(input),
+    return func(service.get(), static_cast<InputType *>(input),
                 static_cast<OutputType *>(output));
   }
   void filledMsgDesc(const pb_msgdesc_t **input_desc, void **input_msg,
@@ -81,9 +81,9 @@ class Method : public MethodBase {
 
  private:
   std::function<rpc_status(Service *, InputType *, OutputType *)> func;
-  Service *service;
+  std::shared_ptr<Service> service;
 };
-
+typedef std::vector<std::shared_ptr<erpc::MethodBase>> MethodVector;
 }  // namespace erpc
 
 #endif  // SERVER_SERVICE_HPP_

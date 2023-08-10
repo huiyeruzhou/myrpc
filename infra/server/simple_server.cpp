@@ -28,6 +28,7 @@ void erpc::SimpleServer::stop(void) {
 
 void erpc::SimpleServer::onNewSocket(int sockfd, int port) {
   TCPTransport *transport_worker = new TCPTransport(sockfd, port);
+  // LOGE("memory", "server on new socket methods=%ld", this->methods.use_count());
   ServerWorker *worker = new ServerWorker(methods, transport_worker);
   worker->start();
 }

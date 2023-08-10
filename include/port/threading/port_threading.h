@@ -43,12 +43,10 @@
 #include "freertos/task.h"
 #endif  // ERPC_THREADS
 
-
 //! @brief Thread function type.
 //!
 //! @param arg User provided argument that was passed into the start() method.
 typedef void (*thread_entry_t)(void *arg);
-
 
 #if defined(__cplusplus)
 
@@ -333,7 +331,7 @@ class Semaphore {
    *
    * @param[in] count Semaphore number.
    */
-  Semaphore(int count = 0);
+  explicit Semaphore(int count = 0);
 
   /*!
    * @brief Destructor.
@@ -372,11 +370,14 @@ class Semaphore {
 
  private:
 #if ERPC_THREADS_IS(PTHREADS)
-  int m_count;           /*!< Semaphore count number. */
-  pthread_cond_t m_cond; /*!< Condition variable. Allows threads to suspend
-                            execution and relinquish the processors until some
-                            predicate on shared data is satisfied. */
-  Mutex m_mutex;         /*!< Mutext. */
+  /*!< Semaphore count number. */
+  int m_count;
+  /*!< Condition variable. Allows threads to suspend
+    execution and relinquish the processors until some
+    predicate on shared data is satisfied. */
+  pthread_cond_t m_cond;
+  /*!< Mutext. */
+  Mutex m_mutex;
 #elif ERPC_THREADS_IS(FREERTOS)
   SemaphoreHandle_t m_sem;         /*!< Semaphore. */
   StaticSemaphore_t m_staticQueue; /*!< Static queue. */

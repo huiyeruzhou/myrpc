@@ -7,6 +7,7 @@ extern "C" {
 
 #include <cstdio>
 #include <vector>
+#include <memory>
 
 #include "codec/meta.pb.h"
 #include "port/port.h"
@@ -24,7 +25,7 @@ extern "C" {
 namespace erpc {
 class ServerWorker {
  public:
-  ServerWorker(std::vector<erpc::MethodBase *> methods, TCPTransport *worker);
+  ServerWorker(std::shared_ptr<MethodVector> methods, TCPTransport *worker);
   ~ServerWorker();
   rpc_status runInternal(void);
   rpc_status resetBuffers(void);
@@ -41,8 +42,8 @@ class ServerWorker {
 #elif ERPC_THREADS_IS(FREERTOS)
   char TAG[configMAX_TASK_NAME_LEN];
 #endif
-  MethodBase *m_method = NULL;
-  std::vector<erpc::MethodBase *> methods;
+  std::shared_ptr<MethodBase> m_method = NULL;
+  std::shared_ptr<MethodVector> methods;
   TCPTransport *m_worker;  //!< Worker to do transport
 };
 

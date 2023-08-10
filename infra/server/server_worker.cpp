@@ -1,13 +1,16 @@
 #include "server/server_worker.hpp"
 
-erpc::ServerWorker::ServerWorker(std::vector<erpc::MethodBase *> methods,
+erpc::ServerWorker::ServerWorker(std::shared_ptr<MethodVector> methods,
                                  TCPTransport *worker)
     : m_worker_thread(workerStub, 5), methods(methods), m_worker(worker) {
+  // LOGE("memory", "worker construct methods=%ld", this->methods.use_count());
   snprintf(TAG, sizeof(TAG) - 1, "worker %" PRIin_port_t, m_worker->m_port);
   m_worker_thread.setName(TAG);
 }
 erpc::ServerWorker::~ServerWorker() {
-  m_method->destroyMsg(m_worker->to_recv_msg, m_worker->to_send_msg);
+  // LOGE("memory", "worker deconstruct methods=%ld", this->methods.use_count());
+  if (m_method)
+    m_method->destroyMsg(m_worker->to_recv_msg, m_worker->to_send_msg);
   delete m_worker;
 }
 
@@ -22,7 +25,7 @@ rpc_status erpc::ServerWorker::runInternal(void) {
   // get data frame
   CHECK_STATUS(m_worker->receiveFrame(), err);
   // LOGI(TAG, "receiveFrame()");
-  
+
   // recv inital metadata
   CHECK_STATUS(m_worker->recv_inital_md(), err);
   // LOGI(TAG, "recv_inital_md()");
@@ -66,9 +69,10 @@ done:
     if (err == rpc_status::UnknownService) {
       LOGW(TAG, "Request Service: %s", req_md->path);
       LOGE(TAG, "Available Services:");
-      for_each(methods.begin(), methods.end(), [this](MethodBase *method) {
-        LOGW(TAG, "Service: %s", method->getPath());
-      });
+      std::for_each(methods->begin(), methods->end(),
+                    [&](std::shared_ptr<MethodBase> &method) {
+                      LOGE(TAG, "  %s", method->getPath());
+                    });
     }
     m_worker->close();
   } else {
@@ -84,17 +88,27 @@ rpc_status erpc::ServerWorker::resetBuffers(void) {
   return m_worker->resetBuffers();
 }
 rpc_status erpc::ServerWorker::findServiceByMetadata(myrpc_Meta *req) {
-  auto iter_method = std::find_if(
-      methods.begin(), methods.end(), [&](MethodBase *method) -> bool {
-        return !strcmp(method->getPath(), req->path);
-      });
-  if (iter_method == methods.end()) {
+  auto iter_method =
+      std::find_if(methods->begin(), methods->end(),
+                   [&](std::shared_ptr<MethodBase> &method) -> bool {
+                     return !strcmp(method->getPath(), req->path);
+                   });
+  if (iter_method == methods->end()) {
     m_method = NULL;
     return rpc_status::UnknownService;
   } else {
-    m_method = *iter_method;
+    // LOGE("memory", "worker findServiceByMetadata iter_method=%ld",
+        //  iter_method->use_count());
+    std::shared_ptr<MethodBase> method(*iter_method);
+    // LOGE("memory", "worker findServiceByMetadata method=%ld",
+        //  method.use_count());
+    m_method = method;
   }
   LOGI(this->TAG, "service `%s`", m_method->getPath());
+  // LOGE("memory", "worker findServiceByMetadata iter_method=%ld",
+      //  iter_method->use_count());
+  // LOGE("memory", "worker findServiceByMetadata m_method=%ld",
+      //  this->m_method.use_count());
   return rpc_status::Success;
 }
 rpc_status erpc::ServerWorker::callMethodByMetadata(myrpc_Meta *req,
@@ -127,6 +141,9 @@ void erpc::ServerWorker::workerStub(void *arg) {
     }
   }
   LOGI(This->TAG, "work done\n");
+  // LOGE("memory", "work done: methods=%ld, m_method=%ld",
+      //  This->methods.use_count(), This->m_method.use_count());
+  delete This;
 }
 
 void erpc::ServerWorker::start() { m_worker_thread.start(this); }
