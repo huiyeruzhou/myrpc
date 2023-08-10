@@ -49,26 +49,26 @@ rpc_status erpc::Client::performRequest(char *path,
 
   // send initial metadata
   CHECK_STATUS(m_transport->send_inital_md(), err);
-  LOGI(TAG, "send_inital_md()");
+  // LOGI(TAG, "send_inital_md()");
   // send msg
   CHECK_STATUS(m_transport->send_msg(), err);
-  LOGI(TAG, "send_msg()");
+  // LOGI(TAG, "send_msg()");
   // sned trailing metadata
   CHECK_STATUS(m_transport->send_trailing_md(), err);
-  LOGI(TAG, "send_trailing_md()");
+  // LOGI(TAG, "send_trailing_md()");
 
   // get data frame
   CHECK_STATUS(m_transport->receiveFrame(), err);
-  LOGI(TAG, "receiveFrame()");
+  // LOGI(TAG, "receiveFrame()");
   // recv inital metadata
   CHECK_STATUS(m_transport->recv_inital_md(), err);
-  LOGI(TAG, "recv_inital_md()");
+  // LOGI(TAG, "recv_inital_md()");
   // recv messgae
   CHECK_STATUS(m_transport->recv_msg(), err);
-  LOGI(TAG, "recv_msg()");
+  // LOGI(TAG, "recv_msg()");
   // recv trailing metadata
   CHECK_STATUS(m_transport->recv_trailing_md(), err);
-  LOGI(TAG, "recv_trailing_md()");
+  // LOGI(TAG, "recv_trailing_md()");
 
   err = m_transport->to_recv_md->has_status
             ? static_cast<rpc_status>(m_transport->to_recv_md->status)
