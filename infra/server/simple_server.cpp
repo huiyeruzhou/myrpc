@@ -62,9 +62,9 @@ void erpc::SimpleServer::networkpollerThread(void) {
       // should be inherited from accept() socket but it's not always ...
       int yes = 1;
       setsockopt(m_sockfd, IPPROTO_TCP, TCP_NODELAY, &yes, sizeof(yes));
-      // cancel recv timeout
+      // set recv timeout
       struct timeval timeout;
-      timeout.tv_sec = 0;
+      timeout.tv_sec = 5;
       timeout.tv_usec = 0;
       setsockopt(m_sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeout,
                  sizeof(struct timeval));

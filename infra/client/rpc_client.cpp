@@ -172,6 +172,17 @@ rpc_status erpc::Client::open(void) {
         LOGE(TAG, "setsockopt failed, error: %s", strerror(errno));
         status = Fail;
       }
+      // set socket timeout
+      struct timeval timeout;
+      timeout.tv_sec = 5;
+      timeout.tv_usec = 0;
+      set = setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout,
+                       sizeof(timeout));
+      if (set < 0) {
+        LOGW(TAG, "setsockopt failed, error: %s", strerror(errno));
+        ::close(sock);
+        sock = -1;
+      }
     }
 
     if (status == Success) {
