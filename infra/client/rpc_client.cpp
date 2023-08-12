@@ -49,26 +49,45 @@ rpc_status erpc::Client::performRequest(char *path,
 
   // send initial metadata
   CHECK_STATUS(m_transport->send_inital_md(), err);
-  // LOGI(TAG, "send_inital_md()");
+#ifdef TRACE_CLIENT
+  LOGI(TAG, "send_inital_md()");
+#endif  // TRACE_CLIENT
+
   // send msg
   CHECK_STATUS(m_transport->send_msg(), err);
-  // LOGI(TAG, "send_msg()");
+#ifdef TRACE_CLIENT
+  LOGI(TAG, "send_msg()");
+#endif  // TRACE_CLIENT
+
   // sned trailing metadata
   CHECK_STATUS(m_transport->send_trailing_md(), err);
-  // LOGI(TAG, "send_trailing_md()");
+#ifdef TRACE_CLIENT
+  LOGI(TAG, "send_trailing_md()");
+#endif  // TRACE_CLIENT
 
   // get data frame
   CHECK_STATUS(m_transport->receiveFrame(), err);
-  // LOGI(TAG, "receiveFrame()");
+#ifdef TRACE_CLIENT
+  LOGI(TAG, "receiveFrame()");
+#endif  // TRACE_CLIENT
+
   // recv inital metadata
   CHECK_STATUS(m_transport->recv_inital_md(), err);
-  // LOGI(TAG, "recv_inital_md()");
+#ifdef TRACE_CLIENT
+  LOGI(TAG, "recv_inital_md()");
+#endif  // TRACE_CLIENT
+
   // recv messgae
   CHECK_STATUS(m_transport->recv_msg(), err);
-  // LOGI(TAG, "recv_msg()");
+#ifdef TRACE_CLIENT
+  LOGI(TAG, "recv_msg()");
+#endif  // TRACE_CLIENT
+
   // recv trailing metadata
   CHECK_STATUS(m_transport->recv_trailing_md(), err);
-  // LOGI(TAG, "recv_trailing_md()");
+#ifdef TRACE_CLIENT
+  LOGI(TAG, "recv_trailing_md()");
+#endif  // TRACE_CLIENT
 
   err = m_transport->to_recv_md->has_status
             ? static_cast<rpc_status>(m_transport->to_recv_md->status)
@@ -130,7 +149,7 @@ rpc_status erpc::Client::open(void) {
           LOGW(TAG, "try create a socket, but failed");
           continue;
         }
-        // set socket timeout
+        // set connect/send timeout
         struct timeval timeout;
         timeout.tv_sec = 2;
         timeout.tv_usec = 0;
