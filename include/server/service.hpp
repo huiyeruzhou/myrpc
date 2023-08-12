@@ -8,6 +8,7 @@
 
 #include "codec/message_buffer.hpp"
 #include "codec/meta.pb.h"
+#include "nanopb/pb_decode.h"
 #include "port/port.h"
 #include "rpc_status.hpp"
 namespace erpc {
@@ -72,9 +73,11 @@ class Method : public MethodBase {
   };
   void destroyMsg(void *input, void *output) override {
     if (input) {
+      pb_release(m_input_desc, input);
       delete static_cast<InputType *>(input);
     }
     if (output) {
+      pb_release(m_output_desc, output);
       delete static_cast<OutputType *>(output);
     }
   }

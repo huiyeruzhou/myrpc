@@ -44,6 +44,8 @@ class Client : public CSBase {
    */
   virtual rpc_status open(void);
 
+  virtual rpc_status close(void);
+
  protected:
   virtual rpc_status performRequest(char *path, const pb_msgdesc_t *req_desc,
                                     void *req, const pb_msgdesc_t *rsp_desc,

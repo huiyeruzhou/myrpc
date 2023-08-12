@@ -78,7 +78,15 @@ done:
   m_transport->resetBuffers();
   return err;
 }
-
+rpc_status erpc::Client::close(void) {
+  if (m_sockfd != -1) {
+    ::close(m_sockfd);
+    m_sockfd = -1;
+  }
+  delete m_transport;
+  m_transport = NULL;
+  return Success;
+}
 rpc_status erpc::Client::open(void) {
   rpc_status status = Success;
   struct addrinfo hints = {};
@@ -88,8 +96,8 @@ rpc_status erpc::Client::open(void) {
   int sock = -1;
   struct addrinfo *res;
 
-  if (m_sockfd != -1) {
-    LOGE("%s", "socket already connected, error: %s", strerror(errno));
+  if (m_sockfd > 0) {
+    LOGE(TAG, "socket already connected, error: %s", strerror(errno));
   } else {
     // Fill in hints structure for getaddrinfo.
     hints.ai_flags = AI_NUMERICSERV;
@@ -176,8 +184,8 @@ rpc_status erpc::Client::open(void) {
       struct timeval timeout;
       timeout.tv_sec = 5;
       timeout.tv_usec = 0;
-      set = setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout,
-                       sizeof(timeout));
+      set =
+          setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
       if (set < 0) {
         LOGW(TAG, "setsockopt failed, error: %s", strerror(errno));
         ::close(sock);

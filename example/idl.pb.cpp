@@ -19,10 +19,11 @@ static const char* myrpc_LEDControl_method_names[] = {
 };
 /* Method Registration */
 myrpc_LEDControl_Service::myrpc_LEDControl_Service() {
+    auto self = std::shared_ptr<Service>(this);
        addMethod(new erpc::Method<myrpc_Input, myrpc_Output>(
                myrpc_LEDControl_method_names[0], myrpc_Input_fields, myrpc_Output_fields,
                [](Service *s, myrpc_Input *i, myrpc_Output *o)->rpc_status {return reinterpret_cast<myrpc_LEDControl_Service*>(s)->setColor(i, o);},
-               this));
+               self));
 }
 /* Server stub */
 rpc_status myrpc_LEDControl_Service::setColor(myrpc_Input *req, myrpc_Output *rsp) {

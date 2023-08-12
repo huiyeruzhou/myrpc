@@ -4,12 +4,14 @@
 #ifndef PB_MYRPC_IDL_PB_HPP_INCLUDED
 #define PB_MYRPC_IDL_PB_HPP_INCLUDED
 #include <pb.h>
-#include <server/service.hpp>
-#include <client/rpc_client.hpp>
 #include <rpc_status.hpp>
 #include <pb_encode.h>
 #include <pb_decode.h>
+#include <memory>
 #include <functional>
+#include <server/service.hpp>
+#include <client/rpc_client.hpp>
+#include <server/simple_server.hpp>
 
 #if PB_PROTO_HEADER_VERSION != 40
 #error Regenerate this file with the current version of nanopb generator.
@@ -17,9 +19,7 @@
 
 /* Struct definitions */
 typedef struct _myrpc_Input {
-    int32_t r;
-    int32_t g;
-    int32_t b;
+    char *color;
 } myrpc_Input;
 
 typedef struct _myrpc_Output {
@@ -32,22 +32,18 @@ extern "C" {
 #endif
 
 /* Initializer values for message structs */
-#define myrpc_Input_init_default                 {0, 0, 0}
+#define myrpc_Input_init_default                 {NULL}
 #define myrpc_Output_init_default                {0}
-#define myrpc_Input_init_zero                    {0, 0, 0}
+#define myrpc_Input_init_zero                    {NULL}
 #define myrpc_Output_init_zero                   {0}
 
 /* Field tags (for use in manual encoding/decoding) */
-#define myrpc_Input_r_tag                        1
-#define myrpc_Input_g_tag                        2
-#define myrpc_Input_b_tag                        3
+#define myrpc_Input_color_tag                    1
 #define myrpc_Output_success_tag                 1
 
 /* Struct field encoding specification for nanopb */
 #define myrpc_Input_FIELDLIST(X, a) \
-X(a, STATIC,   REQUIRED, INT32,    r,                 1) \
-X(a, STATIC,   REQUIRED, INT32,    g,                 2) \
-X(a, STATIC,   REQUIRED, INT32,    b,                 3)
+X(a, POINTER,  REQUIRED, STRING,   color,             1)
 #define myrpc_Input_CALLBACK NULL
 #define myrpc_Input_DEFAULT NULL
 
@@ -64,7 +60,7 @@ extern const pb_msgdesc_t myrpc_Output_msg;
 #define myrpc_Output_fields &myrpc_Output_msg
 
 /* Maximum encoded size of messages (where known) */
-#define myrpc_Input_size                         33
+/* myrpc_Input_size depends on runtime parameters */
 #define myrpc_Output_size                        2
 
 /* Service Definations */
@@ -72,8 +68,9 @@ class myrpc_LEDControl_Service : public erpc::Service {
 public:
     myrpc_LEDControl_Service();
     virtual ~myrpc_LEDControl_Service() {}
+	using erpc::Service::Service;
+	using erpc::Service::addMethod;
     virtual rpc_status setColor(myrpc_Input *request, myrpc_Output *response);
-;
 };
 
 /* Client Defination */
@@ -81,6 +78,9 @@ class myrpc_LEDControl_Client : public erpc::Client {
 public:
     myrpc_LEDControl_Client(const char *host, uint16_t port): erpc::Client(host, port) {}
     virtual ~myrpc_LEDControl_Client() {}
+	using erpc::Client::close;
+	using erpc::Client::open;
+	using erpc::Client::Client;
     virtual rpc_status setColor(myrpc_Input *request, myrpc_Output *response);
 };
 #ifdef __cplusplus

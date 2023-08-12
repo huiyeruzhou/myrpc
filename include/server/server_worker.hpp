@@ -5,9 +5,10 @@ extern "C" {
 #include <unistd.h>
 }
 
+#include <atomic>
 #include <cstdio>
-#include <vector>
 #include <memory>
+#include <vector>
 
 #include "codec/meta.pb.h"
 #include "port/port.h"
@@ -25,7 +26,8 @@ extern "C" {
 namespace erpc {
 class ServerWorker {
  public:
-  ServerWorker(std::shared_ptr<MethodVector> methods, TCPTransport *worker);
+  ServerWorker(std::shared_ptr<MethodVector> methods, TCPTransport *worker,
+               std::shared_ptr<std::atomic_bool> isServerOn);
   ~ServerWorker();
   rpc_status runInternal(void);
   rpc_status resetBuffers(void);
@@ -34,6 +36,7 @@ class ServerWorker {
                                   void *output);
   static void workerStub(void *arg);
   void start(void);
+  bool isServerOn(void) { return *p_isServerOn;}
 
  private:
   Thread m_worker_thread;
@@ -42,9 +45,11 @@ class ServerWorker {
 #elif ERPC_THREADS_IS(FREERTOS)
   char TAG[configMAX_TASK_NAME_LEN];
 #endif
-  std::shared_ptr<MethodBase> m_method = NULL;
+  std::shared_ptr<MethodBase> m_method;
   std::shared_ptr<MethodVector> methods;
   TCPTransport *m_worker;  //!< Worker to do transport
+  std::shared_ptr<const std::atomic_bool> p_isServerOn;
+  int error_count = 0;
 };
 
 }  // namespace erpc

@@ -3,9 +3,7 @@ syntax="proto2";
 package myrpc; 
 
 message Input{
-    required int32 r = 1;
-    required int32 g = 2;
-    required int32 b = 3;
+    required string color = 1;
 }
 
 message Output{

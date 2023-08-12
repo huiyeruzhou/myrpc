@@ -42,11 +42,35 @@ rpc_status erpc::TCPTransport::receive(uint8_t *data, uint32_t size) {
 
   int ret = ::recv(m_socket, data, size, 0);
   if (ret <= 0) {
+    int recv_errno = errno;
     LOGE(TAG, "recv error: %s", strerror(errno));
     LOGE(TAG, "m_socket: %d, ret: %d, data: %s, size: %" PRIu32, m_socket, ret,
          data, size);
-    status =
-        ret == 0 ? rpc_status::ConnectionClosed : rpc_status::ConnectionFailure;
+    if (ret == 0) {
+      status = rpc_status::ConnectionClosed;
+    } else {
+      switch (recv_errno) {
+        case EAGAIN:
+#if EAGAIN != EWOULDBLOCK
+        case EWOULDBLOCK:
+#endif
+          status = rpc_status::Timeout;
+          break;
+        case EBADF:
+        case EFAULT:
+        case ENOTSOCK:
+        case EINVAL:
+          status = rpc_status::InvalidArgument;
+          break;
+        case ECONNREFUSED:
+        case ENOTCONN:
+          status = rpc_status::ConnectionFailure;
+          break;
+        default:
+          status = rpc_status::Fail;
+          break;
+      }
+    }
   } else if (ret < size) {
     LOGE(TAG, "recvd %d bytes of data, excepted %" PRIu32, ret, size);
   }
@@ -128,7 +152,7 @@ rpc_status erpc::TCPTransport::receiveFrame() {
   {
     // Receive header first.
     retVal = receive(reinterpret_cast<uint8_t *>(&h), sizeof(h));
-    LOGI(TAG, "receive header: %" PRIu32, h);
+    // LOGI(TAG, "receive header: %" PRIu32, h);
 
     if (retVal == Success) {
       // received size can't be zero.
@@ -147,7 +171,7 @@ rpc_status erpc::TCPTransport::receiveFrame() {
       // Receive rest of the message now we know its size.
       retVal = receive(message->get(), h);
     }
-    LOGI(TAG, "receive message");
+    // LOGI(TAG, "receive message");
   }
   return retVal;
 }

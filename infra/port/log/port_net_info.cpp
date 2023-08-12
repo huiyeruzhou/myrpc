@@ -15,9 +15,10 @@ int getnameinfo(const struct sockaddr *addr, socklen_t addrlen, char *host,
 void sprint_net_info(char *netinfo, int netinfo_len, const sockaddr *__sockaddr,
                      int __len) {
   // get host ip by sockaddr
-  char host[16];
+  char host[18];
   if (__sockaddr->sa_family == AF_INET)
-    inet_ntop(AF_INET, &(reinterpret_cast<const sockaddr_in *>(__sockaddr))->sin_addr,
+    inet_ntop(AF_INET,
+              &(reinterpret_cast<const sockaddr_in *>(__sockaddr))->sin_addr,
               host, 16);
   else
     snprintf(host, sizeof(host), "AF:%d-notipv4", __sockaddr->sa_family);

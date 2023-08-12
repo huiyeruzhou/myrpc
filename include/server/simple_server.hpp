@@ -13,6 +13,9 @@
 
 #include <fcntl.h>
 
+#include <atomic>
+#include <memory>
+
 #include "port/port.h"
 #include "server/server_base.hpp"
 #include "server/server_worker.hpp"
@@ -43,6 +46,8 @@ class SimpleServer : public Server {
 
   virtual rpc_status close(void);
 
+  bool isServerOn(void) { return *m_isServerOn; }
+
  private:
   /*!
    * @brief callback called when new socket accepted
@@ -55,7 +60,8 @@ class SimpleServer : public Server {
   /* Information if server is ON or OFF. OFF means never
     accept incoming connection.
     Call stop() will set m_isServerOn to false*/
-  bool m_isServerOn;
+  std::shared_ptr<std::atomic_bool> m_isServerOn;
+  
   Thread m_serverThread; /* Pointer to server thread. */
   /* Thread is executed while this is true. Call close() will set it to false*/
   bool m_runServer;

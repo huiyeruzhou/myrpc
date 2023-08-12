@@ -3,7 +3,7 @@ __attribute__((unused)) static const char *TAG = "server";
 
 erpc::SimpleServer::SimpleServer(const char *host, uint16_t port)
     : Server(host, port),
-      m_isServerOn(true),
+      m_isServerOn(new std::atomic_bool(true)),
       m_serverThread(erpc::SimpleServer::networkpollerStub, 1),
       m_runServer(false) {}
 
@@ -22,14 +22,16 @@ rpc_status erpc::SimpleServer::run(void) {
 }
 
 void erpc::SimpleServer::stop(void) {
-  m_isServerOn = false;
+  *m_isServerOn = false;
   close();
 }
 
 void erpc::SimpleServer::onNewSocket(int sockfd, int port) {
   TCPTransport *transport_worker = new TCPTransport(sockfd, port);
-  // LOGE("memory", "server on new socket methods=%ld", this->methods.use_count());
-  ServerWorker *worker = new ServerWorker(methods, transport_worker);
+  // LOGE("memory", "server on new socket methods=%ld",
+  // this->methods.use_count());
+  ServerWorker *worker =
+      new ServerWorker(methods, transport_worker, m_isServerOn);
   worker->start();
 }
 
@@ -74,6 +76,24 @@ void erpc::SimpleServer::networkpollerThread(void) {
     } else {
       LOGE(TAG, "accept failed,errorno: %d, m_sockfd: %d, error: %s", errno,
            m_sockfd, strerror(errno));
+      int accept_errno = errno;
+      if (accept_errno == EAGAIN || accept_errno == EWOULDBLOCK ||
+          accept_errno == EINTR || accept_errno == ETIMEDOUT) {
+        continue;
+      } else {
+        // case EBADF:
+        // case EFAULT:
+        // case EINVAL:
+        // case ENFILE:
+        // case ENOTSOCK:
+        // case EOPNOTSUPP:
+        // /*defined by lwip*/
+        // case EPERM:
+        // case EPROTO:
+        LOGE(TAG, "networkPollThread failed, error: %s",
+             strerror(accept_errno));
+        break;
+      }
     }
   }
   if (m_sockfd > 0) ::close(m_sockfd);
@@ -84,7 +104,7 @@ void erpc::SimpleServer::networkpollerStub(void *arg) {
   if (This != NULL) {
     This->networkpollerThread();
   }
-  if (!This->m_isServerOn) {
+  if (!This->isServerOn()) {
     LOGE(TAG, "server is stopped, delete it.");
     delete This;
   }
@@ -94,6 +114,10 @@ rpc_status erpc::SimpleServer::open(void) {
   rpc_status status = rpc_status::Success;
   int result;
   struct sockaddr_in serverAddress;
+  if (m_sockfd > 0) {
+    LOGE(TAG, "server is already opened.");
+    return rpc_status::Success;
+  }
   // Create socket.
   m_sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (m_sockfd < 0) {

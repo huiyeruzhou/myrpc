@@ -1,41 +1,51 @@
-#include "idl.pb.hpp"
-
 #include <stdio.h>
 #include <unistd.h>
 
+#include <iostream>
+
+#include "idl.pb.hpp"
 
 int main(int argc, char **argv) {
+  /* eRPC client side initialization */
 
-    /* MessageBufferFactory initialization */
-
-
-    /* eRPC client side initialization */
-    // MatrixMultiplyServiceClient *client = new MatrixMultiplyServiceClient("192.168.0.101", 12345, message_buffer_factory);
-    // MatrixMultiplyServiceClient *client = new MatrixMultiplyServiceClient("192.168.1.6", 12345, message_buffer_factory);
-    auto *client = new myrpc_LEDControl_Client("localhost", 12345);
-
-    /* code */
-    int32_t ret = 0;
-    if (rpc_status::Success != client->open()) return -1;
-    for (;;) {
-        myrpc_Input req;
-        myrpc_Output rsp;
-        req.r = 1;
-        req.g = 2;
-        req.b = 3;
-        rpc_status err = client->setColor(&req, &rsp);
-        if (err != Success) {
-            printf("qaq!\n");
-            break;
-        }
-        sleep(1);
-        printf("response: %" PRId32 "\n", rsp.success);
+  /* code */
+  int32_t ret = 0;
+  std::string cmd;
+  auto *client = new myrpc_LEDControl_Client("localhost", 12345);
+  while (std::cin >> cmd) {
+    if (cmd == std::string("exit")) {
+      std::cout << "bye" << std::endl;
+      break;
+    } else if (cmd == std::string("open")) {
+      if (rpc_status::Success != client->open()) {
+        std::cout << "open failed" << std::endl;
+        continue;
+      }
+    } else if (cmd == std::string("set")) {
+      std::cout << "r: ";
+      std::string r;
+      std::cin >> r;
+      myrpc_Input req;
+      myrpc_Output rsp;
+      req.color = const_cast<char *>(r.c_str());
+      if (rpc_status::Success != client->setColor(&req, &rsp)) {
+        std::cout << "rpc failed" << std::endl;
+      } else {
+        std::cout << "success, rsp = " << rsp.success << std::endl;
+      }
+      printf("setColor: %s\n", req.color);
+      pb_release(myrpc_Input_fields , & req);
+      printf("setColor: %s\n", req.color);
+    } else if (cmd == std::string("close")) {
+      std::cout << "closing" << std::endl;
+      client->close();
+    } else {
+      std::cout << "unknown cmd" << std::endl;
     }
-    // printMatrix(result_matrix);
-    /* other code like print result matrix */
+  }
 
-    return 0;
+  return 0;
 }
 // arch linux
 
-//kde
+// kde

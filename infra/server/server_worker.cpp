@@ -1,14 +1,19 @@
 #include "server/server_worker.hpp"
 
 erpc::ServerWorker::ServerWorker(std::shared_ptr<MethodVector> methods,
-                                 TCPTransport *worker)
-    : m_worker_thread(workerStub, 5), methods(methods), m_worker(worker) {
+                                 TCPTransport *worker,
+                                 std::shared_ptr<std::atomic_bool> isServerOn)
+    : m_worker_thread(workerStub, 5),
+      methods(methods),
+      m_worker(worker),
+      p_isServerOn(isServerOn) {
   // LOGE("memory", "worker construct methods=%ld", this->methods.use_count());
   snprintf(TAG, sizeof(TAG) - 1, "worker %" PRIin_port_t, m_worker->m_port);
   m_worker_thread.setName(TAG);
 }
 erpc::ServerWorker::~ServerWorker() {
-  // LOGE("memory", "worker deconstruct methods=%ld", this->methods.use_count());
+  // LOGE("memory", "worker deconstruct methods=%ld",
+  // this->methods.use_count());
   if (m_method)
     m_method->destroyMsg(m_worker->to_recv_msg, m_worker->to_send_msg);
   delete m_worker;
@@ -64,8 +69,10 @@ rpc_status erpc::ServerWorker::runInternal(void) {
   CHECK_STATUS(m_worker->send_trailing_md(), err);
   // LOGI(TAG, "send_trailing_md()");
 done:
+
   if (err != rpc_status::Success) {
     LOGW(TAG, "RPC Call Failed Because: %s", StatusToString(err));
+    error_count++;
     if (err == rpc_status::UnknownService) {
       LOGW(TAG, "Request Service: %s", req_md->path);
       LOGE(TAG, "Available Services:");
@@ -73,9 +80,24 @@ done:
                     [&](std::shared_ptr<MethodBase> &method) {
                       LOGE(TAG, "  %s", method->getPath());
                     });
+    } else if (err == rpc_status::ConnectionClosed) {
+      LOGW(TAG, "Connection Closed");
+      m_worker->close();
+    } else if (err == rpc_status::Timeout) {
+      /*For server, we don't want closed beacuse
+       * timeout. Instead, we want to keep the connection
+       * and wait for the next request, untill the server
+       * is closed.
+       */
+      error_count--;
     }
-    m_worker->close();
+    /*if there are more than five consecutive errors, close*/
+    if (error_count > 5) {
+      LOGE(TAG, "Too many errors, close the connection");
+      m_worker->close();
+    }
   } else {
+    error_count = 0;
     LOGI(TAG, "RPC Call Success\n");
   }
   resetBuffers();
@@ -98,17 +120,17 @@ rpc_status erpc::ServerWorker::findServiceByMetadata(myrpc_Meta *req) {
     return rpc_status::UnknownService;
   } else {
     // LOGE("memory", "worker findServiceByMetadata iter_method=%ld",
-        //  iter_method->use_count());
+    //  iter_method->use_count());
     std::shared_ptr<MethodBase> method(*iter_method);
     // LOGE("memory", "worker findServiceByMetadata method=%ld",
-        //  method.use_count());
+    //  method.use_count());
     m_method = method;
   }
   LOGI(this->TAG, "service `%s`", m_method->getPath());
   // LOGE("memory", "worker findServiceByMetadata iter_method=%ld",
-      //  iter_method->use_count());
+  //  iter_method->use_count());
   // LOGE("memory", "worker findServiceByMetadata m_method=%ld",
-      //  this->m_method.use_count());
+  //  this->m_method.use_count());
   return rpc_status::Success;
 }
 rpc_status erpc::ServerWorker::callMethodByMetadata(myrpc_Meta *req,
@@ -135,15 +157,21 @@ void erpc::ServerWorker::workerStub(void *arg) {
   ServerWorker *This = reinterpret_cast<ServerWorker *>(arg);
 
   if (This != NULL) {
-    while (err == rpc_status::Success) {
+    while (This->isServerOn() &&
+           (err == rpc_status::Success || err == rpc_status::Timeout)) {
       err = This->runInternal();
       LOGI(This->TAG, "runInternal return\n");
     }
+    LOGI(This->TAG, "work done\n");
+    if (!This->isServerOn()) {
+      LOGI(This->TAG, "closed because server shut down\n");
+    }
+    delete This;
+    // LOGE("memory", "work done: methods=%ld, m_method=%ld",
+    //  This->methods.use_count(), This->m_method.use_count());
+  } else {
+    LOGE("Worke Stub", "This is NULL");
   }
-  LOGI(This->TAG, "work done\n");
-  // LOGE("memory", "work done: methods=%ld, m_method=%ld",
-      //  This->methods.use_count(), This->m_method.use_count());
-  delete This;
 }
 
 void erpc::ServerWorker::start() { m_worker_thread.start(this); }
