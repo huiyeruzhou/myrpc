@@ -2,6 +2,7 @@
 #define SERVER_SERVER_BASE_HPP_
 
 #include <vector>
+#include <memory>
 
 #include "port/port.h"
 #include "rpc_base.hpp"

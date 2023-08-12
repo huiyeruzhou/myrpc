@@ -28,8 +28,9 @@ void erpc::SimpleServer::stop(void) {
 
 void erpc::SimpleServer::onNewSocket(int sockfd, int port) {
   TCPTransport *transport_worker = new TCPTransport(sockfd, port);
-  // LOGE("memory", "server on new socket methods=%ld",
-  // this->methods.use_count());
+#ifdef TRACE_MEMORY
+  LOGE("memory", "server on new socket methods=%ld", this->methods.use_count());
+#endif  // TRACE_MEMORY
   ServerWorker *worker =
       new ServerWorker(methods, transport_worker, m_isServerOn);
   worker->start();
@@ -51,7 +52,6 @@ void erpc::SimpleServer::networkpollerThread(void) {
   fd_set readFds;
   FD_ZERO(&readFds);
   FD_SET(m_sockfd, &readFds);
-  // FD_SET(pipeline[0], &readFds);
 
   LOGI(TAG, "%s", "networkpollerThread");
   while (m_runServer && m_sockfd > 0) {
@@ -74,11 +74,10 @@ void erpc::SimpleServer::networkpollerThread(void) {
       onNewSocket(incomingSocket,
                   get_port_from_addr(&incomingAddress, incomingAddressLength));
     } else {
-      LOGE(TAG, "accept failed,errorno: %d, m_sockfd: %d, error: %s", errno,
-           m_sockfd, strerror(errno));
       int accept_errno = errno;
       if (accept_errno == EAGAIN || accept_errno == EWOULDBLOCK ||
           accept_errno == EINTR || accept_errno == ETIMEDOUT) {
+        LOGI(TAG, "continue accepting, errno: %s", strerror(errno));
         continue;
       } else {
         // case EBADF:
@@ -90,8 +89,8 @@ void erpc::SimpleServer::networkpollerThread(void) {
         // /*defined by lwip*/
         // case EPERM:
         // case EPROTO:
-        LOGE(TAG, "networkPollThread failed, error: %s",
-             strerror(accept_errno));
+        LOGE(TAG, "accept failed,errorno: %d, m_sockfd: %d, error: %s", errno,
+             m_sockfd, strerror(errno));
         break;
       }
     }

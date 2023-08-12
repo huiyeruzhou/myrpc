@@ -30,7 +30,6 @@ rpc_status erpc::TCPTransport::close() {
   return rpc_status::Success;
 }
 rpc_status erpc::TCPTransport::receive(uint8_t *data, uint32_t size) {
-  // ssize_t length;
   rpc_status status = Success;
 
   if (m_socket <= 0) {
@@ -43,10 +42,10 @@ rpc_status erpc::TCPTransport::receive(uint8_t *data, uint32_t size) {
   int ret = ::recv(m_socket, data, size, 0);
   if (ret <= 0) {
     int recv_errno = errno;
-    LOGE(TAG, "recv error: %s", strerror(errno));
-    LOGE(TAG, "m_socket: %d, ret: %d, data: %s, size: %" PRIu32, m_socket, ret,
-         data, size);
     if (ret == 0) {
+      LOGE(TAG, "recv returns 0, ConnectionClosed.");
+      LOGE(TAG, "m_socket: %d, ret: %d, data: %s, size: %" PRIu32, m_socket,
+           ret, data, size);
       status = rpc_status::ConnectionClosed;
     } else {
       switch (recv_errno) {
@@ -60,13 +59,22 @@ rpc_status erpc::TCPTransport::receive(uint8_t *data, uint32_t size) {
         case EFAULT:
         case ENOTSOCK:
         case EINVAL:
+          LOGE(TAG, "InvalidArgument: %s", strerror(errno));
+          LOGE(TAG, "m_socket: %d, ret: %d, data: %s, size: %" PRIu32, m_socket,
+               ret, data, size);
           status = rpc_status::InvalidArgument;
           break;
         case ECONNREFUSED:
         case ENOTCONN:
+          LOGE(TAG, "ConnectionFailure: %s", strerror(errno));
+          LOGE(TAG, "m_socket: %d, ret: %d, data: %s, size: %" PRIu32, m_socket,
+               ret, data, size);
           status = rpc_status::ConnectionFailure;
           break;
         default:
+          LOGE(TAG, "Fail: %s", strerror(errno));
+          LOGE(TAG, "m_socket: %d, ret: %d, data: %s, size: %" PRIu32, m_socket,
+               ret, data, size);
           status = rpc_status::Fail;
           break;
       }
@@ -125,7 +133,6 @@ rpc_status erpc::TCPTransport::send_inital_md() {
   rpc_status err = rpc_status::NanopbCodecError;
   CHECK_STATUS(
       m_codec.write(m_initial_md_buffer, myrpc_Meta_fields, to_send_md), err);
-  //    CHECK_STATUS(m_send_buffer_list->add(initial_md_buffer), err);
   return err;
 }
 rpc_status erpc::TCPTransport::send_msg() {
@@ -135,7 +142,6 @@ rpc_status erpc::TCPTransport::send_msg() {
   } else {
     LOGE(TAG, "send_desc or to_send_msg  is NULL");
   }
-  //    m_send_buffer_list->add(msg_buffer);
   return err;
 }
 rpc_status erpc::TCPTransport::send_trailing_md() {
@@ -149,30 +155,33 @@ rpc_status erpc::TCPTransport::receiveFrame() {
   rpc_status retVal;
   MessageBuffer *message = m_read_buffer;
 
-  {
-    // Receive header first.
-    retVal = receive(reinterpret_cast<uint8_t *>(&h), sizeof(h));
-    // LOGI(TAG, "receive header: %" PRIu32, h);
+  // Receive header first.
+  retVal = receive(reinterpret_cast<uint8_t *>(&h), sizeof(h));
+#ifdef TRACE_TCP
+  LOGI(TAG, "receive header: %" PRIu32, h);
+#endif
 
-    if (retVal == Success) {
-      // received size can't be zero.
-      if (h == 0U) {
-        retVal = ReceiveFailed;
-        printf("transport:    received size can't be zero.\n");
-      }
+  if (retVal == Success) {
+    // received size can't be zero.
+    if (h == 0U) {
+      retVal = ReceiveFailed;
+      LOGE(TAG, "transport:    received size can't be zero.\n");
     }
-
-    if (retVal == Success) {
-      // received size can't be larger then buffer length.
-      CHECK_STATUS(message->prepareForWrite(h), retVal);
-    }
-
-    if (retVal == Success) {
-      // Receive rest of the message now we know its size.
-      retVal = receive(message->get(), h);
-    }
-    // LOGI(TAG, "receive message");
   }
+
+  if (retVal == Success) {
+    // received size can't be larger then buffer length.
+    CHECK_STATUS(message->prepareForWrite(h), retVal);
+  }
+
+  if (retVal == Success) {
+    // Receive rest of the message now we know its size.
+    retVal = receive(message->get(), h);
+  }
+#ifdef TRACE_TCP
+  LOGI(TAG, "receive message");
+#endif
+
   return retVal;
 }
 
@@ -184,8 +193,8 @@ rpc_status erpc::TCPTransport::sendFrame() {
   message.append(reinterpret_cast<const char *>(m_msg_buffer->get()),
                  m_msg_buffer->getWritePos());
   uint32_t h = message.size();
-  LOGE(TAG, "length is %zu",
-       std::string(reinterpret_cast<char *>(&h), sizeof(h)).size());
+  // LOGE(TAG, "length is %zu",
+  //      std::string(reinterpret_cast<char *>(&h), sizeof(h)).size());
   message = std::string(reinterpret_cast<char *>(&h), sizeof(h)) + message;
   ret = send(reinterpret_cast<const uint8_t *>(message.c_str()), h + sizeof(h));
   return ret;

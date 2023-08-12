@@ -58,8 +58,8 @@ clean:
 	rm -f server client *.pb.cpp *.pb.hpp
 # Build rule for the main program
 server: $(SRC) $(ERPC_LIB)
-	$(CXX) $(CXXFLAGS) -osimple $^
+	$(CXX) $(CXXFLAGS) -oserver $^
 
 # Build rule for the main program
 client: $(CRC) $(ERPC_LIB) 
-	$(CXX) $(CXXFLAGS) -osimpleclient $^
+	$(CXX) $(CXXFLAGS) -oclient $^

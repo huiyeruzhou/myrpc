@@ -47,9 +47,10 @@ class ServerWorker {
 #endif
   std::shared_ptr<MethodBase> m_method;
   std::shared_ptr<MethodVector> methods;
-  TCPTransport *m_worker;  //!< Worker to do transport
+  std::unique_ptr<TCPTransport> m_worker;  //!< Worker to do transport
   std::shared_ptr<const std::atomic_bool> p_isServerOn;
   int error_count = 0;
+  int timeout_count = 0;
 };
 
 }  // namespace erpc

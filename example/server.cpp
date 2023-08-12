@@ -29,7 +29,10 @@ int main() {
       break;
     } else if (cmd == std::string("close")) {
       std::cout << "closing" << std::endl;
-      server->close();
+      if (server)
+        server->close();
+      else
+        std::cout << "server is stopped" << std::endl;
     } else if (cmd == std::string("open")) {
       std::cout << "opening" << std::endl;
       if (server == nullptr) {
@@ -40,8 +43,12 @@ int main() {
       server->open();
     } else if (cmd == std::string("stop")) {
       std::cout << "stopping" << std::endl;
-      server->stop();
-      server = nullptr;
+      if (server) {
+        server->stop();
+        server = nullptr;
+      } else {
+        std::cout << "server is stopped" << std::endl;
+      }
     } else {
       std::cout << "unknown cmd" << std::endl;
     }

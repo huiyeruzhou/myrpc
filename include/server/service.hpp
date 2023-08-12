@@ -21,7 +21,7 @@ class MethodBase {
         m_input_desc(input_desc),
         m_output_desc(output_desc) {}
 
-  virtual ~MethodBase(void) { LOGE("Method", "MethodBase::~MethodBase"); }
+  virtual ~MethodBase(void) { LOGE(m_path, "deonstructed"); }
   const char *getPath(void) const { return m_path; }
   virtual rpc_status handleInvocation(void *input, void *output) = 0;
   virtual void filledMsgDesc(const pb_msgdesc_t **input_desc, void **input_msg,

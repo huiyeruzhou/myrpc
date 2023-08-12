@@ -5,11 +5,12 @@
     "version": "0.2.0",
     "configurations": [
 
+
         {
             "name": "client启动",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceRoot}/example/simpleclient",
+            "program": "${workspaceRoot}/example/client",
             "args": ["2","2"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -41,7 +42,7 @@
             "name": "server启动",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceRoot}/example/simple",
+            "program": "${workspaceRoot}/example/server",
             "args": ["2","2"]
             // "initCommands": [
             //     "${workspaceRoot}/example/server"
