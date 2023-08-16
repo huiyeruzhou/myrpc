@@ -61,7 +61,6 @@ class SimpleServer : public Server {
     accept incoming connection.
     Call stop() will set m_isServerOn to false*/
   std::shared_ptr<std::atomic_bool> m_isServerOn;
-  
   Thread m_serverThread; /* Pointer to server thread. */
   /* Thread is executed while this is true. Call close() will set it to false*/
   bool m_runServer;

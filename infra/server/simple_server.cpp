@@ -95,6 +95,7 @@ void erpc::SimpleServer::networkpollerThread(void) {
       }
     }
   }
+  LOGI(TAG, "networkpollerThread exit");
   if (m_sockfd > 0) ::close(m_sockfd);
 }
 
