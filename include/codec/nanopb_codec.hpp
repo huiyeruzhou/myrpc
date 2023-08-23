@@ -1,3 +1,15 @@
+/*
+ * Copyright 2023 YuHongli
+ *
+ * File: nanopb_codec.hpp
+ * Description: This file defines the NanopbCodec class.
+ * Version: V1.0.0
+ * Date: 2023/08/23
+ * Author: YuHongli
+ * Revision History:
+ *   Version       Date          Author         Revision Description
+ *  V1.0.0        2023/08/23    YuHongli       Create and initialize
+ */
 #ifndef CODEC_NANOPB_CODEC_HPP_
 #define CODEC_NANOPB_CODEC_HPP_
 
@@ -14,12 +26,10 @@ extern "C" {
 
 namespace erpc {
 class NanopbCodec {
- public:
-  ~NanopbCodec() = default;
-  rpc_status write(MessageBuffer *obuf, const pb_msgdesc_t *fields,
-                   const void *src_struct);
-  rpc_status get(MessageBuffer *ibuf, const pb_msgdesc_t *fields,
-                 void *dst_struct);
+   public:
+    ~NanopbCodec() = default;
+    rpc_status write(MessageBuffer *obuf, const pb_msgdesc_t *fields, const void *src_struct);
+    rpc_status get(MessageBuffer *ibuf, const pb_msgdesc_t *fields, void *dst_struct);
 };
 }  // namespace erpc
 #ifdef __cplusplus

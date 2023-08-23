@@ -1,3 +1,15 @@
+/*
+ * Copyright 2023 YuHongli
+ *
+ * File: port_config.h
+ * Description: the header to detect the platform
+ * Version: V1.0.0
+ * Date: 2023/08/23
+ * Author: YuHongli
+ * Revision History:
+ *   Version       Date          Author         Revision Description
+ *  V1.0.0        2023/08/23    YuHongli       Create and initialize
+ */
 #ifndef PORT_CONFIG_H_
 #define PORT_CONFIG_H_
 

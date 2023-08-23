@@ -1,3 +1,15 @@
+/*
+ * Copyright 2023 YuHongli
+ *
+ * File: port_log.h
+ * Description: This file defines the portable log macro
+ * Version: V1.0.0
+ * Date: 2023/08/23
+ * Author: YuHongli
+ * Revision History:
+ *   Version       Date          Author         Revision Description
+ *  V1.0.0        2023/08/23    YuHongli       Create and initialize
+ */
 #ifndef PORT_LOG_PORT_LOG_H_
 #define PORT_LOG_PORT_LOG_H_
 #include "../config.h"
@@ -23,29 +35,19 @@
 #if CONFIG_HAS_FREERTOS
 #include "esp_log.h"
 #if defined(__cplusplus) && (__cplusplus > 201703L)
-/*cpplint: __VA_OPT__(, ) will ether trigger "Missing space after , " 
+/*cpplint: __VA_OPT__(, ) will ether trigger "Missing space after , "
   or "Extra space before )"*/
-#define LOGE(tag, format, ...) \
-  ESP_LOG_LEVEL_LOCAL(ESP_LOG_ERROR, tag, format __VA_OPT__(, ) __VA_ARGS__)
-#define LOGW(tag, format, ...) \
-  ESP_LOG_LEVEL_LOCAL(ESP_LOG_WARN, tag, format __VA_OPT__(, ) __VA_ARGS__)
-#define LOGI(tag, format, ...) \
-  ESP_LOG_LEVEL_LOCAL(ESP_LOG_INFO, tag, format __VA_OPT__(, ) __VA_ARGS__)
-#define LOGD(tag, format, ...) \
-  ESP_LOG_LEVEL_LOCAL(ESP_LOG_DEBUG, tag, format __VA_OPT__(, ) __VA_ARGS__)
-#define LOGV(tag, format, ...) \
-  ESP_LOG_LEVEL_LOCAL(ESP_LOG_VERBOSE, tag, format __VA_OPT__(, ) __VA_ARGS__)
+#define LOGE(tag, format, ...) ESP_LOG_LEVEL_LOCAL(ESP_LOG_ERROR, tag, format __VA_OPT__(, ) __VA_ARGS__)
+#define LOGW(tag, format, ...) ESP_LOG_LEVEL_LOCAL(ESP_LOG_WARN, tag, format __VA_OPT__(, ) __VA_ARGS__)
+#define LOGI(tag, format, ...) ESP_LOG_LEVEL_LOCAL(ESP_LOG_INFO, tag, format __VA_OPT__(, ) __VA_ARGS__)
+#define LOGD(tag, format, ...) ESP_LOG_LEVEL_LOCAL(ESP_LOG_DEBUG, tag, format __VA_OPT__(, ) __VA_ARGS__)
+#define LOGV(tag, format, ...) ESP_LOG_LEVEL_LOCAL(ESP_LOG_VERBOSE, tag, format __VA_OPT__(, ) __VA_ARGS__)
 #else  // !(defined(__cplusplus) && (__cplusplus >  201703L))
-#define LOGE(tag, format, ...) \
-  ESP_LOG_LEVEL_LOCAL(ESP_LOG_ERROR, tag, format, ##__VA_ARGS__)
-#define LOGW(tag, format, ...) \
-  ESP_LOG_LEVEL_LOCAL(ESP_LOG_WARN, tag, format, ##__VA_ARGS__)
-#define LOGI(tag, format, ...) \
-  ESP_LOG_LEVEL_LOCAL(ESP_LOG_INFO, tag, format, ##__VA_ARGS__)
-#define LOGD(tag, format, ...) \
-  ESP_LOG_LEVEL_LOCAL(ESP_LOG_DEBUG, tag, format, ##__VA_ARGS__)
-#define LOGV(tag, format, ...) \
-  ESP_LOG_LEVEL_LOCAL(ESP_LOG_VERBOSE, tag, format, ##__VA_ARGS__)
+#define LOGE(tag, format, ...) ESP_LOG_LEVEL_LOCAL(ESP_LOG_ERROR, tag, format, ##__VA_ARGS__)
+#define LOGW(tag, format, ...) ESP_LOG_LEVEL_LOCAL(ESP_LOG_WARN, tag, format, ##__VA_ARGS__)
+#define LOGI(tag, format, ...) ESP_LOG_LEVEL_LOCAL(ESP_LOG_INFO, tag, format, ##__VA_ARGS__)
+#define LOGD(tag, format, ...) ESP_LOG_LEVEL_LOCAL(ESP_LOG_DEBUG, tag, format, ##__VA_ARGS__)
+#define LOGV(tag, format, ...) ESP_LOG_LEVEL_LOCAL(ESP_LOG_VERBOSE, tag, format, ##__VA_ARGS__)
 #endif  // !(defined(__cplusplus) && (__cplusplus >  201703L))
 #elif CONFIG_HAS_ANDROID
 #define LOGI(TAG, ...) __android_log_print(ANDROID_LOG_INFO, TAG, __VA_ARGS__)
@@ -74,35 +76,35 @@ void _printTime();
 #define printTrace() printf("%s[%s]: ", FILENAME, FUNCNAME);
 #define printTAG(tag) printf(" %s: ", tag);
 
-#define LOGE(tag, format, arg...)      \
-  printLevel(E);                       \
-  _printTime();                        \
-  printTAG(tag) printf(format, ##arg); \
-  printf(color_default "\n");          \
-  fflush(stdout);
-#define LOGW(tag, format, arg...)      \
-  printLevel(W);                       \
-  _printTime();                        \
-  printTAG(tag) printf(format, ##arg); \
-  printf(color_default "\n");          \
-  fflush(stdout);
-#define LOGI(tag, format, arg...)      \
-  printLevel(I);                       \
-  _printTime();                        \
-  printTAG(tag) printf(format, ##arg); \
-  printf(color_default "\n");          \
-  fflush(stdout);
-#define LOGD(tag, format, arg...)      \
-  printLevel(D);                       \
-  _printTime();                        \
-  printTAG(tag) printf(format, ##arg); \
-  printf(color_default "\n");          \
-  fflush(stdout);
-#define LOGV(tag, format, arg...)      \
-  printLevel(V);                       \
-  _printTime();                        \
-  printTAG(tag) printf(format, ##arg); \
-  printf(color_default "\n");          \
-  fflush(stdout);
+#define LOGE(tag, format, arg...)        \
+    printLevel(E);                       \
+    _printTime();                        \
+    printTAG(tag) printf(format, ##arg); \
+    printf(color_default "\n");          \
+    fflush(stdout);
+#define LOGW(tag, format, arg...)        \
+    printLevel(W);                       \
+    _printTime();                        \
+    printTAG(tag) printf(format, ##arg); \
+    printf(color_default "\n");          \
+    fflush(stdout);
+#define LOGI(tag, format, arg...)        \
+    printLevel(I);                       \
+    _printTime();                        \
+    printTAG(tag) printf(format, ##arg); \
+    printf(color_default "\n");          \
+    fflush(stdout);
+#define LOGD(tag, format, arg...)        \
+    printLevel(D);                       \
+    _printTime();                        \
+    printTAG(tag) printf(format, ##arg); \
+    printf(color_default "\n");          \
+    fflush(stdout);
+#define LOGV(tag, format, arg...)        \
+    printLevel(V);                       \
+    _printTime();                        \
+    printTAG(tag) printf(format, ##arg); \
+    printf(color_default "\n");          \
+    fflush(stdout);
 #endif
 #endif  // PORT_LOG_PORT_LOG_H_

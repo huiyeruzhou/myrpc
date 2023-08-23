@@ -103,15 +103,19 @@
         "message_buffer.hpp": "c",
         "c++config.h": "c",
         "rpc_status.hpp": "c",
-        "port.h": "c"
+        "port.h": "c",
+        "set": "cpp",
+        "unordered_set": "cpp",
+        "future": "cpp",
+        "shared_mutex": "cpp"
     },
     "C_Cpp.clang_format_path": "",
     "C_Cpp.clang_format_fallbackStyle": "Google",
-    "C_Cpp.clang_format_style": "Google",
+    "C_Cpp.clang_format_style": "{ BasedOnStyle: Google, UseTab: Never, IndentWidth: 4, TabWidth: 4, ColumnLimit: 150, BreakBeforeBraces: WebKit, IndentCaseLabels: true}",
     "C_Cpp.formatting": "clangFormat",
     "cpplint.filters": [
         "-build/include_subdir",
-        "-build/c++11"
+        "-build/c++11",
         "-legal/copyright"
     ]
 }

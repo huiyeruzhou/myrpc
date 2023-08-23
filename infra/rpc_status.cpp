@@ -1,47 +1,62 @@
+/*
+ * Copyright 2023 YuHongli
+ *
+ * File: rpc_status.cpp
+ * Description: the rpc status code and StatusToString function
+ * Version: V1.0.0
+ * Date: 2023/08/23
+ * Author: YuHongli
+ * Revision History:
+ *   Version       Date          Author         Revision Description
+ *  V1.0.0        2023/08/23    YuHongli       Create and initialize
+ */
 #include "rpc_status.hpp"
-const char *status_string[] = {
-    //! Success
-    "Success",
-    //! Success
-    "Fail",
-    "InvalidArgument",
-    "Timeout",
+const char *StatusToString(int stat)
+{
+    static const char *status_string[] = {
+        //! Success
+        "Success",
+        //! Success
+        "Fail",
+        "InvalidArgument",
+        "Timeout",
 
-    //! Message header contains an unknown version.
-    "InvalidMessageVersion",
+        //! Message header contains an unknown version.
+        "InvalidMessageVersion",
 
-    //! Failed to encode or decode a message.
-    "NanopbCodecError",
+        //! Failed to encode or decode a message.
+        "NanopbCodecError",
 
-    //! Expected a reply message but got another message type.
-    "UnExpectedMsgType",
+        //! Expected a reply message but got another message type.
+        "UnExpectedMsgType",
 
-    "UnknownService",
+        "UnknownService",
 
-    //! Attempt to read or write past the end of a buffer.
-    "BufferOverrun",
+        //! Attempt to read or write past the end of a buffer.
+        "BufferOverrun",
 
-    //! Could not find host with given name.
-    "UnknownAddress",
+        //! Could not find host with given name.
+        "UnknownAddress",
 
-    //! Failed to connect to host.
-    "ConnectionFailure",
+        //! Failed to connect to host.
+        "ConnectionFailure",
 
-    //! Connected closed by peer.
-    "ConnectionClosed",
+        //! Connected closed by peer.
+        "ConnectionClosed",
 
-    //! Memory allocation error.
-    "MemoryError",
+        //! Memory allocation error.
+        "MemoryError",
 
-    //! Failed to receive data.
-    "ReceiveFailed",
+        //! Failed to receive data.
+        "ReceiveFailed",
 
-    //! Failed to send data.
-    "SendFailed",
+        //! Failed to send data.
+        "SendFailed",
 
-    "UnexpectedTransportOperation",
-    "IOError",
+        "UnexpectedTransportOperation",
+        "IOError",
 
-    "UnimplmentedService",
-};
-extern const char *StatusToString(int stat) { return status_string[stat]; }
+        "UnimplmentedService",
+    };
+    return status_string[stat];
+}
