@@ -1,14 +1,14 @@
 /*
- * Copyright 2023 YuHongli
+ * Copyright (C), 2022-2023, Soochow University & OPPO Mobile Comm Corp., Ltd.
  *
  * File: port_prt_scn.h
  * Description: This file defines the portable scan/print macro
  * Version: V1.0.0
  * Date: 2023/08/23
- * Author: YuHongli
+ * Author: Soochow University
  * Revision History:
  *   Version       Date          Author         Revision Description
- *  V1.0.0        2023/08/23    YuHongli       Create and initialize
+ *  V1.0.0        2023/08/23    Soochow University       Create and initialize
  */
 #ifndef PORT_LOG_PORT_PRT_SCN_H_
 #define PORT_LOG_PORT_PRT_SCN_H_

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 YuHongli
+ * Copyright (C), 2022-2023, Soochow University & OPPO Mobile Comm Corp., Ltd.
  *
  * File: server_service.hpp
  * Description: This file defines the Service class. MethodBase class. and the Method class.
@@ -10,10 +10,10 @@
  *              A Method is shared by the Server and the ServerWorker thread which is processing a request of the method.
  * Version: V1.0.0
  * Date: 2023/08/23
- * Author: YuHongli
+ * Author: Soochow University
  * Revision History:
  *   Version       Date          Author         Revision Description
- *  V1.0.0        2023/08/23    YuHongli       Create and initialize
+ *  V1.0.0        2023/08/23    Soochow University       Create and initialize
  */
 #ifndef SERVER_SERVICE_HPP_
 #define SERVER_SERVICE_HPP_

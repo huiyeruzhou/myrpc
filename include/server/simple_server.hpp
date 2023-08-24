@@ -1,14 +1,14 @@
 /*
- * Copyright 2023 YuHongli
+ * Copyright (C), 2022-2023, Soochow University & OPPO Mobile Comm Corp., Ltd.
  *
  * File: simple_server.hpp
  * Description: This file defines the SimpleServer class. Which controls the network thread and the worker threads.
  * Version: V1.0.0
  * Date: 2023/08/23
- * Author: YuHongli
+ * Author: Soochow University
  * Revision History:
  *   Version       Date          Author         Revision Description
- *  V1.0.0        2023/08/23    YuHongli       Create and initialize
+ *  V1.0.0        2023/08/23    Soochow University       Create and initialize
  */
 
 #ifndef SERVER_SIMPLE_SERVER_HPP_

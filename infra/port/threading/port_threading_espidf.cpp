@@ -13,10 +13,10 @@
  * Description: portable threading implementation for FreeRTOS
  * Version: V1.0.0
  * Date: 2023/08/23
- * Author: eRPC, YuHongli
+ * Author: eRPC, Soochow University
  * Revision History:
  *   Version       Date          Author         Revision Description
- *  V1.0.0        2023/08/23    YuHongli       Create and initialize
+ *  V1.0.0        2023/08/23    Soochow University       Create and initialize
  */
 #include "port/threading/port_threading.h"
 

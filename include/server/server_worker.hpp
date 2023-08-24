@@ -1,15 +1,15 @@
 /*
- * Copyright 2023 YuHongli
+ * Copyright (C), 2022-2023, Soochow University & OPPO Mobile Comm Corp., Ltd.
  *
  * File: server_worker.hpp
  * Description: This file defines the ServerWorker class.Which is the worker for each RPC connect.
  *             It will receive the request from client and call the method to process the request.
  * Version: V1.0.0
  * Date: 2023/08/23
- * Author: YuHongli
+ * Author: Soochow University
  * Revision History:
  *   Version       Date          Author         Revision Description
- *  V1.0.0        2023/08/23    YuHongli       Create and initialize
+ *  V1.0.0        2023/08/23    Soochow University       Create and initialize
  */
 #ifndef SERVER_SERVER_WORKER_HPP_
 #define SERVER_SERVER_WORKER_HPP_

@@ -12,10 +12,10 @@
  * Description: This file defines the portable thread/mutex/semaphore classes.
  * Version: V1.0.0
  * Date: 2023/08/23
- * Author: eRPC, YuHongli
+ * Author: eRPC, Soochow University
  * Revision History:
  *   Version       Date          Author         Revision Description
- *  V1.0.0        2023/08/23    YuHongli       Create and initialize
+ *  V1.0.0        2023/08/23    Soochow University       Create and initialize
  */
 #ifndef PORT_THREADING_PORT_THREADING_H_
 #define PORT_THREADING_PORT_THREADING_H_
