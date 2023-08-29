@@ -23,7 +23,7 @@ extern "C" {
 #include <memory>
 #include <vector>
 
-#include "codec/meta.pb.h"
+#include "codec/meta.pb.hpp"
 #include "port/port.h"
 #include "server/service.hpp"
 #include "transport/tcp_transport.hpp"

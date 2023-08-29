@@ -24,7 +24,7 @@
 #include <vector>
 
 #include "codec/message_buffer.hpp"
-#include "codec/meta.pb.h"
+#include "codec/meta.pb.hpp"
 #include "nanopb/pb_decode.h"
 #include "port/port.h"
 #include "rpc_status.hpp"

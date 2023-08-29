@@ -13,7 +13,7 @@
 #ifndef TRANSPORT_TCP_TRANSPORT_HPP_
 #define TRANSPORT_TCP_TRANSPORT_HPP_
 #include "codec/message_buffer.hpp"
-#include "codec/meta.pb.h"
+#include "codec/meta.pb.hpp"
 #include "codec/nanopb_codec.hpp"
 #include "port/port.h"
 #include "port/threading/port_threading.h"

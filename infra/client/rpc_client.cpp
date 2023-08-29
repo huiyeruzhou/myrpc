@@ -19,7 +19,7 @@ extern "C" {
 #include <string>
 
 #include "client/rpc_client.hpp"
-#include "codec/meta.pb.h"
+#include "codec/meta.pb.hpp"
 #include "transport/tcp_transport.hpp"
 
 __attribute__((unused)) static const char *TAG = "client";
