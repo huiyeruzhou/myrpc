@@ -26,7 +26,9 @@ erpc::ServerWorker::~ServerWorker()
 #ifdef TRACE_MEMORY
     LOGE("memory", "worker deconstruct methods=%ld", this->methods.use_count());
 #endif  // TRACE_MEMORY
-    if (m_method) m_method->destroyMsg(m_worker->to_recv_msg, m_worker->to_send_msg);
+    if (m_method) {
+        m_method->destroyMsg(m_worker->to_recv_msg, m_worker->to_send_msg);
+    }
 }
 
 rpc_status erpc::ServerWorker::runInternal(void)
@@ -136,7 +138,9 @@ done:
 }
 rpc_status erpc::ServerWorker::resetBuffers(void)
 {
-    if (m_method) m_method->destroyMsg(m_worker->to_recv_msg, m_worker->to_send_msg);
+    if (m_method) {
+        m_method->destroyMsg(m_worker->to_recv_msg, m_worker->to_send_msg);
+    }
     m_method = NULL;
     return m_worker->resetBuffers();
 }

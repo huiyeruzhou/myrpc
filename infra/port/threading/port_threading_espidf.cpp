@@ -1,15 +1,8 @@
 /*
- * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
- * Copyright 2021 ACRIOS Systems s.r.o.
- * All rights reserved.
  *
+ * Copyright (C), 2022-2023, Soochow University & OPPO Mobile Comm Corp., Ltd.
  *
- * SPDX-License-Identifier: BSD-3-Clause
- */
-/*
- *
- * File: port_threading_freertos.cpp
+ *  File: port_threading_freertos.cpp
  * Description: portable threading implementation for FreeRTOS
  * Version: V1.0.0
  * Date: 2023/08/23
@@ -42,12 +35,6 @@ void erpc::Thread::init(thread_entry_t entry, uint32_t priority, uint32_t stackS
 void erpc::Thread::start(void *arg)
 {
     m_arg = arg;
-
-    // Enter a critical section to disable preemptive scheduling until we add the
-    // newly created thread to the linked list. This prevents a race condition if
-    // the new thread is higher priority than the current thread, and the new
-    // thread calls getCurrenThread(), which will scan the linked list.
-
     LOGI(TAG, "stacksize = %" PRIu32, (configSTACK_DEPTH_TYPE)(m_stackSize));
 
     if (pdPASS == xTaskCreate(threadEntryPointStub, (m_name[0] ? m_name : "task"), (configSTACK_DEPTH_TYPE)(m_stackSize),

@@ -37,11 +37,11 @@
 #if defined(__cplusplus) && (__cplusplus > 201703L)
 /*cpplint: __VA_OPT__(, ) will ether trigger "Missing space after , "
   or "Extra space before )"*/
-#define LOGE(tag, format, ...) ESP_LOG_LEVEL_LOCAL(ESP_LOG_ERROR, tag, format __VA_OPT__(, ) __VA_ARGS__)
-#define LOGW(tag, format, ...) ESP_LOG_LEVEL_LOCAL(ESP_LOG_WARN, tag, format __VA_OPT__(, ) __VA_ARGS__)
-#define LOGI(tag, format, ...) ESP_LOG_LEVEL_LOCAL(ESP_LOG_INFO, tag, format __VA_OPT__(, ) __VA_ARGS__)
-#define LOGD(tag, format, ...) ESP_LOG_LEVEL_LOCAL(ESP_LOG_DEBUG, tag, format __VA_OPT__(, ) __VA_ARGS__)
-#define LOGV(tag, format, ...) ESP_LOG_LEVEL_LOCAL(ESP_LOG_VERBOSE, tag, format __VA_OPT__(, ) __VA_ARGS__)
+#define LOGE(tag, format, ...) ESP_LOG_LEVEL_LOCAL(ESP_LOG_ERROR, tag, format __VA_OPT__(, ) __VA_ARGS__) // NOLINT
+#define LOGW(tag, format, ...) ESP_LOG_LEVEL_LOCAL(ESP_LOG_WARN, tag, format __VA_OPT__(, ) __VA_ARGS__)  // NOLINT
+#define LOGI(tag, format, ...) ESP_LOG_LEVEL_LOCAL(ESP_LOG_INFO, tag, format __VA_OPT__(, ) __VA_ARGS__)  // NOLINT
+#define LOGD(tag, format, ...) ESP_LOG_LEVEL_LOCAL(ESP_LOG_DEBUG, tag, format __VA_OPT__(, ) __VA_ARGS__)    // NOLINT
+#define LOGV(tag, format, ...) ESP_LOG_LEVEL_LOCAL(ESP_LOG_VERBOSE, tag, format __VA_OPT__(, ) __VA_ARGS__)  // NOLINT
 #else  // !(defined(__cplusplus) && (__cplusplus >  201703L))
 #define LOGE(tag, format, ...) ESP_LOG_LEVEL_LOCAL(ESP_LOG_ERROR, tag, format, ##__VA_ARGS__)
 #define LOGW(tag, format, ...) ESP_LOG_LEVEL_LOCAL(ESP_LOG_WARN, tag, format, ##__VA_ARGS__)
@@ -57,7 +57,6 @@
 // cpplint: this is not available in c++11.
 #include <chrono>
 #include <string>
-extern const std::time_t begin;
 std::time_t _getTimeStamp();
 void _printTime();
 #define colorE color_red

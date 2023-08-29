@@ -1,3 +1,15 @@
+/*
+ * Copyright (C), 2022-2023, Soochow University & OPPO Mobile Comm Corp., Ltd.
+ *
+ * File: rpc_status.hpp
+ * Description: the status and tostring function
+ * Version: V1.0.0
+ * Date: 2023/08/23
+ * Author: Soochow University
+ * Revision History:
+ *   Version       Date          Author         Revision Description
+ *  V1.0.0        2023/08/23    Soochow University       Create and initialize
+ */
 #ifndef RPC_STATUS_HPP_
 #define RPC_STATUS_HPP_
 #ifdef __cplusplus

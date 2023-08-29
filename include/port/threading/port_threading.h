@@ -1,13 +1,4 @@
-/*
- * Copyright (c) 2014-2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
- * Copyright 2021 ACRIOS Systems s.r.o.
- * All rights reserved.
- *
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
-/*
+/* Copyright (C), 2022-2023, Soochow University & OPPO Mobile Comm Corp., Ltd.
  * File: port_threading.h
  * Description: This file defines the portable thread/mutex/semaphore classes.
  * Version: V1.0.0
@@ -180,9 +171,9 @@ class Thread {
 
    private:
 #if ERPC_THREADS_IS(FREERTOS)
-    char m_name[configMAX_TASK_NAME_LEN];  // 任务名字
+    char m_name[configMAX_TASK_NAME_LEN];
 #elif ERPC_THREADS_IS(PTHREADS)
-    char m_name[CONFIG_MAX_PTHREAD_NAME_LEN];  // 任务名字
+    char m_name[CONFIG_MAX_PTHREAD_NAME_LEN];
 #endif
     thread_entry_t m_entry; /*!< Thread entry function. */
     void *m_arg;            /*!< Entry parameter. */

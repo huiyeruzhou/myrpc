@@ -26,8 +26,7 @@ erpc::TCPTransport::TCPTransport(int sockfd, int port)
       to_send_md(new myrpc_Meta()),
       m_read_buffer(new MessageBuffer()),
       m_initial_md_buffer(new MessageBuffer()),
-      m_msg_buffer(new MessageBuffer())
-{
+      m_msg_buffer(new MessageBuffer()) {
 }
 erpc::TCPTransport::~TCPTransport(void)
 {

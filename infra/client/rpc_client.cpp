@@ -119,7 +119,8 @@ rpc_status erpc::Client::open(void)
     struct addrinfo hints = {};
     char port_str[8];
     struct addrinfo *res0;
-    int result, set;
+    int result;
+    int set;
     int sock = -1;
     struct addrinfo *res;
 

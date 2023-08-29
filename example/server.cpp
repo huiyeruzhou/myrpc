@@ -43,10 +43,11 @@ int main()
             break;
         } else if (cmd == std::string("close")) {
             std::cout << "closing" << std::endl;
-            if (server)
+            if (server) {
                 server->close();
-            else
+            } else {
                 std::cout << "server is stopped" << std::endl;
+            }
         } else if (cmd == std::string("open")) {
             std::cout << "opening" << std::endl;
             if (server == nullptr) {

@@ -17,10 +17,48 @@
 #include <thread>
 
 #include "idl.pb.hpp"
-// translate all comment above to English
+static std::atomic_bool stop(false);
+void new_thread(int num, int i)
+{
+    std::thread([i, num] {
+        // sleep for i second in the beginning
+        std::this_thread::sleep_for(std::chrono::seconds(i));
+
+        /*client can't be used by multiple thread, each of them has to build a new client*/
+        auto *client = new myrpc_LEDControl_Client("localhost", 12345);
+
+        if (rpc_status::Success != client->open()) {
+            std::cout << "open failed" << std::endl;
+            return;
+        }
+        std::cout << "thread " << i + 1 << " started" << std::endl;
+
+        myrpc_Input req;
+        myrpc_Output rsp;
+        std::string name = "thread " + std::to_string(i);
+
+        req.color = const_cast<char *>(name.c_str());
+        int err = 0;
+
+        // stop is the flag to stop all thread
+        while (!stop && err < 2) {
+            // call rpc method per num seconds
+            std::this_thread::sleep_for(std::chrono::seconds(num));
+            if (rpc_status::Success != client->setColor(&req, &rsp)) {
+                std::cout << "rpc failed" << std::endl;
+                ++err;
+            } else {
+                err = 0;
+                std::cout << "Thread " << (i + 1) << " : success, rsp = " << rsp.success << std::endl;
+            }
+            pb_release(myrpc_Output_fields, &rsp);
+        }
+        client->close();
+        std::cout << "thread " << i + 1 << " stopped" << std::endl;
+    }).detach();
+}
 int main(int argc, char **argv)
 {
-    std::atomic_bool stop(false);
     /* read input command */
     std::string cmd;
     /*create RPC Client*/
@@ -39,6 +77,8 @@ int main(int argc, char **argv)
             if (rpc_status::Success != client->open()) {
                 std::cout << "open failed" << std::endl;
                 continue;
+            } else {
+                std::cout << "open success" << std::endl;
             }
         } else if (cmd == std::string("set")) {
             /*call RPC method*/
@@ -71,47 +111,16 @@ int main(int argc, char **argv)
             std::cin >> num;
             /*create those thread*/
             for (int i = 0; i < num; ++i) {
-                std::thread([i, num, &stop] {
-                    /*client can't be used by multiple thread, each of them has to build a new client*/
-                    auto *client = new myrpc_LEDControl_Client("localhost", 12345);
-
-                    if (rpc_status::Success != client->open()) {
-                        std::cout << "open failed" << std::endl;
-                        return;
-                    }
-                    std::cout << "thread " << i + 1 << " started" << std::endl;
-
-                    myrpc_Input req;
-                    myrpc_Output rsp;
-                    std::string name = "thread " + std::to_string(i);
-
-                    req.color = const_cast<char *>(name.c_str());
-
-                    int err = 0;
-                    // sleep for i second in the beginning
-                    std::this_thread::sleep_for(std::chrono::seconds(i));
-                    // stop is the flag to stop all thread
-                    while (!stop && err < 2) {
-                        // call rpc method per num seconds
-                        std::this_thread::sleep_for(std::chrono::seconds(num));
-                        if (rpc_status::Success != client->setColor(&req, &rsp)) {
-                            std::cout << "rpc failed" << std::endl;
-                            ++err;
-                        } else {
-                            err = 0;
-                            std::cout << "Thread " << (i + 1)
-                                      << " : "
-                                         "success, rsp = "
-                                      << rsp.success << std::endl;
-                        }
-                        pb_release(myrpc_Output_fields, &rsp);
-                    }
-                    client->close();
-                }).detach();
+                new_thread(num, i);
             }
         } else if (cmd == std::string("cancel")) {
             /*stop all thread*/
-            stop = true;
+            if (!stop) {
+                stop = true;
+                std::cout << "cancel all thread" << std::endl;
+            } else {
+                std::cout << "no thread is running" << std::endl;
+            }
         } else {
             std::cout << "unknown cmd" << std::endl;
         }

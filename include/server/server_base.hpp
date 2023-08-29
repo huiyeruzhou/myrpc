@@ -24,8 +24,7 @@ namespace erpc {
 
 class Server : public CSBase {
    public:
-    Server(const char *host, uint16_t port) : CSBase(host, port), methods(new MethodVector())
-    {
+    Server(const char *host, uint16_t port) : CSBase(host, port), methods(new MethodVector()) {
         // LOGE("memory", "server construct methods=%ld", methods.use_count());
     }
 

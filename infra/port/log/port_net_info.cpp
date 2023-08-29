@@ -28,10 +28,11 @@ void sprint_net_info(char *netinfo, int netinfo_len, const sockaddr *__sockaddr,
 {
     // get host ip by sockaddr
     char host[18];
-    if (__sockaddr->sa_family == AF_INET)
+    if (__sockaddr->sa_family == AF_INET) {
         inet_ntop(AF_INET, &(reinterpret_cast<const sockaddr_in *>(__sockaddr))->sin_addr, host, 16);
-    else
+    } else {
         snprintf(host, sizeof(host), "AF:%d-notipv4", __sockaddr->sa_family);
+    }
     snprintf(netinfo, netinfo_len, "%s:%d", host, get_port_from_addr(__sockaddr, __len));
 }
 

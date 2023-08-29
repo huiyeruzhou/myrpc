@@ -1,12 +1,4 @@
-/*
- * Copyright (c) 2014-2016, Freescale Semiconductor, Inc.
- * Copyright 2016 - 2021 NXP
- * Copyright 2021 ACRIOS Systems s.r.o.
- * All rights reserved.
- *
- *
- * SPDX-License-Identifier: BSD-3-Clause
- *
+/* Copyright (C), 2022-2023, Soochow University & OPPO Mobile Comm Corp., Ltd.
  * File: port_threading_freertos.cpp
  * Description: portable threading implementation for Linux/Android
  * Version: V1.0.0

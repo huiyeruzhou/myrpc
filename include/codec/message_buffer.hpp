@@ -125,8 +125,6 @@ class MessageBuffer {
 };
 }  // namespace erpc
 
-/*! @} */
-
 #ifdef __cplusplus
 }
 #endif

@@ -12,7 +12,7 @@
  */
 #include "codec/message_buffer.hpp"
 
-static const char *TAG = "Message Buffer";
+__attribute__((unused)) static const char *TAG = "Message Buffer";
 
 rpc_status erpc::MessageBuffer::read(void *data, uint32_t length, uint16_t offset)
 {

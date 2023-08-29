@@ -14,8 +14,7 @@
 __attribute__((unused)) static const char *TAG = "server";
 
 erpc::SimpleServer::SimpleServer(const char *host, uint16_t port)
-    : Server(host, port), m_isServerOn(new std::atomic_bool(true)), m_serverThread(erpc::SimpleServer::networkpollerStub, 1), m_runServer(false)
-{
+    : Server(host, port), m_isServerOn(new std::atomic_bool(true)), m_serverThread(erpc::SimpleServer::networkpollerStub, 1), m_runServer(false) {
 }
 
 erpc::SimpleServer::~SimpleServer()
@@ -107,7 +106,9 @@ void erpc::SimpleServer::networkpollerThread(void)
         }
     }
     LOGI(TAG, "networkpollerThread exit");
-    if (m_sockfd > 0) ::close(m_sockfd);
+    if (m_sockfd > 0) {
+        ::close(m_sockfd);
+    }
 }
 
 void erpc::SimpleServer::networkpollerStub(void *arg)
