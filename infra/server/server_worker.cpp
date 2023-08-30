@@ -174,6 +174,8 @@ rpc_status erpc::ServerWorker::callMethodByMetadata(myrpc_Meta *req, myrpc_Meta 
     rpc_status err;
     rsp->seq = req->seq;
     rsp->version = req->version;
+    //we use req's path, which will be released in TCPTransport::resetBuffers
+    //otherwise, we should build rsp by outselves and release the char* used in rsp.
     rsp->path = req->path;
     rsp->has_status = true;
     rsp->has_send_end = false;

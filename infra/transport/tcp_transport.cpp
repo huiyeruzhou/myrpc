@@ -219,5 +219,8 @@ rpc_status erpc::TCPTransport::resetBuffers()
     send_desc = NULL;
     to_recv_msg = NULL;
     to_send_msg = NULL;
+    // we must release the string in meta to avoid memory leak.
+    // but we should not release to_send_md, for string in it is not allocated by nanopb.
+    pb_release(myrpc_Meta_fields, to_recv_md);
     return rpc_status::Success;
 }
